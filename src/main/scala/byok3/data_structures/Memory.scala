@@ -34,9 +34,8 @@ case object Memory {
     Memory(size = size, Map.empty)
   }
 
-  def poke(addr: Address, data: Word): State[Memory, Unit] = for {
-    _ <- modify[Memory](mem => mem.poke(addr, data))
-  } yield ()
+  def poke(addr: Address, data: Word): State[Memory, Unit] =
+    modify(_.poke(addr, data))
 
   def peek(addr: Address): State[Memory, Word] =
     inspect(_.peek(addr))

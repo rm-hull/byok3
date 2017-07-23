@@ -8,19 +8,19 @@ object Stack {
 
   type Stack[A] = List[A]
 
+  private def stackUnderflow = error(-4)
+
   def empty[A]: Stack[A] = List.empty[A]
 
   def push[A](value: A): State[Stack[A], Unit] = modify(value :: _)
 
   def pop[A]: State[Stack[A], A] = State {
-    case Nil => error(-4) // stack underflow
+    case Nil => stackUnderflow
     case h :: t => (t, h)
   }
 
-  def peek[A]: State[Stack[A], A] = for {
-    a <- pop
-    _ <- push(a)
-  } yield a
+  def peek[A]: State[Stack[A], A] =
+    inspect(_.headOption.getOrElse(stackUnderflow))
 
   def arity1stackOp[A](f: A => A): State[Stack[A], Unit] = for {
     a <- pop
