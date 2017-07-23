@@ -1,9 +1,12 @@
 package byok3.primitives
 
 import byok3.data_structures.Context._
+import byok3.data_structures.PrimitiveImpl
 import byok3.data_structures.Stack._
 
-object Arithmetics {
+object Arithmetics extends PrimitiveImpl {
+  import scala.reflect.runtime.{universe => ru}
+  override def typeOf = ru.typeOf[this.type]
 
   val + = dataStack(arity2stackOp(_ + _))
   val - = dataStack(arity2stackOp(_ - _))

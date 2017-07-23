@@ -3,10 +3,13 @@ package byok3.primitives
 import byok3.data_structures.Context._
 import byok3.data_structures.Memory.{peek, poke}
 import byok3.data_structures.Stack.{pop, push}
-import byok3.data_structures.{Address, Context, Data}
-import cats.data.{State}
+import byok3.data_structures.{Address, Context, Data, PrimitiveImpl}
+import cats.data.State
 
-object Memory {
+object Memory extends PrimitiveImpl {
+
+  import scala.reflect.runtime.{universe => ru}
+  override def typeOf = ru.typeOf[this.type]
 
   val `!`: State[Context, Unit] = for {
     x <- dataStack(pop)

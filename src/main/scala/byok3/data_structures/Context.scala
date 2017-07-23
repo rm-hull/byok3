@@ -1,7 +1,6 @@
 package byok3.data_structures
 
 import byok3.data_structures.Stack.Stack
-import byok3.primitives.{Arithmetics, StackManip}
 import cats.data.State
 import cats.data.State._
 
@@ -16,18 +15,7 @@ case class Context(ds: Stack[Int], // data stack
 
 object Context {
 
-  val tmpExeTok = Map(
-    "+" -> Primitive(Arithmetics.+),
-    "-" -> Primitive(Arithmetics.-),
-    "*" -> Primitive(Arithmetics.*),
-    "/" -> Primitive(Arithmetics./),
-    "DUP" -> Primitive(StackManip.dup),
-    "SWAP" -> Primitive(StackManip.swap),
-    "DEPTH" -> Primitive(StackManip.depth),
-    "DROP" -> Primitive(StackManip.drop)
-  )
-
-  def apply(memSize: Int): Context = Context(Stack.empty, Stack.empty, Memory(memSize), Registers(), OK, tmpExeTok)
+  def apply(memSize: Int): Context = Context(Stack.empty, Stack.empty, Memory(memSize), Registers(), OK, ExecutionTokenMapBuilder())
 
   def dataStack[A](block: State[Stack[Int], A]): State[Context, A] = for {
     ctx <- get[Context]
