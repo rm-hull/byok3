@@ -33,4 +33,14 @@ object StackManip {
       _ <- push(a)
     } yield ()
   }
+
+  val `>R` = for {
+    a <- dataStack(pop)
+    _ <- returnStack(push(a))
+  } yield ()
+
+  val `R>` = for {
+    a <- returnStack(pop)
+    _ <- dataStack(push(a))
+  } yield ()
 }
