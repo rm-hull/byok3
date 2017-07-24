@@ -28,29 +28,29 @@ object Stack {
   } yield ()
 
   def arity2stackOp[A](f: (A, A) => A): State[Stack[A], Unit] = for {
-    a <- pop
     b <- pop
+    a <- pop
     _ <- push(f(a, b))
   } yield ()
 
   def arity2stackOp2[A](f1: (A, A) => A)(f2: (A, A) => A): State[Stack[A], Unit] = for {
-    a <- pop
     b <- pop
+    a <- pop
     _ <- push(f1(a, b))
     _ <- push(f2(a, b))
   } yield ()
 
   def arity3stackOp[A](f: (A, A, A) => A): State[Stack[A], Unit] = for {
-    a <- pop
-    b <- pop
     c <- pop
+    b <- pop
+    a <- pop
     _ <- push(f(a, b, c))
   } yield ()
 
   def arity3stackOp2[A](f1: (A, A, A) => A)(f2: (A, A, A) => A): State[Stack[A], Unit] = for {
-    a <- pop
-    b <- pop
     c <- pop
+    b <- pop
+    a <- pop
     _ <- push(f1(a, b, c))
     _ <- push(f2(a, b, c))
   } yield ()
