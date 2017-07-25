@@ -23,7 +23,7 @@ object DictionaryBuilder {
     for {
       decl <- ru.typeOf[T].decls
       term = decl.asTerm
-      if term.isVal
+      if term.isVal && term.typeSignature =:= ru.typeOf[State[Context, Unit]]
       name = term.toString.substring(6).toUpperCase
       effect = instanceMirror.reflectField(term).get.asInstanceOf[State[Context, Unit]]
     } yield {
