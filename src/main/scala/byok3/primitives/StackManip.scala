@@ -3,6 +3,7 @@ package byok3.primitives
 import byok3.data_structures.Context._
 import byok3.data_structures.PrimitiveImpl
 import byok3.data_structures.Stack._
+import byok3.types.Stack
 import cats.data.State._
 
 object StackManip extends PrimitiveImpl {

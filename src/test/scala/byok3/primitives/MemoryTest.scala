@@ -1,9 +1,8 @@
 package byok3.primitives
 
-import byok3._
 import byok3.data_structures.Context._
 import byok3.data_structures.Stack._
-import byok3.data_structures.{Address, Data}
+import byok3.helpers.sequence
 
 class MemoryTest extends PrimitivesTestBase {
 
@@ -15,7 +14,7 @@ class MemoryTest extends PrimitivesTestBase {
         Memory.`!`)
 
       val ctx = ops.run(emptyContext).value._1
-      assert(ctx.mem.peek(Address(0x1000)) === Data(0x77))
+      assert(ctx.mem.peek(0x1000) === 0x77)
     }
 
     it("should write a value in memory and read back from memory") {
@@ -44,10 +43,10 @@ class MemoryTest extends PrimitivesTestBase {
         dataStack(push(-2)),
         Memory.`@`)
 
-      val ex = intercept[StackMachineException] {
+      val ex = intercept[IndexOutOfBoundsException] {
         ops.run(emptyContext).value
       }
-      assert(ex.getMessage === "invalid memory address")
+      assert(ex.getMessage === "invalid memory address: -2")
     }
 
     it("should error when invalid memory location accessed") {
@@ -55,10 +54,10 @@ class MemoryTest extends PrimitivesTestBase {
         dataStack(push(emptyContext.mem.size + 5)),
         Memory.`@`)
 
-      val ex = intercept[StackMachineException] {
+      val ex = intercept[IndexOutOfBoundsException] {
         ops.run(emptyContext).value
       }
-      assert(ex.getMessage === "invalid memory address")
+      assert(ex.getMessage === s"invalid memory address: ${emptyContext.mem.size + 5}")
     }
 
     it("should increment a value in memory") {
@@ -70,7 +69,7 @@ class MemoryTest extends PrimitivesTestBase {
         Memory.`+!`)
 
       val ctx = ops.run(emptyContext).value._1
-      assert(ctx.mem.peek(Address(0x1000)) === Data(0x78))
+      assert(ctx.mem.peek(0x1000) === 0x78)
     }
   }
 }

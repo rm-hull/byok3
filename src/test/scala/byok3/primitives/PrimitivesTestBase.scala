@@ -1,16 +1,16 @@
 package byok3.primitives
 
-import byok3._
 import byok3.data_structures.Context
 import byok3.data_structures.Context.dataStack
 import byok3.data_structures.Stack.push
+import byok3.helpers.sequence
 import cats.data.State
 import org.scalatest.FunSpec
 
 abstract class PrimitivesTestBase extends FunSpec {
 
-  val emptyContext = Context(0x10000)
-  val ops = sequence(dataStack(push(4)), dataStack(push(2)), dataStack(push(8)))
+  protected val emptyContext = Context(0x10000)
+  protected val ops = sequence(dataStack(push(4)), dataStack(push(2)), dataStack(push(8)))
 
   def assertDataStack(op: State[Context, Unit], expected: List[Int]) = {
     val effects = for {

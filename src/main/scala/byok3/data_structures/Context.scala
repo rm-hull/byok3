@@ -1,6 +1,6 @@
 package byok3.data_structures
 
-import byok3.data_structures.Stack.Stack
+import byok3.types.{Dictionary, Stack}
 import cats.data.State
 import cats.data.State._
 
@@ -10,12 +10,12 @@ case class Context(ds: Stack[Int], // data stack
                    mem: Memory,
                    reg: Registers,
                    status: MachineState,
-                   exeTok: Map[String, ExecutionToken])
-
+                   dictionary: Dictionary,
+                   currentXT: Option[ExecutionToken] = None)
 
 object Context {
 
-  def apply(memSize: Int): Context = Context(Stack.empty, Stack.empty, Memory(memSize), Registers(), OK, ExecutionTokenMapBuilder())
+  def apply(memSize: Int): Context = Context(Stack.empty, Stack.empty, Memory(memSize), Registers(), OK, DictionaryBuilder())
 
   def dataStack[A](block: State[Stack[Int], A]): State[Context, A] = for {
     ctx <- get[Context]
@@ -37,4 +37,7 @@ object Context {
 
   def machineState(newStatus: MachineState): State[Context, Unit] =
     modify[Context](_.copy(status = newStatus))
+
+  def setCurrentXT(token: Option[ExecutionToken] = None): State[Context, Unit] =
+    modify[Context](_.copy(currentXT = token))
 }

@@ -7,6 +7,13 @@ class InterpreterTest extends FunSpec {
 
   val emptyContext = Context(0x10000)
 
+  describe("tokenize") {
+    it("should stream tokens separated by whitespace") {
+      assert(Interpreter.tokenize("10\t\t 3\t6 \nHELLO\n\n").toList ===
+        List("10", "3", "6", "HELLO"))
+    }
+  }
+
   describe("Interpreter") {
     it("should push values onto the data stack") {
       val ops = Interpreter.exec("9 5 3")

@@ -2,8 +2,8 @@ package byok3.primitives
 
 import byok3.data_structures.Context._
 import byok3.data_structures.Stack.push
+import byok3.helpers.sequence
 import byok3.primitives.StackManip._
-import byok3.sequence
 
 class StackManipTest extends PrimitivesTestBase {
 

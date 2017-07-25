@@ -2,7 +2,7 @@ package byok3.primitives
 
 import byok3.data_structures.Context.dataStack
 import byok3.data_structures.Stack.push
-import byok3.sequence
+import byok3.helpers.sequence
 
 class ArithmeticsTest extends PrimitivesTestBase {
 

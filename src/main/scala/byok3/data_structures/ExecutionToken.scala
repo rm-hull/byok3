@@ -1,13 +1,15 @@
 package byok3.data_structures
 
-import byok3.primitives.{Arithmetics, Memory => Mem, StackManip}
+import byok3.primitives.{Arithmetics, StackManip, Memory => Mem}
+import byok3.types.{Dictionary, Word}
 import cats.data.State
 
 sealed trait ExecutionToken {
+  val name: Word
   val effect: State[Context, Unit]
 }
 
-case class Primitive(effect: State[Context, Unit]) extends ExecutionToken
+case class Primitive(name: Word, effect: State[Context, Unit]) extends ExecutionToken
 
 trait PrimitiveImpl {
   import scala.reflect.runtime.{universe => ru}
@@ -15,17 +17,25 @@ trait PrimitiveImpl {
   def typeOf: ru.Type
 }
 
-object ExecutionTokenMapBuilder {
+object DictionaryBuilder {
 
   private def getExecutionTokens(obj: PrimitiveImpl) = {
-    obj.typeOf.decls
-      .map(_.asTerm)
-      .filter(_.isVal)
-      .map(ts => (ts.toString.substring(6).toUpperCase, Primitive(effect = obj.instanceMirror.reflectField(ts).get.asInstanceOf[State[Context, Unit]]))).toMap
+    for {
+      decl <- obj.typeOf.decls
+      term = decl.asTerm
+      if term.isVal
+      name = term.toString.substring(6).toUpperCase
+      effect = obj.instanceMirror.reflectField(term).get.asInstanceOf[State[Context, Unit]]
+    } yield {
+      Primitive(name, effect)
+    }
   }
 
-  def apply(): Map[String, ExecutionToken] =
-    getExecutionTokens(Arithmetics) ++
+  def apply(): Dictionary = {
+    val tokens = getExecutionTokens(Arithmetics) ++
       getExecutionTokens(Mem) ++
       getExecutionTokens(StackManip)
+
+    tokens.foldLeft[Dictionary](Map.empty)((m, a) => m + (a.name -> a))
+  }
 }

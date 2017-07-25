@@ -1,26 +1,24 @@
 package byok3.data_structures
 
-import byok3.StackMachineException._
+import byok3.types.Stack
 import cats.data.State
 import cats.data.State._
 
 object Stack {
 
-  type Stack[A] = List[A]
-
-  private def stackUnderflow = error(-4)
+  private val stackUnderflowError = new NoSuchElementException("stack underflow") // MError(-4)
 
   def empty[A]: Stack[A] = List.empty[A]
 
   def push[A](value: A): State[Stack[A], Unit] = modify(value :: _)
 
   def pop[A]: State[Stack[A], A] = State {
-    case Nil => stackUnderflow
+    case Nil => throw stackUnderflowError
     case h :: t => (t, h)
   }
 
   def peek[A]: State[Stack[A], A] =
-    inspect(_.headOption.getOrElse(stackUnderflow))
+    inspect(_.headOption.getOrElse(throw stackUnderflowError))
 
   def arity1stackOp[A](f: A => A): State[Stack[A], Unit] = for {
     a <- pop

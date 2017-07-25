@@ -2,6 +2,7 @@ package byok3
 
 import byok3.data_structures.Stack
 import byok3.data_structures.Stack._
+import byok3.helpers.sequence
 import org.scalatest.FunSpec
 
 
@@ -43,7 +44,7 @@ class StackTest extends FunSpec {
         c <- pop
       } yield (a, b, c)
 
-      val ex = intercept[StackMachineException] {
+      val ex = intercept[NoSuchElementException] {
         ops.run(Stack.empty).value
       }
       assert(ex.getMessage === "stack underflow")
