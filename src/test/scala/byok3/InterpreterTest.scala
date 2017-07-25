@@ -38,7 +38,5 @@ class InterpreterTest extends FunSpec {
       val result = ops.run(emptyContext).value
       assert(result._1.ds === List(5))
     }
-
-
   }
 }
