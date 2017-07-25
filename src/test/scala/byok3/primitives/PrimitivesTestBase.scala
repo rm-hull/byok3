@@ -10,11 +10,12 @@ import org.scalatest.FunSpec
 abstract class PrimitivesTestBase extends FunSpec {
 
   protected val emptyContext = Context(0x10000)
-  protected val ops = sequence(dataStack(push(4)), dataStack(push(2)), dataStack(push(8)))
 
-  def assertDataStack(op: State[Context, Unit], expected: List[Int]) = {
+  def assertDataStack(op: State[Context, Unit], expected: List[Int],
+                      presets: State[Context, List[Unit]] = sequence(dataStack(push(4)), dataStack(push(2)), dataStack(push(8)))) = {
+
     val effects = for {
-      _ <- ops
+      _ <- presets
       _ <- op
     } yield ()
 
