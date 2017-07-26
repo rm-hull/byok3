@@ -4,6 +4,7 @@ import byok3.data_structures.Context._
 import byok3.data_structures.Stack.push
 import byok3.helpers.sequence
 import byok3.primitives.StackManip._
+import cats.implicits._
 
 class StackManipTest extends PrimitivesTestBase {
 
@@ -26,16 +27,16 @@ class StackManipTest extends PrimitivesTestBase {
 
     it("should move x from data stack to return stack") {
       val ops = sequence(dataStack(push(4)), dataStack(push(2)), dataStack(push(8)), `>R`)
-      val ctx = ops.run(emptyContext).value._1
-      assert(ctx.rs === List(8))
-      assert(ctx.ds === List(2, 4))
+      val ctx = ops.run(emptyContext).get._1
+      assert(ctx.rs == List(8))
+      assert(ctx.ds == List(2, 4))
     }
 
     it("should move x from return stack to data stack") {
       val ops = sequence(returnStack(push(4)), dataStack(push(2)), dataStack(push(8)), `R>`)
-      val ctx = ops.run(emptyContext).value._1
-      assert(ctx.rs === List())
-      assert(ctx.ds === List(4, 8, 2))
+      val ctx = ops.run(emptyContext).get._1
+      assert(ctx.rs == List())
+      assert(ctx.ds == List(4, 8, 2))
     }
   }
 }

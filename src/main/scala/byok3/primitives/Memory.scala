@@ -1,14 +1,13 @@
 package byok3.primitives
 
-import byok3.data_structures.Context
 import byok3.data_structures.Context._
 import byok3.data_structures.Memory.{peek, poke}
 import byok3.data_structures.Stack.{pop, push}
-import cats.data.State
+import cats.implicits._
 
 object Memory {
 
-  val `!`: State[Context, Unit] = for {
+  val `!` = for {
     data <- dataStack(pop)
     addr <- dataStack(pop)
     _ <- memory(poke(addr, data))

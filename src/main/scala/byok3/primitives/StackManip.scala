@@ -3,13 +3,16 @@ package byok3.primitives
 import byok3.data_structures.Context._
 import byok3.data_structures.Stack._
 import byok3.types.Stack
-import cats.data.State._
+import cats.data.StateT._
+import cats.implicits._
+
+import scala.util.Try
 
 object StackManip {
 
   val depth = dataStack {
     for {
-      stack <- get[Stack[Int]]
+      stack <- get[Try, Stack[Int]]
       _ <- push(stack.length)
     } yield ()
   }

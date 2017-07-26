@@ -1,8 +1,11 @@
 package byok3.data_structures
 
 import byok3.types.{Address, AddressSpace, Data}
-import cats.data.State
-import cats.data.State._
+import cats.data. StateT
+import cats.data.StateT._
+import cats.implicits._
+
+import scala.util.Try
 
 protected case class Memory(size: Int, private val mem: AddressSpace) {
 
@@ -31,9 +34,9 @@ case object Memory {
     Memory(size = size, Map.empty)
   }
 
-  def poke(addr: Address, data: Data): State[Memory, Unit] =
-    modify(_.poke(addr, data))
+  def poke(addr: Address, data: Data): StateT[Try, Memory, Unit] =
+    modify[Try, Memory](_.poke(addr, data))
 
-  def peek(addr: Address): State[Memory, Data] =
-    inspect(_.peek(addr))
+  def peek(addr: Address): StateT[Try, Memory, Data] =
+    inspect[Try, Memory, Data](_.peek(addr))
 }

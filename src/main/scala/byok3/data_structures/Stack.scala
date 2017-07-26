@@ -1,51 +1,51 @@
 package byok3.data_structures
 
 import byok3.types.Stack
-import cats.data.State
-import cats.data.State._
+import cats.data.StateT
+import cats.data.StateT._
+import cats.implicits._
+
+import scala.util.Try
 
 object Stack {
 
-  private val stackUnderflowError = new NoSuchElementException("stack underflow") // MError(-4)
-
   def empty[A]: Stack[A] = List.empty[A]
 
-  def push[A](value: A): State[Stack[A], Unit] = modify(value :: _)
+  def push[A](value: A): StateT[Try, Stack[A], Unit] =
+    modify(value :: _)
 
-  def pop[A]: State[Stack[A], A] = State {
-    case Nil => throw stackUnderflowError
-    case h :: t => (t, h)
-  }
+  def pop[A]: StateT[Try, Stack[A], A] =
+    StateT(stack => Try((stack.head, stack.tail).swap))
 
-  def peek[A]: State[Stack[A], A] =
-    inspect(_.headOption.getOrElse(throw stackUnderflowError))
+  def peek[A]: StateT[Try, Stack[A], A] =
+    inspect(stack => stack.head)
 
-  def arity1stackOp[A](f: A => A): State[Stack[A], Unit] = for {
+  def arity1stackOp[A](f: A => A): StateT[Try, Stack[A], Unit] = for {
     a <- pop
     _ <- push(f(a))
   } yield ()
 
-  def arity2stackOp[A](f: (A, A) => A): State[Stack[A], Unit] = for {
+  def arity2stackOp[A](f: (A, A) => A): StateT[Try, Stack[A], Unit] = for {
     b <- pop
     a <- pop
     _ <- push(f(a, b))
   } yield ()
 
-  def arity2stackOp2[A](f1: (A, A) => A)(f2: (A, A) => A): State[Stack[A], Unit] = for {
+  def arity2stackOp2[A](f1: (A, A) => A)(f2: (A, A) => A): StateT[Try, Stack[A], Unit] = for {
     b <- pop
     a <- pop
     _ <- push(f1(a, b))
     _ <- push(f2(a, b))
   } yield ()
 
-  def arity3stackOp[A](f: (A, A, A) => A): State[Stack[A], Unit] = for {
+  def arity3stackOp[A](f: (A, A, A) => A): StateT[Try, Stack[A], Unit] = for {
     c <- pop
     b <- pop
     a <- pop
     _ <- push(f(a, b, c))
   } yield ()
 
-  def arity3stackOp2[A](f1: (A, A, A) => A)(f2: (A, A, A) => A): State[Stack[A], Unit] = for {
+  def arity3stackOp2[A](f1: (A, A, A) => A)(f2: (A, A, A) => A): StateT[Try, Stack[A], Unit] = for {
     c <- pop
     b <- pop
     a <- pop

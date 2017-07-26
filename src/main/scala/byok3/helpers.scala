@@ -1,12 +1,13 @@
 package byok3
 
-import cats.data.State
-import cats.data.State.pure
+import cats.{Applicative, FlatMap}
+import cats.data.StateT
+import cats.data.StateT.pure
 
 package object helpers {
 
-  def sequence[S, A](sas: State[S, A]*): State[S, List[A]] =
-    sas.foldRight(pure[S, List[A]](List.empty)) {
+  def sequence[F[_], S, A](sas: StateT[F, S, A]*)(implicit F: Applicative[F], F2: FlatMap[F]): StateT[F, S, List[A]] =
+    sas.foldRight(pure[F, S, List[A]](List.empty)) {
       (f, acc) => f.map2(acc)(_ :: _)
     }
 }

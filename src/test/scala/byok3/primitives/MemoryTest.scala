@@ -3,6 +3,7 @@ package byok3.primitives
 import byok3.data_structures.Context._
 import byok3.data_structures.Stack._
 import byok3.helpers.sequence
+import cats.implicits._
 
 class MemoryTest extends PrimitivesTestBase {
 
@@ -13,8 +14,8 @@ class MemoryTest extends PrimitivesTestBase {
         dataStack(push(0x77)),
         Memory.`!`)
 
-      val ctx = ops.run(emptyContext).value._1
-      assert(ctx.mem.peek(0x1000) === 0x77)
+      val ctx = ops.run(emptyContext).get._1
+      assert(ctx.mem.peek(0x1000) == 0x77)
     }
 
     it("should write a value in memory and read back from memory") {
@@ -25,8 +26,8 @@ class MemoryTest extends PrimitivesTestBase {
         dataStack(push(0x1000)),
         Memory.`@`)
 
-      val ctx = ops.run(emptyContext).value._1
-      assert(ctx.ds === List(0x77))
+      val ctx = ops.run(emptyContext).get._1
+      assert(ctx.ds == List(0x77))
     }
 
     it("should read back from empty memory") {
@@ -34,8 +35,8 @@ class MemoryTest extends PrimitivesTestBase {
         dataStack(push(0x1000)),
         Memory.`@`)
 
-      val ctx = ops.run(emptyContext).value._1
-      assert(ctx.ds === List(0))
+      val ctx = ops.run(emptyContext).get._1
+      assert(ctx.ds == List(0))
     }
 
     it("should error when invalid (negative) memory location accessed") {
@@ -44,9 +45,9 @@ class MemoryTest extends PrimitivesTestBase {
         Memory.`@`)
 
       val ex = intercept[IndexOutOfBoundsException] {
-        ops.run(emptyContext).value
+        ops.run(emptyContext).get
       }
-      assert(ex.getMessage === "invalid memory address: -2")
+      assert(ex.getMessage == "invalid memory address: -2")
     }
 
     it("should error when invalid memory location accessed") {
@@ -55,9 +56,9 @@ class MemoryTest extends PrimitivesTestBase {
         Memory.`@`)
 
       val ex = intercept[IndexOutOfBoundsException] {
-        ops.run(emptyContext).value
+        ops.run(emptyContext).get
       }
-      assert(ex.getMessage === s"invalid memory address: ${emptyContext.mem.size + 5}")
+      assert(ex.getMessage == s"invalid memory address: ${emptyContext.mem.size + 5}")
     }
 
     it("should increment a value in memory") {
@@ -68,8 +69,8 @@ class MemoryTest extends PrimitivesTestBase {
         dataStack(push(0x1000)),
         Memory.`+!`)
 
-      val ctx = ops.run(emptyContext).value._1
-      assert(ctx.mem.peek(0x1000) === 0x78)
+      val ctx = ops.run(emptyContext).get._1
+      assert(ctx.mem.peek(0x1000) == 0x78)
     }
   }
 }

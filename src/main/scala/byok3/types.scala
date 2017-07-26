@@ -1,6 +1,9 @@
 package byok3
 
-import byok3.data_structures.ExecutionToken
+import byok3.data_structures.{Context, ExecutionToken}
+import cats.data.StateT
+
+import scala.util.Try
 
 package object types {
 
@@ -12,4 +15,6 @@ package object types {
   type AddressSpace = Map[Address, Data]
 
   type Dictionary = Map[Word, ExecutionToken]
+
+  type AppState[A] = StateT[Try, Context, A]
 }

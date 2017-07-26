@@ -1,18 +1,17 @@
 package byok3.data_structures
 
 import byok3.primitives.{Arithmetics, StackManip, Memory => Mem}
-import byok3.types.{Dictionary, Word}
-import cats.data.State
+import byok3.types.{AppState, Dictionary, Word}
 
 import scala.reflect.ClassTag
 import scala.reflect.runtime.{universe => ru}
 
 sealed trait ExecutionToken {
   val name: Word
-  val effect: State[Context, Unit]
+  val effect: AppState[Unit]
 }
 
-case class Primitive(name: Word, effect: State[Context, Unit]) extends ExecutionToken
+case class Primitive(name: Word, effect: AppState[Unit]) extends ExecutionToken
 
 
 object DictionaryBuilder {
@@ -23,9 +22,9 @@ object DictionaryBuilder {
     for {
       decl <- ru.typeOf[T].decls
       term = decl.asTerm
-      if term.isVal && term.typeSignature =:= ru.typeOf[State[Context, Unit]]
+      if term.isVal && term.typeSignature =:= ru.typeOf[AppState[Unit]]
       name = term.toString.substring(6).toUpperCase
-      effect = instanceMirror.reflectField(term).get.asInstanceOf[State[Context, Unit]]
+      effect = instanceMirror.reflectField(term).get.asInstanceOf[AppState[Unit]]
     } yield {
       Primitive(name, effect)
     }

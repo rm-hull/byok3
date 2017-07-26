@@ -1,9 +1,11 @@
 package byok3.data_structures
 
+import scala.{Error => errrrrrrrr}
+
 sealed trait MachineState
 case object OK extends MachineState
 case object Smudge extends MachineState
-case class Error(errno: Int, message: String) extends RuntimeException(message.trim) with MachineState
+case class Error(errno: Int, message: String) extends RuntimeException with MachineState
 
 case object Error {
 

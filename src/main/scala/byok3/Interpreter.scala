@@ -3,12 +3,12 @@ package byok3
 import byok3.data_structures.Context._
 import byok3.data_structures.Stack._
 import byok3.data_structures.{Context, Error, ExecutionToken}
-import byok3.helpers.sequence
-import byok3.types.Word
-import cats.data.State
-import cats.data.State._
+import byok3.types.{AppState, Word}
+import cats.data.StateT._
+import cats.implicits._
 
 import scala.util.Try
+
 
 object Interpreter {
 
@@ -36,18 +36,21 @@ object Interpreter {
       .get(token)
       .map(effect)
 
-  private def assemble(token: Word): State[Context, Unit] =
-    get[Context].flatMap { ctx =>
+  private def assemble(token: Word): AppState[Unit] =
+    get[Try, Context].flatMap { ctx =>
       lookup(token)(ctx)
         .orElse(parseAsNumber(token))
         .getOrElse(machineState(Error(-13))) // word not found
     }
 
-  def exec(in: String): State[Context, Unit] = {
-    val ops = tokenize(in).map(assemble)
-
+  private def runner(prev: AppState[Unit], curr: AppState[Unit]): AppState[Unit] =
     for {
-      _ <- sequence(ops: _*)
+      _ <- prev
+      _ <- curr
     } yield ()
+
+
+  def apply(in: String): AppState[Unit] = {
+    tokenize(in).map(assemble).foldRight[AppState[Unit]](pure(()))(runner)
   }
 }

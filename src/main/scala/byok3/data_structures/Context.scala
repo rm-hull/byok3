@@ -1,43 +1,44 @@
 package byok3.data_structures
 
-import byok3.types.{Dictionary, Stack}
-import cats.data.State
-import cats.data.State._
+import byok3.types.{AppState, Dictionary, Stack}
+import cats.data.StateT
+import cats.data.StateT._
+import cats.implicits._
+
+import scala.util.Try
 
 
-case class Context(ds: Stack[Int], // data stack
-                   rs: Stack[Int], // return stack
-                   mem: Memory,
-                   reg: Registers,
-                   status: MachineState,
+case class Context(mem: Memory,
                    dictionary: Dictionary,
-                   currentXT: Option[ExecutionToken] = None)
+                   status: MachineState = OK,
+                   reg: Registers = Registers(),
+                   ds: Stack[Int] = List.empty, // data stack
+                   rs: Stack[Int] = List.empty, // return stack
+                   currentXT: Option[ExecutionToken] = None) {
+
+  def updateState(newStatus: MachineState) = newStatus match {
+    // drain the data and return stacks if there was an error
+    case err: Error => copy(status = err, ds = List.empty, rs = List.empty)
+    case other => copy(status = other)
+  }
+}
 
 object Context {
 
-  def apply(memSize: Int): Context = Context(Stack.empty, Stack.empty, Memory(memSize), Registers(), OK, DictionaryBuilder())
+  def apply(memSize: Int): Context = Context(Memory(memSize), DictionaryBuilder())
 
-  def dataStack[A](block: State[Stack[Int], A]): State[Context, A] = for {
-    ctx <- get[Context]
-    (stack, value) = block.run(ctx.ds).value
-    _ <- set(ctx.copy(ds = stack))
-  } yield value
+  def dataStack[A](block: StateT[Try, Stack[Int], A]): AppState[A] =
+    block.transformS(_.ds, (ctx, stack) => ctx.copy(ds = stack))
 
-  def returnStack[A](block: State[Stack[Int], A]): State[Context, A] = for {
-    ctx <- get[Context]
-    (stack, value) = block.run(ctx.rs).value
-    _ <- set(ctx.copy(rs = stack))
-  } yield value
+  def returnStack[A](block: StateT[Try, Stack[Int], A]): AppState[A] =
+    block.transformS(_.rs, (ctx, stack) => ctx.copy(rs = stack))
 
-  def memory[A](block: State[Memory, A]): State[Context, A] = for {
-    ctx <- get[Context]
-    (memory, value) = block.run(ctx.mem).value
-    _ <- set(ctx.copy(mem = memory))
-  } yield value
+  def memory[A](block: StateT[Try, Memory, A]): StateT[Try, Context, A] =
+    block.transformS[Context](_.mem, (ctx, mem) => ctx.copy(mem = mem))
 
-  def machineState(newStatus: MachineState): State[Context, Unit] =
-    modify[Context](_.copy(status = newStatus))
+  def machineState(newStatus: MachineState): AppState[Unit] =
+    modify(_.updateState(newStatus))
 
-  def setCurrentXT(token: Option[ExecutionToken] = None): State[Context, Unit] =
-    modify[Context](_.copy(currentXT = token))
+  def setCurrentXT(token: Option[ExecutionToken] = None): AppState[Unit] =
+    modify[Try, Context](_.copy(currentXT = token))
 }
