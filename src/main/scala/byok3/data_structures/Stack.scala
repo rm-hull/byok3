@@ -9,16 +9,14 @@ import scala.util.Try
 
 object Stack {
 
-  def empty[A]: Stack[A] = List.empty[A]
-
   def push[A](value: A): StateT[Try, Stack[A], Unit] =
     modify(value :: _)
 
   def pop[A]: StateT[Try, Stack[A], A] =
-    StateT(stack => Try((stack.head, stack.tail).swap))
+    apply(stack => Try((stack.head, stack.tail).swap))
 
   def peek[A]: StateT[Try, Stack[A], A] =
-    inspect(stack => stack.head)
+    inspectF(stack => Try(stack.head))
 
   def arity1stackOp[A](f: A => A): StateT[Try, Stack[A], Unit] = for {
     a <- pop
