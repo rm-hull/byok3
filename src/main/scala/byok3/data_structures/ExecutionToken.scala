@@ -1,8 +1,9 @@
 package byok3.data_structures
 
+import byok3.annonation.{Documentation, StackEffect}
 import byok3.data_structures.Context._
 import byok3.data_structures.Stack._
-import byok3.primitives.{Arithmetics, StackManip, Memory => Mem}
+import byok3.primitives.{Arithmetics, StackManipulation, Memory => Mem}
 import byok3.types.{Address, AppState, Data, Dictionary, Word}
 import cats.data.StateT
 import cats.data.StateT._
@@ -17,7 +18,7 @@ sealed trait ExecutionToken {
   val effect: AppState[Unit]
 }
 
-case class Primitive(name: Word, effect: AppState[Unit]) extends ExecutionToken
+case class Primitive(name: Word, effect: AppState[Unit], doc: Option[Documentation], stackEffect: Option[StackEffect]) extends ExecutionToken
 
 case class Constant(name: Word, value: Data) extends ExecutionToken {
   override val effect = dataStack(push(value))
@@ -29,6 +30,9 @@ case class Variable(name: Word, addr: Address) extends ExecutionToken {
 
 object Dictionary {
 
+  private def annotation[T](term: ru.TermSymbol)(implicit ev: ru.TypeTag[T]) =
+    term.annotations.find(_.tree.tpe =:= ru.typeOf[T]).map(_.asInstanceOf[T])
+
   private def getExecutionTokens[T](obj: T)(implicit ev: ru.TypeTag[T], ev2: ClassTag[T]): Iterable[ExecutionToken] = {
 
     val instanceMirror = ru.runtimeMirror(getClass.getClassLoader).reflect(obj)
@@ -38,15 +42,17 @@ object Dictionary {
       if term.isVal && term.typeSignature =:= ru.typeOf[AppState[Unit]]
       name = term.toString.substring(6).toUpperCase
       effect = instanceMirror.reflectField(term).get.asInstanceOf[AppState[Unit]]
+      documentation = annotation[Documentation](term)
+      stackEffect = annotation[StackEffect](term)
     } yield {
-      Primitive(name, effect)
+      Primitive(name, effect, documentation, stackEffect)
     }
   }
 
   def apply(): Dictionary = {
     val tokens = getExecutionTokens(Arithmetics) ++
       getExecutionTokens(Mem) ++
-      getExecutionTokens(StackManip)
+      getExecutionTokens(StackManipulation)
 
     tokens.foldLeft[Dictionary](Map.empty)((m, a) => m + (a.name -> a))
   }

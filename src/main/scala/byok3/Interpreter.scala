@@ -43,11 +43,12 @@ object Interpreter {
     token <- nextToken()
   } yield token == EndOfData
 
+  def continue(isFinished: Boolean): AppState[Unit] =
+    if (isFinished) pure() else exec
+
   // FIXME: this probably needs to be trampolined
-  def exec: AppState[Unit] = step.flatMap { stop =>
-    if (stop) pure()
-    else exec
-  }
+  def exec: AppState[Unit] =
+    step.flatMap(continue)
 
   def apply(text: String): AppState[Unit] =
     input(text).flatMap(_ => exec)
