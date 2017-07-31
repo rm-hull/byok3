@@ -40,16 +40,15 @@ object Interpreter {
 
   def step: AppState[Boolean] = for {
     _ <- assemble
-    _ <- nextToken()
-    ctx <- get[Try, Context]
-  } yield ctx.input == EndOfData
+    token <- nextToken()
+  } yield token == EndOfData
 
   // FIXME: this probably needs to be trampolined
-  def exec: AppState[Unit] = step.flatMap {
-    if (_) pure()
+  def exec: AppState[Unit] = step.flatMap { stop =>
+    if (stop) pure()
     else exec
   }
 
-  def apply(in: String): AppState[Unit] =
-    input(in).flatMap(_ => exec)
+  def apply(text: String): AppState[Unit] =
+    input(text).flatMap(_ => exec)
 }
