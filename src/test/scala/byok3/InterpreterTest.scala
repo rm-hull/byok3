@@ -8,21 +8,14 @@ class InterpreterTest extends FunSpec {
 
   val emptyContext = Context(0x10000)
 
-  describe("tokenize") {
-    it("should stream tokens separated by whitespace") {
-      assert(Interpreter.tokenize("10\t\t 3\t6 \nHELLO\n\n").toList ==
-        List("10", "3", "6", "HELLO"))
-    }
-  }
-
   describe("Interpreter") {
     it("should push values onto the data stack") {
-      val result = Interpreter("9 5 3").runS(emptyContext).get
+      val result = Interpreter("9  5 3").runS(emptyContext).get
       assert(result.ds == List(3, 5, 9))
     }
 
     it("should execute primitives sequentially") {
-      val result = Interpreter("3 DUP * 2 -").runS(emptyContext).get
+      val result = Interpreter(" 3 DUP * 2 -").runS(emptyContext).get
       assert(result.ds == List(7))
     }
 
@@ -45,6 +38,38 @@ class InterpreterTest extends FunSpec {
     it("should record an error when accessing invalid memory") {
       intercept[IndexOutOfBoundsException] {
         Interpreter("-2 @").runS(emptyContext).get
+      }
+    }
+
+    it("should create a constant") {
+      val ops = for {
+        _ <- Interpreter("220 CONSTANT LIMIT")
+        _ <- Interpreter("20 LIMIT +")
+      } yield ()
+
+      val result = ops.runS(emptyContext).get
+      assert(result.ds == List(240))
+    }
+
+    it("should create a variable") {
+      val ops = for {
+        _ <- Interpreter("VARIABLE DATE")
+        _ <- Interpreter("12 DATE !")
+        _ <- Interpreter("DATE @ 3 +")
+      } yield ()
+
+      val result = ops.runS(emptyContext).get
+      assert(result.ds == List(15))
+      assert(result.mem.peek(0x100) == 12)
+    }
+
+    it("should parse the input stream") {
+      val ops = Interpreter("33 PARSE BEYOND SPACE! 42")
+      val result = ops.runS(emptyContext).get
+      assert(result.ds == List(42, 9, 12))
+
+      Stream.from(9).zip("BEYOND SPACE").foreach {
+        case (addr, ch) => assert(result.mem.peek(addr) === ch)
       }
     }
   }

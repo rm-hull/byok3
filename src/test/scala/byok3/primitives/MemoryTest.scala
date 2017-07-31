@@ -10,8 +10,8 @@ class MemoryTest extends PrimitivesTestBase {
   describe("Memory") {
     it("should poke a value in memory") {
       val ops = sequence(
-        dataStack(push(0x1000)),
         dataStack(push(0x77)),
+        dataStack(push(0x1000)),
         Memory.`!`)
 
       val ctx = ops.run(emptyContext).get._1
@@ -20,8 +20,8 @@ class MemoryTest extends PrimitivesTestBase {
 
     it("should write a value in memory and read back from memory") {
       val ops = sequence(
-        dataStack(push(0x1000)),
         dataStack(push(0x77)),
+        dataStack(push(0x1000)),
         Memory.`!`,
         dataStack(push(0x1000)),
         Memory.`@`)
@@ -63,14 +63,18 @@ class MemoryTest extends PrimitivesTestBase {
 
     it("should increment a value in memory") {
       val ops = sequence(
-        dataStack(push(0x1000)),
         dataStack(push(0x77)),
+        dataStack(push(0x1000)),
         Memory.`!`,
         dataStack(push(0x1000)),
         Memory.`+!`)
 
       val ctx = ops.run(emptyContext).get._1
       assert(ctx.mem.peek(0x1000) == 0x78)
+    }
+
+    it("should parse ") {
+
     }
   }
 }

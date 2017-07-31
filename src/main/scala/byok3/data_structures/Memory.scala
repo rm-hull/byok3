@@ -1,7 +1,7 @@
 package byok3.data_structures
 
 import byok3.types.{Address, AddressSpace, Data}
-import cats.data. StateT
+import cats.data.StateT
 import cats.data.StateT._
 import cats.implicits._
 
@@ -35,8 +35,17 @@ case object Memory {
   }
 
   def poke(addr: Address, data: Data): StateT[Try, Memory, Unit] =
-    modify[Try, Memory](_.poke(addr, data))
+    modify(_.poke(addr, data))
 
   def peek(addr: Address): StateT[Try, Memory, Data] =
     inspect[Try, Memory, Data](_.peek(addr))
+
+  def copy(addr: Address, data: String): StateT[Try, Memory, Unit] = {
+    Stream.from(addr).zip(data).foldLeft[StateT[Try, Memory, Unit]](pure()) {
+      case (prevState, (addr, ch)) => for {
+        _ <- prevState
+        _ <- poke(addr, ch.toInt)
+      } yield ()
+    }
+  }
 }
