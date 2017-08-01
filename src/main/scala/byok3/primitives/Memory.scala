@@ -6,10 +6,12 @@ import byok3.data_structures.Dictionary._
 import byok3.data_structures.Memory.{peek, poke}
 import byok3.data_structures.Registers._
 import byok3.data_structures.Stack.{pop, push}
-import byok3.data_structures.{Constant, Variable}
-import byok3.types.Data
+import byok3.data_structures.{Constant, Error, Variable}
+import byok3.types.{AppState, Data}
 import cats.data.StateT._
 import cats.implicits._
+
+import scala.util.Failure
 
 object Memory {
 
@@ -35,7 +37,7 @@ object Memory {
   } yield ()
 
   @Documentation("Adds x to the single cell number at a-addr.")
-  @StackEffect( "( x a-addr -- )")
+  @StackEffect("( x a-addr -- )")
   val +! = for {
     addr <- dataStack(pop)
     data <- memory(peek(addr))
@@ -97,7 +99,7 @@ object Memory {
     tib <- register(inspect(_.tib))
     ascii <- dataStack(pop)
     token <- nextToken(delim = ascii.toChar.toString)
-    len =  if (token.exhausted) 0 else token.value.length
+    len = if (token.exhausted) 0 else token.value.length
     _ <- dataStack(push(len))
     _ <- dataStack(push(tib + token.offset))
   } yield ()
@@ -117,4 +119,13 @@ object Memory {
     tib <- register(inspect(_.tib))
     _ <- dataStack(push(tib))
   } yield ()
+
+  @StackEffect("( i*x -- )")
+  val THROW: AppState[Unit] =
+    dataStack(pop).flatMapF(err => Failure(Error(err)))
+
+  val `?ERROR` = for {
+    err <- dataStack(pop)
+    cond <- dataStack(pop)
+  } yield if (cond == 0) () else throw Error(err)
 }

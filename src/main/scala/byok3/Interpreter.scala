@@ -4,9 +4,7 @@ import byok3.data_structures.Context._
 import byok3.data_structures.Stack._
 import byok3.data_structures._
 import byok3.types.{AppState, Word}
-import cats.data.StateT
 import cats.data.StateT._
-import cats.free.Trampoline
 import cats.implicits._
 
 import scala.annotation.tailrec
@@ -37,7 +35,7 @@ object Interpreter {
       case Token(token, _, _) =>
         processEffect(token)(ctx)
           .orElse(pushNumber(token))
-          .getOrElse(machineState(Error(-13, token))) // word not found
+          .getOrElse(throw Error(-13, token)) // word not found
     }
   }
 
@@ -49,9 +47,12 @@ object Interpreter {
   @tailrec
   private def exec(ctx: Context): Context = {
     step.run(ctx) match {
-      case Success((next, true)) => next
       case Success((next, false)) => exec(next)
-      case Failure(ex) => throw ex // TODO: Should do something like: ctx.updateState(Error(-1, ex.getMessage))
+      case Success((next, true)) => next
+      case Failure(ex: NoSuchElementException) => ctx.updateState(Error(-4))
+      case Failure(ex: IndexOutOfBoundsException) => ctx.updateState(Error(-9, ex.getMessage))
+      case Failure(ex: Error) => ctx.updateState(ex)
+      case Failure(ex) => ctx.updateState(Error(0, ex.getMessage))
     }
   }
 

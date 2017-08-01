@@ -14,7 +14,7 @@ protected case class Memory(size: Int, private val mem: AddressSpace) {
 
   private def boundsCheck(addr: Address): Unit = {
     if (addr < 0 || addr >= size)
-      throw new IndexOutOfBoundsException(s"invalid memory address: $addr") // MError(-9) invalid memory address
+      throw new IndexOutOfBoundsException(s"$addr")
   }
 
   def poke(addr: Address, data: Data): Memory = {

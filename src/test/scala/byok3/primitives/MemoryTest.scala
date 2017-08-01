@@ -1,6 +1,7 @@
 package byok3.primitives
 
 import byok3.data_structures.Context._
+import byok3.data_structures.Error
 import byok3.data_structures.Stack._
 import byok3.helpers.sequence
 import cats.implicits._
@@ -47,7 +48,7 @@ class MemoryTest extends PrimitivesTestBase {
       val ex = intercept[IndexOutOfBoundsException] {
         ops.runS(emptyContext).get
       }
-      assert(ex.getMessage == "invalid memory address: -2")
+      assert(ex.getMessage == "-2")
     }
 
     it("should error when invalid memory location accessed") {
@@ -58,7 +59,7 @@ class MemoryTest extends PrimitivesTestBase {
       val ex = intercept[IndexOutOfBoundsException] {
         ops.runS(emptyContext).get
       }
-      assert(ex.getMessage == s"invalid memory address: ${emptyContext.mem.size + 5}")
+      assert(ex.getMessage == s"${emptyContext.mem.size + 5}")
     }
 
     it("should increment a value in memory") {
@@ -113,6 +114,24 @@ class MemoryTest extends PrimitivesTestBase {
       val ctx = Memory.`(LIT)`.runS(emptyContext).get
       assert(ctx.ds == List(emptyContext.reg.ip))
       assert(ctx.reg.ip == emptyContext.reg.ip + 1)
+    }
+
+    it("should throw an error") {
+      val ops = sequence(dataStack(push(3)), dataStack(push(-3)), returnStack(push(9)), Memory.THROW)
+      val ex = ops.runS(emptyContext).failed.get
+      assert(ex == Error(-3))
+    }
+
+    it("should conditionally throw an error when NOS non-zero") {
+      val ops = sequence(dataStack(push(3)), dataStack(push(-6)), Memory.`?ERROR`)
+      val ex = ops.runS(emptyContext).failed.get
+      assert(ex == Error(-6))
+    }
+
+    it("should not throw an error when NOS zero") {
+      val ops = sequence(dataStack(push(0)), dataStack(push(-6)), Memory.`?ERROR`, dataStack(push(19)))
+      val ctx = ops.runS(emptyContext).get
+      assert(ctx.ds == List(19))
     }
   }
 }
