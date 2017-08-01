@@ -97,8 +97,9 @@ object Memory {
     tib <- register(inspect(_.tib))
     ascii <- dataStack(pop)
     token <- nextToken(delim = ascii.toChar.toString)
-    _ <- dataStack(push(token.value.length))
-    _ <- dataStack(push(tib + token.offset - token.value.length - 1))
+    len =  if (token.exhausted) 0 else token.value.length
+    _ <- dataStack(push(len))
+    _ <- dataStack(push(tib + token.offset))
   } yield ()
 
   @Documentation("addr is the data-space pointer.")

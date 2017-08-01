@@ -14,7 +14,7 @@ class MemoryTest extends PrimitivesTestBase {
         dataStack(push(0x1000)),
         Memory.`!`)
 
-      val ctx = ops.run(emptyContext).get._1
+      val ctx = ops.runS(emptyContext).get
       assert(ctx.mem.peek(0x1000) == 0x77)
     }
 
@@ -26,7 +26,7 @@ class MemoryTest extends PrimitivesTestBase {
         dataStack(push(0x1000)),
         Memory.`@`)
 
-      val ctx = ops.run(emptyContext).get._1
+      val ctx = ops.runS(emptyContext).get
       assert(ctx.ds == List(0x77))
     }
 
@@ -35,7 +35,7 @@ class MemoryTest extends PrimitivesTestBase {
         dataStack(push(0x1000)),
         Memory.`@`)
 
-      val ctx = ops.run(emptyContext).get._1
+      val ctx = ops.runS(emptyContext).get
       assert(ctx.ds == List(0))
     }
 
@@ -45,7 +45,7 @@ class MemoryTest extends PrimitivesTestBase {
         Memory.`@`)
 
       val ex = intercept[IndexOutOfBoundsException] {
-        ops.run(emptyContext).get
+        ops.runS(emptyContext).get
       }
       assert(ex.getMessage == "invalid memory address: -2")
     }
@@ -56,7 +56,7 @@ class MemoryTest extends PrimitivesTestBase {
         Memory.`@`)
 
       val ex = intercept[IndexOutOfBoundsException] {
-        ops.run(emptyContext).get
+        ops.runS(emptyContext).get
       }
       assert(ex.getMessage == s"invalid memory address: ${emptyContext.mem.size + 5}")
     }
@@ -69,12 +69,26 @@ class MemoryTest extends PrimitivesTestBase {
         dataStack(push(0x1000)),
         Memory.`+!`)
 
-      val ctx = ops.run(emptyContext).get._1
+      val ctx = ops.runS(emptyContext).get
       assert(ctx.mem.peek(0x1000) == 0x78)
     }
 
-    it("should parse ") {
+    it("should parse a string to the next delimiter") {
+      val ops = sequence(
+        input("IGNORED: HELLO WORLD").map(_ => ()),
+        dataStack(push('R'.toInt)),
+        Memory.PARSE)
+      val ctx = ops.runS(emptyContext).get
+      assert(ctx.ds == List(9, 8))
+    }
 
+    it("should return zero length if unable parse to the next delimiter") {
+      val ops = sequence(
+        input("IGNORED: HELLO WORLD").map(_ => ()),
+        dataStack(push('!'.toInt)),
+        Memory.PARSE)
+      val ctx = ops.runS(emptyContext).get
+      assert(ctx.ds == List(9, 0))
     }
   }
 }
