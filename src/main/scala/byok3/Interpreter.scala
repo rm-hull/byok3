@@ -4,10 +4,13 @@ import byok3.data_structures.Context._
 import byok3.data_structures.Stack._
 import byok3.data_structures._
 import byok3.types.{AppState, Word}
+import cats.data.StateT
 import cats.data.StateT._
+import cats.free.Trampoline
 import cats.implicits._
 
-import scala.util.Try
+import scala.annotation.tailrec
+import scala.util.{Failure, Success, Try}
 
 
 object Interpreter {
@@ -38,16 +41,22 @@ object Interpreter {
     }
   }
 
-  def step: AppState[Boolean] = for {
+  private def step: AppState[Boolean] = for {
     _ <- assemble
     token <- nextToken()
   } yield token == EndOfData
 
-  def exec: AppState[Unit] = step.flatMap { stop =>
-    if (stop) pure(())
-    else exec
+  @tailrec
+  private def exec(ctx: Context): Context = {
+    step.run(ctx) match {
+      case Success((next, true)) => next
+      case Success((next, false)) => exec(next)
+      case Failure(ex) => throw ex // TODO: Should do something like: ctx.updateState(Error(-1, ex.getMessage))
+    }
   }
 
-  def apply(text: String): AppState[Unit] =
-    input(text).flatMap(_ => exec)
+  def apply(text: String): AppState[Unit] = for {
+    _ <- input(text)
+    _ <- modify(exec)
+  } yield ()
 }

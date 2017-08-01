@@ -1,6 +1,6 @@
 package byok3
 
-import byok3.data_structures.Context
+import byok3.data_structures.{Context, OK}
 import cats.implicits._
 import org.scalatest.FunSpec
 
@@ -71,6 +71,13 @@ class InterpreterTest extends FunSpec {
       Stream.from(9).zip("BEYOND SPACE").foreach {
         case (addr, ch) => assert(result.mem.peek(addr) === ch)
       }
+    }
+
+    it("should process a large input stream") {
+      val n = 5000
+      val data = Range(0, n).map(i => s"$i DROP").mkString(" ") + s" $n"
+      val result = Interpreter(data).runS(emptyContext).get
+      assert(result.ds == List(n))
     }
   }
 }
