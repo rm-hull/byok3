@@ -44,7 +44,7 @@ object Memory {
 
   @Documentation("Reserve one cell of data space and store x in the cell.")
   @StackEffect("( x -- )")
-  val COMMA = for {
+  val `,` = for {
     data <- dataStack(pop)
     _ <- comma(data)
   } yield ()

@@ -28,6 +28,9 @@ class ArithmeticsTest extends PrimitivesTestBase {
     it("should multiply, divide and mod top three stack elements") {
       assertDataStack(Arithmetics.`*/MOD`, List(16, 16), presets = ops)
     }
+    it("should divide and mod two three stack elements") {
+      assertDataStack(Arithmetics.`/MOD`, List(4, 0, 4), presets = ops)
+    }
     it("should negate the top stack element") {
       assertDataStack(Arithmetics.NEGATE, List(-2, 8, 4), presets = ops)
     }

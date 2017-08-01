@@ -90,5 +90,29 @@ class MemoryTest extends PrimitivesTestBase {
       val ctx = ops.runS(emptyContext).get
       assert(ctx.ds == List(9, 0))
     }
+
+    it("should push DP to the stack") {
+      val ctx = Memory.DP.runS(emptyContext).get
+      assert(ctx.ds == List(ctx.reg.dp))
+    }
+
+    it("should push TIB to the stack") {
+      val ctx = Memory.TIB.runS(emptyContext).get
+      assert(ctx.ds == List(ctx.reg.tib))
+    }
+
+    it("should store TOS in memory at the DP") {
+      val ops = sequence(dataStack(push(19)), Memory.`,`)
+      val ctx = ops.runS(emptyContext).get
+      assert(ctx.ds == List.empty)
+      assert(ctx.reg.dp == emptyContext.reg.dp + 1)
+      assert(ctx.mem.peek(emptyContext.reg.dp) == 19)
+    }
+
+    it("should post-increment IP and push to the stack") {
+      val ctx = Memory.`(LIT)`.runS(emptyContext).get
+      assert(ctx.ds == List(emptyContext.reg.ip))
+      assert(ctx.reg.ip == emptyContext.reg.ip + 1)
+    }
   }
 }
