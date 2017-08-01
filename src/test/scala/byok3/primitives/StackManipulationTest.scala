@@ -8,7 +8,7 @@ import cats.implicits._
 
 class StackManipulationTest extends PrimitivesTestBase {
 
-  describe("StackManip") {
+  describe("Stack Manipulation") {
     it("should count the stack depth") {
       assertDataStack(DEPTH, List(3, 8, 2, 4))
     }
@@ -54,23 +54,29 @@ class StackManipulationTest extends PrimitivesTestBase {
       assertDataStack(`-ROT`, List(2, 4, 8))
     }
 
-    it("should move x from data stack to return stack") {
+    it("should count the return stack depth") {
+      val ops = sequence(returnStack(push(4)), returnStack(push(2)), returnStack(push(8)), RDEPTH)
+      val ctx = ops.runS(emptyContext).get
+      assert(ctx.ds == List(3))
+    }
+
+    it("should move value from data stack to return stack") {
       val ops = sequence(dataStack(push(4)), dataStack(push(2)), dataStack(push(8)), `>R`)
-      val ctx = ops.run(emptyContext).get._1
+      val ctx = ops.runS(emptyContext).get
       assert(ctx.rs == List(8))
       assert(ctx.ds == List(2, 4))
     }
 
-    it("should move x from return stack to data stack") {
+    it("should move value from return stack to data stack") {
       val ops = sequence(returnStack(push(4)), dataStack(push(2)), dataStack(push(8)), `R>`)
-      val ctx = ops.run(emptyContext).get._1
+      val ctx = ops.runS(emptyContext).get
       assert(ctx.rs == List())
       assert(ctx.ds == List(4, 8, 2))
     }
 
-    it("should copy x from return stack to data stack") {
+    it("should copy value from return stack to data stack") {
       val ops = sequence(returnStack(push(4)), dataStack(push(2)), dataStack(push(8)), `R@`)
-      val ctx = ops.run(emptyContext).get._1
+      val ctx = ops.runS(emptyContext).get
       assert(ctx.rs == List(4))
       assert(ctx.ds == List(4, 8, 2))
     }
