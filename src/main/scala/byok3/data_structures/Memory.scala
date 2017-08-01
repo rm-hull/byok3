@@ -41,7 +41,7 @@ case object Memory {
     inspect[Try, Memory, Data](_.peek(addr))
 
   def copy(addr: Address, data: String): StateT[Try, Memory, Unit] = {
-    Stream.from(addr).zip(data).foldLeft[StateT[Try, Memory, Unit]](pure()) {
+    Stream.from(addr).zip(data).foldLeft[StateT[Try, Memory, Unit]](pure(())) {
       case (prevState, (addr, ch)) => for {
         _ <- prevState
         _ <- poke(addr, ch.toInt)

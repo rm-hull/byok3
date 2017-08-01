@@ -109,7 +109,7 @@ object StackManipulation {
   @Documentation("duplicate top stack element if it is non-zero.")
   @StackEffect("( x -- 0 | x x )")
   val `?DUP` = dataStack {
-    peek.flatMap(a => if (a == 0) pure() else push(a))
+    peek.flatMap(a => if (a == 0) pure(()) else push(a))
   }
 
   @Documentation("the number of single-cell values contained in the return stack.")

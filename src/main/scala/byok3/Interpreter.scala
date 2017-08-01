@@ -44,7 +44,7 @@ object Interpreter {
   } yield token == EndOfData
 
   def exec: AppState[Unit] = step.flatMap { stop =>
-    if (stop) pure()
+    if (stop) pure(())
     else exec
   }
 

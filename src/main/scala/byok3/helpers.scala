@@ -1,8 +1,10 @@
 package byok3
 
-import cats.{Applicative, FlatMap}
 import cats.data.StateT
 import cats.data.StateT.pure
+import cats.{Applicative, FlatMap}
+
+import scala.language.higherKinds
 
 package object helpers {
 
