@@ -5,6 +5,7 @@ import cats.data.StateT
 import cats.data.StateT._
 import cats.implicits._
 
+import scala.annotation.tailrec
 import scala.util.Try
 
 protected case class Memory(size: Int, private val mem: AddressSpace) {
@@ -16,7 +17,7 @@ protected case class Memory(size: Int, private val mem: AddressSpace) {
       throw new IndexOutOfBoundsException(s"invalid memory address: $addr") // MError(-9) invalid memory address
   }
 
-  def poke(addr: Address, data: Data) = {
+  def poke(addr: Address, data: Data): Memory = {
     boundsCheck(addr)
     copy(mem = mem.updated(addr, data))
   }
@@ -24,6 +25,14 @@ protected case class Memory(size: Int, private val mem: AddressSpace) {
   def peek(addr: Address): Data = {
     boundsCheck(addr)
     mem.getOrElse(addr, empty)
+  }
+
+  @tailrec
+  final def memcpy(addr: Address, data: String): Memory = {
+    data.headOption match {
+      case Some(ch) => poke(addr, ch).memcpy(addr + 1, data.tail)
+      case None => this
+    }
   }
 }
 
@@ -40,12 +49,6 @@ case object Memory {
   def peek(addr: Address): StateT[Try, Memory, Data] =
     inspect[Try, Memory, Data](_.peek(addr))
 
-  def copy(addr: Address, data: String): StateT[Try, Memory, Unit] = {
-    Stream.from(addr).zip(data).foldLeft[StateT[Try, Memory, Unit]](pure(())) {
-      case (prevState, (addr, ch)) => for {
-        _ <- prevState
-        _ <- poke(addr, ch.toInt)
-      } yield ()
-    }
-  }
+  def copy(addr: Address, data: String): StateT[Try, Memory, Unit] =
+    modify(_.memcpy(addr, data))
 }
