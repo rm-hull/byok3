@@ -23,7 +23,7 @@ object Interpreter {
 
   private def processEffect(token: Word)(ctx: Context) =
     ctx.dictionary
-      .get(token)
+      .get(token.toUpperCase)
       .map(xt => for {
         _ <- setCurrentXT(Some(xt))
         _ <- xt.effect
