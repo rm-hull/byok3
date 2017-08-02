@@ -53,7 +53,7 @@ case object Error {
 
   def apply(errno: Int, additionalInfo: String): Error = {
     val msg = if (errno > 0) "user defined error" else sysErrors.getOrElse(errno, "undefined")
-    new Error(errno, if (additionalInfo.trim.isEmpty) msg else "$msg: $additionalInfo")
+    new Error(errno, if (additionalInfo.trim.isEmpty) msg else s"$msg: $additionalInfo")
   }
 }
 
