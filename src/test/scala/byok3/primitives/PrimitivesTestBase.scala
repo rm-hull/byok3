@@ -7,11 +7,11 @@ import byok3.helpers.sequence
 import byok3.types.AppState
 import cats.data.StateT
 import cats.implicits._
-import org.scalatest.FunSpec
+import org.scalatest.{FunSuite, Matchers}
 
 import scala.util.Try
 
-abstract class PrimitivesTestBase extends FunSpec {
+abstract class PrimitivesTestBase extends FunSuite with Matchers {
 
   protected val emptyContext = Context(0x10000)
 
