@@ -3,7 +3,7 @@ package byok3.data_structures
 import byok3.annonation.{Documentation, StackEffect}
 import byok3.data_structures.Context._
 import byok3.data_structures.Stack._
-import byok3.primitives.{Arithmetics, StackManipulation, Memory => Mem}
+import byok3.primitives.{Arithmetics, IO, StackManipulation, Memory => Mem}
 import byok3.types.{Address, AppState, Data, Dictionary, Word}
 import cats.data.StateT
 import cats.data.StateT._
@@ -50,7 +50,9 @@ object Dictionary {
   }
 
   def apply(): Dictionary = {
-    val tokens = getExecutionTokens(Arithmetics) ++
+    val tokens =
+      getExecutionTokens(Arithmetics) ++
+      getExecutionTokens(IO) ++
       getExecutionTokens(Mem) ++
       getExecutionTokens(StackManipulation)
 

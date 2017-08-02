@@ -1,12 +1,23 @@
 package byok3
 
+import java.io.ByteArrayOutputStream
+
 import byok3.data_structures.{Context, Error}
+import cats.effect.IO
 import cats.implicits._
 import org.scalatest.{FunSuite, Matchers}
 
 class InterpreterTest extends FunSuite with Matchers {
 
   val emptyContext = Context(0x10000)
+
+  def assertOutput(program: IO[Unit])(expected: String): Unit = {
+    val baos = new ByteArrayOutputStream()
+    Console.withOut(baos) {
+      program.unsafeRunSync()
+    }
+    baos.toString shouldEqual expected
+  }
 
   test("should push values onto the data stack") {
     val ctx = Interpreter("9  5 3").runS(emptyContext).get
@@ -94,4 +105,22 @@ class InterpreterTest extends FunSuite with Matchers {
     ctx.ds shouldEqual List.empty
     ctx.rs shouldEqual List.empty
   }
+
+  test("should print the top stack item") {
+    val ctx = Interpreter("1 2 3 5 7 + . . .").runS(emptyContext).get
+    ctx.ds shouldEqual List(1)
+    assertOutput(ctx.output)("12 3 2 ")
+  }
+
+  test("should print the stack") {
+    val ctx = Interpreter("1 2 3 5 7 + .S").runS(emptyContext).get
+    ctx.ds shouldEqual List(12, 3, 2, 1)
+    assertOutput(ctx.output)("12 3 2 1 ")
+  }
+
+  test("should parse and print the message") {
+    val ctx = Interpreter("33 PARSE HELLO, WORLD! TYPE 10 EMIT 33 PARSE THAT IS ALL! TYPE").runS(emptyContext).get
+    assertOutput(ctx.output)("HELLO, WORLD\nTHAT IS ALL")
+  }
+
 }

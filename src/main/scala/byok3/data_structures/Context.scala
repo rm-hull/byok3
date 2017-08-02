@@ -4,6 +4,7 @@ import byok3.data_structures.Memory._
 import byok3.types.{AppState, Dictionary, Stack}
 import cats.data.StateT
 import cats.data.StateT._
+import cats.effect.IO
 import cats.implicits._
 
 import scala.util.Try
@@ -14,6 +15,7 @@ case class Context(mem: Memory,
                    status: MachineState = OK,
                    reg: Registers = Registers(),
                    input: Tokenizer = EndOfData,
+                   output: IO[Unit] = IO.unit,
                    ds: Stack[Int] = List.empty, // data stack
                    rs: Stack[Int] = List.empty, // return stack
                    currentXT: Option[ExecutionToken] = None) {
@@ -25,11 +27,19 @@ case class Context(mem: Memory,
   }
 
   def nextToken(delim: String) = copy(input = input.next(delim))
+
+  def append(out: IO[Unit]) = copy(output = output.flatMap(_ => out))
 }
 
 object Context {
 
   def apply(memSize: Int): Context = Context(Memory(memSize), Dictionary())
+
+//  def dataStack2[A](block: StateT[Try, Stack[Int], A]): AppState[Unit] =
+//    modify[Try, Context](ctx => block.runS(ctx.ds).foldLeft[Context](ctx.updateState(Error(-4))) {
+//          (ctx, stack) => ctx.copy(ds = stack)
+//    })
+
 
   def dataStack[A](block: StateT[Try, Stack[Int], A]): AppState[A] =
     block.transformS(_.ds, (ctx, stack) => ctx.copy(ds = stack))
@@ -64,4 +74,8 @@ object Context {
     _ <- modify[Try, Context](_.nextToken(delim))
     ctx <- get[Try, Context]
   } yield ctx.input
+
+  def output(block: => Unit): AppState[Unit] =
+    modify(_.append(IO { block }))
+
 }

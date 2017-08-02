@@ -34,6 +34,20 @@ protected case class Memory(size: Int, private val mem: AddressSpace) {
       case None => this
     }
   }
+
+  final def fetch(addr: Address, len: Int): String = {
+    require(len >= 0)
+    boundsCheck(addr)
+    boundsCheck(addr + len)
+
+    @tailrec
+    def fetch0(addr: Address, len: Int, acc: String): String = {
+      if (len == 0) acc
+      else fetch0(addr + 1, len - 1, acc + peek(addr).toChar)
+    }
+
+    fetch0(addr, len, "")
+  }
 }
 
 case object Memory {
@@ -47,8 +61,11 @@ case object Memory {
     modify(_.poke(addr, data))
 
   def peek(addr: Address): StateT[Try, Memory, Data] =
-    inspect[Try, Memory, Data](_.peek(addr))
+    inspect(_.peek(addr))
 
   def copy(addr: Address, data: String): StateT[Try, Memory, Unit] =
     modify(_.memcpy(addr, data))
+
+  def fetch(addr: Address, len: Int): StateT[Try, Memory, String] =
+    inspect(_.fetch(addr, len))
 }
