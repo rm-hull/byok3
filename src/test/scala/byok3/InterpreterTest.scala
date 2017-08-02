@@ -115,7 +115,7 @@ class InterpreterTest extends FunSuite with Matchers {
   test("should print the stack") {
     val ctx = Interpreter("1 2 3 5 7 + .S").runS(emptyContext).get
     ctx.ds shouldEqual List(12, 3, 2, 1)
-    assertOutput(ctx.output)("12 3 2 1 ")
+    assertOutput(ctx.output)("1 2 3 12 ")
   }
 
   test("should parse and print the message") {

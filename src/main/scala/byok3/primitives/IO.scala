@@ -23,7 +23,7 @@ object IO {
   @StackEffect("( -- )")
   val `.S` = for {
     stack <- dataStack(get[Try, Stack[Int]])
-    _ <- output(print(stack.mkString(" ") + " "))
+    _ <- output(print(stack.reverse.mkString(" ") + " "))
   } yield ()
 
   @Documentation("outputs ascii as character.")
