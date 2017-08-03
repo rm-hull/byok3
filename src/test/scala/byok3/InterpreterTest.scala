@@ -85,13 +85,6 @@ class InterpreterTest extends FunSuite with Matchers {
     }
   }
 
-  test("should process a large input stream") {
-    val n = 5000
-    val data = Range(0, n).map(i => s"$i DROP").mkString(" ") + s" $n"
-    val ctx = Interpreter(data).runS(emptyContext).get
-    ctx.ds shouldEqual List(n)
-  }
-
   test("should record an error on unfound word") {
     val ctx = Interpreter("10 4 + SAUSAGES 19 4 -").runS(emptyContext).get
     ctx.status shouldEqual Error(-13, "SAUSAGES")
