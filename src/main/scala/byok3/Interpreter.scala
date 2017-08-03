@@ -52,7 +52,7 @@ object Interpreter {
       case Failure(ex: NoSuchElementException) => ctx.updateState(Error(-4))
       case Failure(ex: IndexOutOfBoundsException) => ctx.updateState(Error(-9, ex.getMessage))
       case Failure(ex: Error) => ctx.updateState(ex)
-      case Failure(ex) => ctx.updateState(Error(0, s"[${ex.getClass.getSimpleName}] ${ex.getMessage}"))
+      case Failure(ex) => ctx.updateState(Error(0, s"[${ex.getClass.getName}] ${ex.getMessage}"))
     }
   }
 
