@@ -11,7 +11,7 @@ mainClass in (Compile, packageBin) := Some("byok3.REPL")
 libraryDependencies ++= Seq(
   "org.typelevel" %% "cats" % "0.9.0",
   "org.typelevel" %% "cats-effect" % "0.3",
-  "org.jline" % "jline" % "3.3.0"
+  "org.jline" % "jline" % "3.3.1"
 )
 
 // test dependencies
