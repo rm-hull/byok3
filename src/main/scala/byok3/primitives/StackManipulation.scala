@@ -26,6 +26,13 @@ object StackManipulation {
     pop.map(_ => ())
   }
 
+  @Documentation("drop cell pair x1 x2 from the stack.")
+  @StackEffect("( x1 x2 -- )")
+  val `2DROP` = for {
+    _ <- DROP
+    _ <- DROP
+  } yield ()
+
   @Documentation("copy NOS (next of stack) to top of stack.")
   @StackEffect("( x1 x2 -- x1 x2 x1)")
   val OVER = dataStack {
