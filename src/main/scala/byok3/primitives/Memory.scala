@@ -6,12 +6,12 @@ import byok3.data_structures.Dictionary._
 import byok3.data_structures.Memory.{peek, poke}
 import byok3.data_structures.Registers._
 import byok3.data_structures.Stack.{pop, push}
-import byok3.data_structures.{Constant, Error, Variable}
+import byok3.data_structures._
 import byok3.types.{AppState, Data}
 import cats.data.StateT._
 import cats.implicits._
 
-import scala.util.Failure
+import scala.util.{Failure, Try}
 
 object Memory {
 
@@ -102,6 +102,18 @@ object Memory {
     len = if (token.exhausted) 0 else token.value.length
     _ <- dataStack(push(len))
     _ <- dataStack(push(tib + token.offset))
+  } yield ()
+
+  @Documentation("c-addr is the address of, and u is the number of characters in, the input buffer.")
+  @StackEffect("( -- c-addr u )")
+  val SOURCE = for {
+    tib <- deref("TIB")
+    ctx <- get[Try, Context]
+    _ <- dataStack(push(tib))
+    _ <- dataStack(push(ctx.input match {
+      case EndOfData => 0
+      case Token(_, _, in) => in.length
+    }))
   } yield ()
 
   @Documentation("addr is the data-space pointer.")
