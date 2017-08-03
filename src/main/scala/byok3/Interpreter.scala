@@ -13,13 +13,18 @@ import scala.util.{Failure, Success, Try}
 
 object Interpreter {
 
-  private def pushNumber(base: Int)(token: Word) =
-    Try(token.toInt)
-      .toOption
-      .map(n => for {
-        _ <- setCurrentXT(None)
-        _ <- dataStack(push(n))
-      } yield ())
+  private def toNumber(value: String, radix: Int) = try {
+    Integer.parseInt(value, radix)
+  } catch {
+    case _: NumberFormatException => throw Error(-13, value)
+  }
+
+  private def pushNumber(token: Word) = for {
+    base <- deref("BASE")
+    _ <- setCurrentXT(None)
+    n = toNumber(token, base)
+    _ <- dataStack(push(n))
+  } yield ()
 
   private def processEffect(token: Word)(ctx: Context) =
     ctx.dictionary
@@ -29,16 +34,14 @@ object Interpreter {
         _ <- xt.effect
       } yield ())
 
-  private def assemble: AppState[Unit] = get[Try, Context].flatMap { ctx =>
-    lazy val base = 10 // TODO - lookup from value in memory
-    ctx.input match {
-      case EndOfData | Token("", _, _) => pure(ctx)
-      case Token(token, _, _) =>
-        processEffect(token)(ctx)
-          .orElse(pushNumber(base)(token))
-          .getOrElse(throw Error(-13, token)) // word not found
+  private def assemble: AppState[Unit] =
+    get[Try, Context].flatMap { ctx =>
+      ctx.input match {
+        case Token(token, _, _) if token.nonEmpty =>
+          processEffect(token)(ctx).getOrElse(pushNumber(token))
+        case _ => pure(ctx)
+      }
     }
-  }
 
   private def step: AppState[Boolean] = for {
     _ <- assemble
