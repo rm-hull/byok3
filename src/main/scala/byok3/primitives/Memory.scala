@@ -98,7 +98,7 @@ object Memory {
   val PARSE = for {
     tib <- register(inspect(_.tib))
     ascii <- dataStack(pop)
-    token <- nextToken(delim = ascii.toChar.toString)
+    token <- nextToken(delim = s"\\Q${ascii.toChar}\\E")
     len = if (token.exhausted) 0 else token.value.length
     _ <- dataStack(push(len))
     _ <- dataStack(push(tib + token.offset))
