@@ -11,7 +11,7 @@ import scala.util.Try
 
 
 case class Context(mem: Memory,
-                   dictionary: Dictionary,
+                   dictionary: Dictionary = Dictionary(),
                    status: MachineState = OK,
                    reg: Registers = Registers(),
                    input: Tokenizer = EndOfData,
