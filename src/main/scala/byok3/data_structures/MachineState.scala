@@ -1,5 +1,7 @@
 package byok3.data_structures
 
+import scala.util.Failure
+
 sealed trait MachineState
 case object OK extends MachineState
 case object Smudge extends MachineState
@@ -54,6 +56,15 @@ case object Error {
   def apply(errno: Int, additionalInfo: String): Error = {
     val msg = if (errno > 0) "user defined error" else sysErrors.getOrElse(errno, "undefined")
     new Error(errno, if (additionalInfo.trim.isEmpty) msg else s"$msg: $additionalInfo")
+  }
+
+  def apply(ex: Throwable): Error = ex match {
+    case _: NoSuchElementException => Error(-4)
+    //case _: DivideByZeroException => Error(-10)
+    case _: IndexOutOfBoundsException => Error(-9, ex.getMessage)
+    case err: Error => err
+    case _ => Error(0, s"[${ex.getClass.getName}] ${ex.getMessage}")
+
   }
 }
 
