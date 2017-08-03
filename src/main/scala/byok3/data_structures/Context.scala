@@ -2,7 +2,7 @@ package byok3.data_structures
 
 import byok3.data_structures.Memory.{copy, peek}
 import byok3.data_structures.Stack.{pop, push}
-import byok3.types.{AppState, Dictionary, Stack, Word}
+import byok3.types.{Address, AppState, Dict, Stack, Word}
 import cats.data.StateT
 import cats.data.StateT._
 import cats.effect.IO
@@ -12,7 +12,7 @@ import scala.util.Try
 
 
 case class Context(mem: Memory,
-                   dictionary: Dictionary = Dictionary(),
+                   dictionary: Dict = Dictionary(),
                    status: MachineState = OK,
                    reg: Registers = Registers(),
                    input: Tokenizer = EndOfData,
@@ -77,7 +77,7 @@ object Context {
   def register[A](block: StateT[Try, Registers, A]): AppState[A] =
     block.transformS[Context](_.reg, (ctx, reg) => ctx.copy(reg = reg))
 
-  def dictionary[A](block: StateT[Try, Dictionary, A]): AppState[A] =
+  def dictionary[A](block: StateT[Try, Dict, A]): AppState[A] =
     block.transformS[Context](_.dictionary, (ctx, dict) => ctx.copy(dictionary = dict))
 
   def machineState(newStatus: MachineState): AppState[Unit] =
