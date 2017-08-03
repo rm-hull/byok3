@@ -1,6 +1,6 @@
 package byok3.data_structures
 
-import byok3.annonation.{Documentation, StackEffect}
+import byok3.annonation.Documentation
 import byok3.data_structures.Context._
 import byok3.data_structures.Stack._
 import byok3.primitives.{Arithmetics, IO, StackManipulation, Memory => Mem}
@@ -18,7 +18,7 @@ sealed trait ExecutionToken {
   val effect: AppState[Unit]
 }
 
-case class Primitive(name: Word, effect: AppState[Unit], doc: Option[Documentation], stackEffect: Option[StackEffect]) extends ExecutionToken
+case class Primitive(name: Word, effect: AppState[Unit], override val immediate: Boolean, doc: Option[Documentation]) extends ExecutionToken
 
 case class Constant(name: Word, value: Data) extends ExecutionToken {
   override val effect = dataStack(push(value))

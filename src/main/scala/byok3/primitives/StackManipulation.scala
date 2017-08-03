@@ -1,6 +1,6 @@
 package byok3.primitives
 
-import byok3.annonation.{Documentation, StackEffect}
+import byok3.annonation.Documentation
 import byok3.data_structures.Context._
 import byok3.data_structures.Stack._
 import byok3.types.Stack
@@ -11,8 +11,7 @@ import scala.util.Try
 
 object StackManipulation {
 
-  @Documentation("the number of single-cell values contained in the data stack before n was placed on the stack.")
-  @StackEffect("( -- n )")
+  @Documentation("the number of single-cell values contained in the data stack before n was placed on the stack.", stackEffect = "( -- n )")
   val DEPTH = dataStack {
     for {
       stack <- get[Try, Stack[Int]]
@@ -20,21 +19,18 @@ object StackManipulation {
     } yield ()
   }
 
-  @Documentation("drop top stack element.")
-  @StackEffect("( x -- )")
+  @Documentation("drop top stack element.", stackEffect = "( x -- )")
   val DROP = dataStack {
     pop.map(_ => ())
   }
 
-  @Documentation("drop cell pair x1 x2 from the stack.")
-  @StackEffect("( x1 x2 -- )")
+  @Documentation("drop cell pair x1 x2 from the stack.", stackEffect = "( x1 x2 -- )")
   val `2DROP` = for {
     _ <- DROP
     _ <- DROP
   } yield ()
 
-  @Documentation("copy NOS (next of stack) to top of stack.")
-  @StackEffect("( x1 x2 -- x1 x2 x1)")
+  @Documentation("copy NOS (next of stack) to top of stack.", stackEffect = "( x1 x2 -- x1 x2 x1)")
   val OVER = dataStack {
     for {
       a <- pop
@@ -45,8 +41,7 @@ object StackManipulation {
     } yield ()
   }
 
-  @Documentation("remove NOS.")
-  @StackEffect("( x1 x2 -- x2 )")
+  @Documentation("remove NOS.", stackEffect = "( x1 x2 -- x2 )")
   val NIP = dataStack {
     for {
       a <- pop
@@ -55,8 +50,7 @@ object StackManipulation {
     } yield ()
   }
 
-  @Documentation("copy the first (top) stack item below the second stack item.")
-  @StackEffect("( x1 x2 -- x2 x1 x2 )")
+  @Documentation("copy the first (top) stack item below the second stack item.", stackEffect = "( x1 x2 -- x2 x1 x2 )")
   val TUCK = dataStack {
     for {
       a <- pop
@@ -67,8 +61,7 @@ object StackManipulation {
     } yield ()
   }
 
-  @Documentation("rotate the top three stack entries.")
-  @StackEffect("( x1 x2 x3 -- x2 x3 x1 )")
+  @Documentation("rotate the top three stack entries.", stackEffect = "( x1 x2 x3 -- x2 x3 x1 )")
   val ROT = dataStack {
     for {
       a <- pop
@@ -80,8 +73,7 @@ object StackManipulation {
     } yield ()
   }
 
-  @Documentation("rotate the top three stack entries.")
-  @StackEffect("( x1 x2 x3 -- x3 x1 x2 )")
+  @Documentation("rotate the top three stack entries.", stackEffect = "( x1 x2 x3 -- x3 x1 x2 )")
   val `-ROT` = dataStack {
     for {
       a <- pop
@@ -93,8 +85,7 @@ object StackManipulation {
     } yield ()
   }
 
-  @Documentation("swap top two stack elements.")
-  @StackEffect("( x1 x2 -- x2 x1)")
+  @Documentation("swap top two stack elements.", stackEffect = "( x1 x2 -- x2 x1)")
   val SWAP = dataStack {
     for {
       a <- pop
@@ -104,8 +95,7 @@ object StackManipulation {
     } yield ()
   }
 
-  @Documentation("duplicate top stack element.")
-  @StackEffect("( x -- x x )")
+  @Documentation("duplicate top stack element.", stackEffect = "( x -- x x )")
   val DUP = dataStack {
     for {
       a <- peek
@@ -113,35 +103,30 @@ object StackManipulation {
     } yield ()
   }
 
-  @Documentation("duplicate top stack element if it is non-zero.")
-  @StackEffect("( x -- 0 | x x )")
+  @Documentation("duplicate top stack element if it is non-zero.", stackEffect = "( x -- 0 | x x )")
   val `?DUP` = dataStack {
     peek.flatMap(a => if (a == 0) pure(()) else push(a))
   }
 
-  @Documentation("the number of single-cell values contained in the return stack.")
-  @StackEffect("( -- n )")
+  @Documentation("the number of single-cell values contained in the return stack.", stackEffect = "( -- n )")
   val RDEPTH = for {
     stack <- returnStack(get[Try, Stack[Int]])
     _ <- dataStack(push(stack.length))
   } yield ()
 
-  @Documentation("move x to the return stack.")
-  @StackEffect("( x -- )  ( R:  -- x)")
+  @Documentation("move x to the return stack.", stackEffect = "( x -- )  ( R:  -- x)")
   val `>R` = for {
     a <- dataStack(pop)
     _ <- returnStack(push(a))
   } yield ()
 
-  @Documentation("move x from the return stack to the data stack.")
-  @StackEffect("( -- x ) ( R:  x -- )")
+  @Documentation("move x from the return stack to the data stack.", stackEffect = "( -- x ) ( R:  x -- )")
   val `R>` = for {
     a <- returnStack(pop)
     _ <- dataStack(push(a))
   } yield ()
 
-  @Documentation("copy x from the return stack to the data stack.")
-  @StackEffect("( -- x ) ( R:  x -- x)")
+  @Documentation("copy x from the return stack to the data stack.", stackEffect = "( -- x ) ( R:  x -- x)")
   val `R@`= for {
     a <- returnStack(peek)
     _ <- dataStack(push(a))

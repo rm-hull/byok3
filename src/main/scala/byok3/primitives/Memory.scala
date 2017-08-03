@@ -1,6 +1,6 @@
 package byok3.primitives
 
-import byok3.annonation.{Documentation, StackEffect}
+import byok3.annonation.{Documentation, Immediate}
 import byok3.data_structures.Context._
 import byok3.data_structures.Dictionary._
 import byok3.data_structures.Memory.{peek, poke}
@@ -20,32 +20,28 @@ object Memory {
     _ <- memory(poke(addr, value))
   } yield addr
 
-  @Documentation("Store x at a-addr.")
-  @StackEffect("( x a-addr -- )")
+  @Documentation("Store x at a-addr.", stackEffect = "( x a-addr -- )")
   val `!` = for {
     addr <- dataStack(pop)
     data <- dataStack(pop)
     _ <- memory(poke(addr, data))
   } yield ()
 
-  @Documentation("x is the value stored at a-addr.")
-  @StackEffect("( a-addr -- x )")
+  @Documentation("x is the value stored at a-addr.", stackEffect = "( a-addr -- x )")
   val `@` = for {
     addr <- dataStack(pop)
     data <- memory(peek(addr))
     _ <- dataStack(push(data))
   } yield ()
 
-  @Documentation("Adds x to the single cell number at a-addr.")
-  @StackEffect("( x a-addr -- )")
+  @Documentation("Adds x to the single cell number at a-addr.", stackEffect = "( x a-addr -- )")
   val +! = for {
     addr <- dataStack(pop)
     data <- memory(peek(addr))
     _ <- memory(poke(addr, data + 1))
   } yield ()
 
-  @Documentation("Reserve one cell of data space and store x in the cell.")
-  @StackEffect("( x -- )")
+  @Documentation("Reserve one cell of data space and store x in the cell.", stackEffect = "( x -- )")
   val `,` = for {
     data <- dataStack(pop)
     _ <- comma(data)
@@ -64,8 +60,7 @@ object Memory {
       |   `name Execution: ( -- a-addr )`.
       |
       | Reserve one cell of data space at an aligned address.
-    """.stripMargin)
-  @StackEffect("( \"<spaces>name\" -- )")
+    """.stripMargin, stackEffect = "( \"<spaces>name\" -- )")
   val VARIABLE = for {
     addr <- comma(0)
     token <- nextToken()
@@ -80,8 +75,7 @@ object Memory {
       |   `name Execution: ( -- x )`,
       |
       | which places x on the stack.
-    """.stripMargin)
-  @StackEffect("( x \"<spaces>name\" -- )")
+    """.stripMargin, stackEffect = "( x \"<spaces>name\" -- )")
   val CONSTANT = for {
     value <- dataStack(pop)
     token <- nextToken()
@@ -93,8 +87,7 @@ object Memory {
       | Parse ccc delimited by the delimiter char. c-addr is the address
       | (within the input buffer) and u is the length of the parsed string.
       | If the parse area was empty, the resulting string has a zero length.
-    """.stripMargin)
-  @StackEffect("( char \"ccc<char>\" -- c-addr u )")
+    """.stripMargin, stackEffect = "( char \"ccc<char>\" -- c-addr u )")
   val PARSE = for {
     tib <- deref("TIB")
     ascii <- dataStack(pop)
@@ -104,8 +97,7 @@ object Memory {
     _ <- dataStack(push(tib + token.offset))
   } yield ()
 
-  @Documentation("c-addr is the address of, and u is the number of characters in, the input buffer.")
-  @StackEffect("( -- c-addr u )")
+  @Documentation("c-addr is the address of, and u is the number of characters in, the input buffer.", stackEffect = "( -- c-addr u )")
   val SOURCE = for {
     tib <- deref("TIB")
     ctx <- get[Try, Context]
@@ -116,18 +108,16 @@ object Memory {
     }))
   } yield ()
 
-  @Documentation("addr is the data-space pointer.")
-  @StackEffect("( -- addr )")
+  @Documentation("addr is the data-space pointer.", stackEffect = "( -- addr )")
   val DP = for {
     dp <- register(inspect(_.dp))
     _ <- dataStack(push(dp))
   } yield ()
 
-  @Documentation("addr is the data-space pointer.")
-  @StackEffect("( -- addr )")
+  @Documentation("addr is the data-space pointer.", stackEffect = "( -- addr )")
   val HERE = DP
 
-  @StackEffect("( i*x -- )")
+  @Documentation("TODO", stackEffect = "( i*x -- )")
   val THROW: AppState[Unit] =
     dataStack(pop).flatMapF(err => Failure(Error(err)))
 
