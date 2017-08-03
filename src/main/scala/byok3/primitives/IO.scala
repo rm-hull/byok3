@@ -6,27 +6,32 @@ import byok3.annonation.{Documentation, StackEffect}
 import byok3.data_structures.Context
 import byok3.data_structures.Context._
 import byok3.data_structures.Memory._
-import byok3.data_structures.Stack._
+import byok3.data_structures.Stack.pop
 import byok3.types.Stack
-import cats.data.StateT.get
+import cats.data.StateT._
 import cats.implicits._
 
 import scala.util.Try
 
 object IO {
 
+  private def num(base: Int)(n: Int) =
+    BigInt(n).toString(base)
+
   @Documentation("convert signed number n to string of digits, and output.")
   @StackEffect("( n -- )")
   val `.` = for {
-    a <- dataStack(pop)
-    _ <- output(print(s"$a "))
+    base <- deref("BASE")
+    n <- dataStack(pop)
+    _ <- output(print(num(base)(n) + " "))
   } yield ()
 
   @Documentation("display stack contents.")
   @StackEffect("( -- )")
   val `.S` = for {
+    base <- deref("BASE")
     stack <- dataStack(get[Try, Stack[Int]])
-    _ <- output(print(stack.reverse.mkString(" ") + " "))
+    _ <- output(print(stack.reverse.map(num(base)).mkString(" ") + " "))
   } yield ()
 
   @Documentation("outputs ascii as character.")

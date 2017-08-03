@@ -13,7 +13,7 @@ import scala.util.{Failure, Success, Try}
 
 object Interpreter {
 
-  private def pushNumber(token: Word) =
+  private def pushNumber(base: Int)(token: Word) =
     Try(token.toInt)
       .toOption
       .map(n => for {
@@ -30,11 +30,12 @@ object Interpreter {
       } yield ())
 
   private def assemble: AppState[Unit] = get[Try, Context].flatMap { ctx =>
+    lazy val base = 10 // TODO - lookup from value in memory
     ctx.input match {
       case EndOfData | Token("", _, _) => pure(ctx)
       case Token(token, _, _) =>
         processEffect(token)(ctx)
-          .orElse(pushNumber(token))
+          .orElse(pushNumber(base)(token))
           .getOrElse(throw Error(-13, token)) // word not found
     }
   }
@@ -58,6 +59,7 @@ object Interpreter {
 
   def apply(text: String): AppState[Unit] = for {
     _ <- input(text)
+    _ <- modify[Try, Context](_.reset)
     _ <- modify(exec)
   } yield ()
 }

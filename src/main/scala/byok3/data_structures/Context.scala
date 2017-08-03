@@ -1,7 +1,8 @@
 package byok3.data_structures
 
-import byok3.data_structures.Memory._
-import byok3.types.{AppState, Dictionary, Stack}
+import byok3.data_structures.Memory.{copy, peek}
+import byok3.data_structures.Stack.{pop, push}
+import byok3.types.{AppState, Dictionary, Stack, Word}
 import cats.data.StateT
 import cats.data.StateT._
 import cats.effect.IO
@@ -29,16 +30,39 @@ case class Context(mem: Memory,
   def nextToken(delim: String) = copy(input = input.next(delim))
 
   def append(out: IO[Unit]) = copy(output = output.flatMap(_ => out))
+
+  def reset =
+    copy(
+      output = IO.unit,
+      currentXT = None,
+      status = if (status == Smudge) Smudge else OK)
+
+  def getEffect(token: Word) =
+    dictionary.get(token.toUpperCase)
+      .map(_.effect)
+      .getOrElse(throw Error(-13, token))
+
+  def exec(token: Word) = getEffect(token).runS(this)
 }
 
 object Context {
 
-  def apply(memSize: Int): Context = Context(Memory(memSize), Dictionary())
+  private val bootstrap = for {
+    _ <- dataStack(push(10))
+    _ <- exec("BASE")
+    _ <- exec("!")
+    _ <- dataStack(push(0x20))
+    _ <- exec("TIB")
+    _ <- exec("!")
+  } yield ()
 
-//  def dataStack2[A](block: StateT[Try, Stack[Int], A]): AppState[Unit] =
-//    modify[Try, Context](ctx => block.runS(ctx.ds).foldLeft[Context](ctx.updateState(Error(-4))) {
-//          (ctx, stack) => ctx.copy(ds = stack)
-//    })
+  def apply(memSize: Int): Context =
+    bootstrap.runS(Context(Memory(memSize))).get
+
+  //  def dataStack2[A](block: StateT[Try, Stack[Int], A]): AppState[Unit] =
+  //    modify[Try, Context](ctx => block.runS(ctx.ds).foldLeft[Context](ctx.updateState(Error(-4))) {
+  //          (ctx, stack) => ctx.copy(ds = stack)
+  //    })
 
 
   def dataStack[A](block: StateT[Try, Stack[Int], A]): AppState[A] =
@@ -62,9 +86,18 @@ object Context {
   def setCurrentXT(token: Option[ExecutionToken] = None): AppState[Unit] =
     modify(_.copy(currentXT = token))
 
+  def exec(token: Word): AppState[Unit] =
+    modifyF(_.exec(token))
+
+  def deref(token: Word): AppState[Int] = for {
+    _ <- exec(token)
+    addr <- dataStack(pop)
+    ref <- memory(peek(addr))
+  } yield ref
+
   def input(text: String): AppState[Boolean] = for {
-    // TODO: check to make sure text.len < TIB size
-    tib <- register(inspect(_.tib))
+  // TODO: check to make sure text.len < TIB size
+    tib <- deref("TIB")
     _ <- modify[Try, Context](_.copy(input = Tokenizer(text)))
     _ <- memory(copy(tib, text))
     ctx <- get[Try, Context]
@@ -76,6 +109,8 @@ object Context {
   } yield ctx.input
 
   def output(block: => Unit): AppState[Unit] =
-    modify(_.append(IO { block }))
+    modify(_.append(IO {
+      block
+    }))
 
 }

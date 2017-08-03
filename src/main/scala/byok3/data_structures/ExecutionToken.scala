@@ -54,7 +54,11 @@ object Dictionary {
       getExecutionTokens(Arithmetics) ++
       getExecutionTokens(IO) ++
       getExecutionTokens(Mem) ++
-      getExecutionTokens(StackManipulation)
+      getExecutionTokens(StackManipulation) ++
+      Seq(
+        Constant("BASE", 0x0000),
+        Constant("ECHO", 0x0001),
+        Constant("TIB",  0x0002))
 
     tokens.foldLeft[Dictionary](Map.empty)((m, a) => m + (a.name -> a))
   }

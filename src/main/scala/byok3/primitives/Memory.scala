@@ -96,7 +96,7 @@ object Memory {
     """.stripMargin)
   @StackEffect("( char \"ccc<char>\" -- c-addr u )")
   val PARSE = for {
-    tib <- register(inspect(_.tib))
+    tib <- deref("TIB")
     ascii <- dataStack(pop)
     token <- nextToken(delim = s"\\Q${ascii.toChar}\\E")
     len = if (token.exhausted) 0 else token.value.length
@@ -114,11 +114,6 @@ object Memory {
   @Documentation("addr is the data-space pointer.")
   @StackEffect("( -- addr )")
   val HERE = DP
-
-  val TIB = for {
-    tib <- register(inspect(_.tib))
-    _ <- dataStack(push(tib))
-  } yield ()
 
   @StackEffect("( i*x -- )")
   val THROW: AppState[Unit] =

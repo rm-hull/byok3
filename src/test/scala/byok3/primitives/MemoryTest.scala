@@ -74,31 +74,28 @@ class MemoryTest extends PrimitivesTestBase {
   }
 
   test("should parse a string to the next delimiter") {
+    val offset = 32 + 9
     val ops = sequence(
       input("IGNORED: HELLO WORLD").map(_ => ()),
       dataStack(push('R'.toInt)),
       Memory.PARSE)
     val ctx = ops.runS(emptyContext).get
-    ctx.ds shouldEqual List(9, 8)
+    ctx.ds shouldEqual List(offset, 8)
   }
 
   test("should return zero length if unable parse to the next delimiter") {
+    val offset = 32 + 9
     val ops = sequence(
       input("IGNORED: HELLO WORLD").map(_ => ()),
       dataStack(push('!'.toInt)),
       Memory.PARSE)
     val ctx = ops.runS(emptyContext).get
-    ctx.ds shouldEqual List(9, 0)
+    ctx.ds shouldEqual List(offset, 0)
   }
 
   test("should push DP to the stack") {
     val ctx = Memory.DP.runS(emptyContext).get
     ctx.ds shouldEqual List(ctx.reg.dp)
-  }
-
-  test("should push TIB to the stack") {
-    val ctx = Memory.TIB.runS(emptyContext).get
-    ctx.ds shouldEqual List(ctx.reg.tib)
   }
 
   test("should store TOS in memory at the DP") {
