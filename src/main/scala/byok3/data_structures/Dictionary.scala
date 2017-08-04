@@ -29,6 +29,8 @@ class Dictionary[K, A](private val byKey: Map[K, Int], private val byPosn: Vecto
   def keys = byKey.keys
 
   def length = byPosn.length
+
+  def toMap = byKey.mapValues(idx => get(idx).get)
 }
 
 object Dictionary {

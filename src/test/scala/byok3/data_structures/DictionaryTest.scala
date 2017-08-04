@@ -36,4 +36,8 @@ class DictionaryTest extends FunSuite with Matchers {
     newDict.indexOf("7") shouldEqual Some(10)
     newDict.get(10) shouldEqual Some(70)
   }
+
+  test("should convert to a map") {
+    dict.toMap shouldEqual Range(0, 10).map(i => i.toString -> i).toMap
+  }
 }
