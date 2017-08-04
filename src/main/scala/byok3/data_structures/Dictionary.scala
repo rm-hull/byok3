@@ -8,8 +8,6 @@ import cats.data.StateT
 import cats.data.StateT._
 import cats.implicits._
 
-import scala.reflect.ClassTag
-import scala.reflect.runtime.{universe => ru}
 import scala.util.Try
 
 class Dictionary[K, A](private val byKey: Map[K, Int], private val byPosn: Vector[A]) {
@@ -35,8 +33,22 @@ class Dictionary[K, A](private val byKey: Map[K, Int], private val byPosn: Vecto
 
 object Dictionary {
 
-  private def annotation[T](term: ru.TermSymbol)(implicit ev: ru.TypeTag[T]) =
-    term.annotations.find(_.tree.tpe =:= ru.typeOf[T]).map(_.asInstanceOf[T])
+  import scala.reflect.ClassTag
+  import scala.reflect.runtime.{universe => ru}
+
+  private def annotation[T](term: ru.TermSymbol)(implicit ev: ru.TypeTag[T]) = {
+    val mirror = ru.runtimeMirror(getClass.getClassLoader)
+    term.annotations.find(_.tree.tpe =:= ru.typeOf[T]).map { annotation =>
+      val cls = annotation.tree.tpe.typeSymbol.asClass
+      val classMirror = mirror.reflectClass(cls)
+      val constructor = annotation.tree.tpe.decl(ru.termNames.CONSTRUCTOR).asMethod
+      val constructorMirror = classMirror.reflectConstructor(constructor)
+      val result = annotation.tree.children.tail.collect {
+        case ru.Literal(ru.Constant(value)) => value
+      }
+      constructorMirror(result: _*).asInstanceOf[T]
+    }
+  }
 
   private def getExecutionTokens[T](obj: T)(implicit ev: ru.TypeTag[T], ev2: ClassTag[T]): Iterable[ExecutionToken] = {
 
