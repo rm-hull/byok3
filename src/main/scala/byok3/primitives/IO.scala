@@ -48,8 +48,8 @@ object IO {
   @Documentation("outputs the contents of addr for n bytes.", stackEffect = "( addr n -- )")
   val TYPE = for {
     addr <- dataStack(pop)
-    n <- dataStack(pop)
-    data <- memory(fetch(addr, n))
+    len <- dataStack(pop)
+    data <- memory(fetch(addr, len))
     _ <- output(print(data))
   } yield ()
 
