@@ -19,7 +19,8 @@ case class Context(mem: Memory,
                    output: IO[Unit] = IO.unit,
                    ds: Stack[Int] = List.empty, // data stack
                    rs: Stack[Int] = List.empty, // return stack
-                   currentXT: Option[ExecutionToken] = None) {
+                   currentXT: Option[ExecutionToken] = None,
+                   compiling: Option[UserDefined] = None) {
 
   def updateState(newStatus: MachineState) = newStatus match {
     // drain the data and return stacks if there was an error
@@ -43,6 +44,11 @@ case class Context(mem: Memory,
       .getOrElse(throw Error(-13, token))
 
   def exec(token: Word) = getEffect(token).runS(this)
+
+  def beginCompilation(token: Word, addr: Address) = {
+    if (status == Smudge) throw Error(-29) // compiler nesting
+    else copy(status = Smudge, compiling = Some(UserDefined(token, addr)))
+  }
 }
 
 object Context {

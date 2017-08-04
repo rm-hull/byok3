@@ -16,6 +16,29 @@ import scala.util.{Failure, Try}
 
 object Control {
 
+  @Internal
+  val __NEST = for {
+    addr <- register(inspect[Try, Registers, Address](_.ip))
+    _ <- returnStack(push(addr))
+    next = -1 // FIXME - this should be the address of the currentXT's param
+    _ <- register(setIP(next))
+  } yield ()
+
+  @Internal
+  val __UNNEST = for {
+    addr <- returnStack(pop)
+    _ <- register(setIP(addr))
+  } yield ()
+
+  @Internal
+  val __EXEC = for {
+    currXT <- inspectF[Try, Context, ExecutionToken](_.currentXT.toTry(Error(3)))
+
+    opcode <- memory(peek(currXT.addr))
+    exeTok <- dictionary(instruction(opcode))
+    _ <- setCurrentXT(Some(exeTok))
+    _ <- exec(exeTok.name)
+  } yield ()
 
   @Documentation(
     """
