@@ -2,10 +2,10 @@ package byok3
 
 import byok3.data_structures.{Context, Error, OK, Smudge}
 import byok3.repl.AnsiColor._
-import byok3.repl.Banner
+import byok3.repl.{Banner, UpperCaseParser, WordCompleter}
 import cats.effect.IO
 import cats.implicits._
-import org.jline.reader.{EndOfFileException, LineReaderBuilder, UserInterruptException}
+import org.jline.reader.{EndOfFileException, LineReader, LineReaderBuilder, UserInterruptException}
 import org.jline.terminal.TerminalBuilder
 
 import scala.annotation.tailrec
@@ -14,10 +14,17 @@ import scala.util.{Failure, Success, Try}
 
 object REPL {
 
-  val terminal = TerminalBuilder.builder.name("byok3").build
-  val lineReader = LineReaderBuilder.builder
+  private val wordCompleter = new WordCompleter
+  private val upperCaseParser = new UpperCaseParser
+  private val terminal = TerminalBuilder.terminal()
+  private val lineReader = LineReaderBuilder.builder
     .terminal(terminal)
-    .build;
+    .parser(upperCaseParser)
+    .completer(wordCompleter)
+    .build
+
+  lineReader.setOpt(LineReader.Option.CASE_INSENSITIVE)
+  lineReader.setOpt(LineReader.Option.GROUP)
 
   def main(args: Array[String]): Unit = {
     println(Banner())
@@ -36,6 +43,7 @@ object REPL {
     }
 
     IO {
+      wordCompleter.setContext(ctx)
       lineReader.readLine(prompt)
     }
   }
