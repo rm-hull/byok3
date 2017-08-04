@@ -17,9 +17,9 @@ object Banner {
        |       _X/XXXXXXXXXXXXX/________X/XXX_______X///XXXXX/______X/XXX______X//XXX_
        |        _X/////////////__________X///__________X/////________X///________X///__
     """.stripMargin.map {
-      case '_' => s"${DARK_GREY}_"
-      case '/' => s"${GREEN}${BOLD}/"
-      case 'X' => s"${GREEN}${BOLD}\\"
+      case '_' => s"${RESET}${DARK_GREY}_"
+      case '/' => s"${RESET}${GREEN}${BOLD}/"
+      case 'X' => s"${RESET}${GREEN}${BOLD}\\"
       case other => other
     }.mkString
 
