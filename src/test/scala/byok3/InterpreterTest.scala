@@ -1,9 +1,6 @@
 package byok3
 
-import java.io.ByteArrayOutputStream
-
 import byok3.data_structures.{Context, Error}
-import cats.effect.IO
 import cats.implicits._
 import org.scalatest.{FunSuite, Matchers}
 
@@ -40,7 +37,7 @@ class InterpreterTest extends FunSuite with Matchers {
 
   test("should record an error when accessing invalid memory") {
     val ctx = Interpreter("-2 @").runS(emptyContext).get
-    assert(ctx.status == Error(-9, "-2"))
+    assert(ctx.status == Error(-9, "0xFFFFFFFE"))
     ctx.ds shouldEqual List.empty
     ctx.rs shouldEqual List.empty
   }

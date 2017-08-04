@@ -1,7 +1,6 @@
 package byok3.primitives
 
 import byok3.data_structures.Context._
-import byok3.data_structures.Error
 import byok3.data_structures.Stack._
 import byok3.helpers.sequence
 import cats.implicits._
@@ -47,7 +46,7 @@ class MemoryTest extends PrimitivesTestBase {
     val ex = intercept[IndexOutOfBoundsException] {
       ops.runS(emptyContext).get
     }
-    ex.getMessage shouldEqual "-2"
+    ex.getMessage shouldEqual "0xFFFFFFFE"
   }
 
   test("should error when invalid memory location accessed") {
@@ -58,7 +57,7 @@ class MemoryTest extends PrimitivesTestBase {
     val ex = intercept[IndexOutOfBoundsException] {
       ops.runS(emptyContext).get
     }
-    ex.getMessage shouldEqual s"${emptyContext.mem.size + 5}"
+    ex.getMessage shouldEqual f"0x${emptyContext.mem.size + 5}%08X"
   }
 
   test("should increment a value in memory") {
