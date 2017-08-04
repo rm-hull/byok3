@@ -84,7 +84,7 @@ object IO {
   val WORDS = for {
     ctx <- get[Try, Context]
     _ <- output {
-      println(ctx.dictionary.keys.toList.sorted.mkString(" "))
+      println(ctx.dictionary.toMap.filterNot(_._2.internal).keys.toList.sorted.mkString(" "))
     }
   } yield ()
 
