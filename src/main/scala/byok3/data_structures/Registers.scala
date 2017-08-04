@@ -7,14 +7,13 @@ import cats.implicits._
 
 import scala.util.Try
 
-case class Registers(dp: Address, ip: Address) {
+case class Registers(dp: Address = 0x100, ip: Address = 0x2000) {
   def incDP = copy(dp = dp + 1)
   def incIP = copy(ip = ip + 1)
 }
 
 
 object Registers {
-  def apply(): Registers = Registers(dp = 0x0100, ip = 0x2000)
 
   def postIncDP: StateT[Try, Registers, Address] = for {
     reg <- get[Try, Registers]
@@ -25,4 +24,7 @@ object Registers {
     reg <- get[Try, Registers]
     _ <- set[Try, Registers](reg.incIP)
   } yield reg.ip
+
+  def setIP(addr: Address): StateT[Try, Registers, Unit] =
+    modify[Try, Registers](_.copy(ip = addr))
 }
