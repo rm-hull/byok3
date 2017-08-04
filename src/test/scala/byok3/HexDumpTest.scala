@@ -55,7 +55,6 @@ class HexDumpTest extends FunSuite {
         |00000090:  7F 80 81 82 83 84 85 86  87 88                    |........ ..      |
         |""".stripMargin
 
-    prog.unsafeRunSync()
     assertOutput(prog)(expected)
   }
 
