@@ -17,12 +17,12 @@ class HexDump(mem: Memory) {
 
     def valid(addr: Address) = addr >= offset && addr < offset + len
 
-    def printable(i: Int) = if (i >= 32 && i <= 127) i.toChar.toString else "."
+    def printable(i: Int) = if (i >= 32 && i < 127) i.toChar.toString else "."
 
-    def printRow(addr: Address)(block: Int => Unit) = {
+    def printRow(addr: Address)(block: Int => String) = {
       Range(0, columns).foreach { j =>
         Range(0, BYTES_PER_BLOCK).foreach { i =>
-          block(addr + (j * BYTES_PER_BLOCK) + i)
+          pr(block(addr + (j * BYTES_PER_BLOCK) + i))
         }
 
         if (j != columns - 1) pr(" ")
@@ -34,15 +34,9 @@ class HexDump(mem: Memory) {
 
     Range(start, end, bytesPerLine).foreach { addr =>
       pr(f"$addr%08X:  ")
-      printRow(addr) { n =>
-        if (valid(n)) pr(f"${mem.peek(n)}%02X ")
-        else pr("   ")
-      }
+      printRow(addr) { n => if (valid(n)) f"${mem.peek(n)}%02X " else "   " }
       pr(" |")
-      printRow(addr) { n =>
-        if (valid(n)) pr(printable(mem.peek(n)))
-        else pr(" ")
-      }
+      printRow(addr) { n => if (valid(n)) printable(mem.peek(n)) else " " }
       pr("|\n")
     }
   }
