@@ -1,8 +1,8 @@
 package byok3.data_structures
 
-import byok3.annonation.{Documentation, Immediate}
+import byok3.annonation.{Documentation, Immediate, Internal}
 import byok3.implicits._
-import byok3.primitives.{Arithmetics, IO, Memory => Mem, StackManipulation}
+import byok3.primitives.{Arithmetics, Compiler, Control, IO, StackManipulation, Memory => Mem}
 import byok3.types.{AppState, Dict, Word}
 import cats.data.StateT
 import cats.data.StateT._
@@ -26,9 +26,9 @@ class Dictionary[K, A](private val byKey: Map[K, Int], private val byPosn: Vecto
   def indexOf(key: K): Option[Int] =
     byKey.get(key)
 
-  lazy val toMap = byKey.mapValues(index => get(index).get)
-  val keys = byKey.keys
-  val length = byPosn.length
+  def keys = byKey.keys
+
+  def length = byPosn.length
 }
 
 object Dictionary {
@@ -47,14 +47,17 @@ object Dictionary {
       effect = instanceMirror.reflectField(term).get.asInstanceOf[AppState[Unit]]
       documentation = annotation[Documentation](term)
       immediate = annotation[Immediate](term).isDefined
+      internal = annotation[Internal](term).isDefined
     } yield {
-      Primitive(name, effect, immediate, documentation)
+      Primitive(name, effect, immediate, internal, documentation)
     }
   }
 
   def apply(): Dict = {
     val tokens =
-      getExecutionTokens(Arithmetics) ++
+        getExecutionTokens(Arithmetics) ++
+        getExecutionTokens(Control) ++
+        getExecutionTokens(Compiler) ++
         getExecutionTokens(IO) ++
         getExecutionTokens(Mem) ++
         getExecutionTokens(StackManipulation) ++
@@ -75,6 +78,9 @@ object Dictionary {
 
   def addressOf(token: Word): StateT[Try, Dict, Int] =
     inspectF[Try, Dict, Int](_.indexOf(token).toTry(Error(-13, token)))
+
+  def instruction(index: Int): StateT[Try, Dict, ExecutionToken] =
+    inspectF[Try, Dict, ExecutionToken](_.get(index).toTry(Error(-13)))
 
   def last(): StateT[Try, Dict, ExecutionToken] =
     inspectF[Try, Dict, ExecutionToken](dict => dict.get(dict.length - 1).toTry(Error(-13)))

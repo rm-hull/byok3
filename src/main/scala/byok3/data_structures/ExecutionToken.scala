@@ -13,7 +13,11 @@ sealed trait ExecutionToken {
   def markImmediate: ExecutionToken = throw new UnsupportedOperationException()
 }
 
-case class Primitive(name: Word, effect: AppState[Unit], override val immediate: Boolean, doc: Option[Documentation]) extends ExecutionToken
+case class Primitive(name: Word,
+                     effect: AppState[Unit],
+                     override val immediate: Boolean,
+                     override val internal: Boolean,
+                     doc: Option[Documentation]) extends ExecutionToken
 
 case class Constant(name: Word, value: Data) extends ExecutionToken {
   override val effect = dataStack(push(value))
