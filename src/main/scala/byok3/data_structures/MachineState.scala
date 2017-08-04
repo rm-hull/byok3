@@ -1,7 +1,5 @@
 package byok3.data_structures
 
-import scala.util.Failure
-
 sealed trait MachineState
 case object OK extends MachineState
 case object Smudge extends MachineState
@@ -60,11 +58,10 @@ case object Error {
 
   def apply(ex: Throwable): Error = ex match {
     case _: NoSuchElementException => Error(-4)
-    //case _: DivideByZeroException => Error(-10)
     case _: IndexOutOfBoundsException => Error(-9, ex.getMessage)
+    case ar: ArithmeticException if ar.getMessage == "/ by zero" => Error(-10)
     case err: Error => err
     case _ => Error(0, s"[${ex.getClass.getName}] ${ex.getMessage}")
-
   }
 }
 
