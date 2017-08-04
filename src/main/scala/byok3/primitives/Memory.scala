@@ -89,19 +89,20 @@ object Memory {
     ascii <- dataStack(pop)
     token <- nextToken(delim = s"\\Q${ascii.toChar}\\E")
     len = if (token.exhausted) 0 else token.value.length
-    _ <- dataStack(push(len))
     _ <- dataStack(push(tib + token.offset))
+    _ <- dataStack(push(len))
   } yield ()
 
   @Documentation("c-addr is the address of, and u is the number of characters in, the input buffer.", stackEffect = "( -- c-addr u )")
   val SOURCE = for {
     tib <- deref("TIB")
     ctx <- get[Try, Context]
-    _ <- dataStack(push(tib))
-    _ <- dataStack(push(ctx.input match {
+    len = ctx.input match {
       case EndOfData => 0
       case Token(_, _, in) => in.length
-    }))
+    }
+    _ <- dataStack(push(tib))
+    _ <- dataStack(push(len))
   } yield ()
 
   @Documentation("addr is the data-space pointer.", stackEffect = "( -- addr )")

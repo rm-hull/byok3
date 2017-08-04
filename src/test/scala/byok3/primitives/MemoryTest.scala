@@ -80,7 +80,7 @@ class MemoryTest extends PrimitivesTestBase {
       dataStack(push('R'.toInt)),
       Memory.PARSE)
     val ctx = ops.runS(emptyContext).get
-    ctx.ds shouldEqual List(offset, 8)
+    ctx.ds shouldEqual List(8, offset)
   }
 
   test("should return zero length if unable parse to the next delimiter") {
@@ -90,7 +90,7 @@ class MemoryTest extends PrimitivesTestBase {
       dataStack(push('!'.toInt)),
       Memory.PARSE)
     val ctx = ops.runS(emptyContext).get
-    ctx.ds shouldEqual List(offset, 0)
+    ctx.ds shouldEqual List(0, offset)
   }
 
   test("should push DP to the stack") {
