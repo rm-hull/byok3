@@ -18,34 +18,34 @@ object IO {
   private def num(base: Int)(n: Int) =
     BigInt(n).toString(base)
 
-  @Documentation("convert signed number n to string of digits, and output.", stackEffect = "( n -- )")
+  @Documentation("convert signed number n to string of digits, and output", stackEffect = "( n -- )")
   val `.` = for {
     base <- deref("BASE")
     n <- dataStack(pop)
     _ <- output(print(num(base)(n) + " "))
   } yield ()
 
-  @Documentation("display stack contents.", stackEffect = "( -- )")
+  @Documentation("display stack contents", stackEffect = "( -- )")
   val `.S` = for {
     base <- deref("BASE")
     stack <- dataStack(get[Try, Stack[Int]])
     _ <- output(print(stack.reverse.map(num(base)).mkString(" ") + " "))
   } yield ()
 
-  @Documentation("outputs ascii as character.", stackEffect = "( ascii -- )")
+  @Documentation("outputs ascii as character", stackEffect = "( ascii -- )")
   val EMIT = for {
     ascii <- dataStack(pop)
     _ <- output(print(ascii.toChar))
   } yield ()
 
 
-  @Documentation("outputs u space characters.", stackEffect = "( u -- )")
+  @Documentation("outputs u space characters", stackEffect = "( u -- )")
   val SPACES = for {
     n <- dataStack(pop)
     _ <- output(print(' ' * n))
   } yield ()
 
-  @Documentation("outputs the contents of addr for n bytes.", stackEffect = "( addr n -- )")
+  @Documentation("outputs the contents of addr for n bytes", stackEffect = "( addr n -- )")
   val TYPE = for {
     n <- dataStack(pop)
     addr <- dataStack(pop)
@@ -53,7 +53,7 @@ object IO {
     _ <- output(print(data))
   } yield ()
 
-  @Documentation("displays the MIT license text.", stackEffect = "( -- )")
+  @Documentation("displays the MIT license text", stackEffect = "( -- )")
   val LICENSE = output {
     val now = LocalDate.now
     println(
@@ -80,7 +80,7 @@ object IO {
        """.stripMargin)
   }
 
-  @Documentation("List the definition names in alphabetical order.", stackEffect = "( -- )")
+  @Documentation("List the definition names in alphabetical order", stackEffect = "( -- )")
   val WORDS = for {
     ctx <- get[Try, Context]
     _ <- output {
