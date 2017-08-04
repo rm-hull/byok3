@@ -61,7 +61,7 @@ object REPL {
 
     Try(program.unsafeRunSync) match {
       case Success(next) => loop(reader)(next)
-      case Failure(ex: UserInterruptException) => loop(reader)(ctx.reset)
+      case Failure(ex: UserInterruptException) => loop(reader)(ctx.reset.updateState(Error(-28)))
       case Failure(ex: EndOfFileException) => ctx
       case Failure(ex) => throw ex
     }
