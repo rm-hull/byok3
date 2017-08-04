@@ -13,7 +13,7 @@ object Banner {
        |   _X/XXXXXXXXXXXXXX______X///XXX/____/XXX______X//XXX__X/XXXXXX//XXX_____
        |    _X/XXX/////////XXX_______X/XXX____X/XXX_______X/XXX__X/XXX//_X//XXX____
        |     _X/XXX_______X/XXX_______X/XXX____X//XXX______/XXX___X/XXX____X//XXX___
-       |      _X/XXX_______X/XXX_______X/XXX_____X///XXX__/XXX_____X/XXX_____X//XXX__
+       |      _X/XXX_______X/XXX_______X/XXX_____X///XXX__/XXX/____X/XXX_____X//XXX__
        |       _X/XXXXXXXXXXXXX/________X/XXX_______X///XXXXX/______X/XXX______X//XXX_
        |        _X/////////////__________X///__________X/////________X///________X///__
     """.stripMargin.map {
