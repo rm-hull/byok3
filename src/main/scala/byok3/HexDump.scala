@@ -20,12 +20,9 @@ class HexDump(mem: Memory) {
     def printable(i: Int) = if (i >= 32 && i < 127) i.toChar.toString else "."
 
     def printRow(addr: Address)(block: Int => String) = {
-      Range(0, columns).foreach { j =>
-        Range(0, BYTES_PER_BLOCK).foreach { i =>
-          pr(block(addr + (j * BYTES_PER_BLOCK) + i))
-        }
-
-        if (j != columns - 1) pr(" ")
+      for (j <- Range(0, columns); i <- Range(0, BYTES_PER_BLOCK)) {
+        pr(block(addr + (j * BYTES_PER_BLOCK) + i))
+        if (i == BYTES_PER_BLOCK - 1 && j != columns - 1) pr(" ")
       }
     }
 
