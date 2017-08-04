@@ -2,6 +2,7 @@ package byok3.primitives
 
 import byok3.annonation.Documentation
 import byok3.data_structures.Context._
+import byok3.data_structures.Error
 import byok3.data_structures.Stack._
 import byok3.types.Stack
 import cats.data.StateT._
@@ -41,6 +42,22 @@ object StackManipulation {
       _ <- push(x1)
       _ <- push(x2)
       _ <- push(x1)
+    } yield ()
+  }
+
+  @Documentation("copy cell pair x1 x2 to the top of the stack", stackEffect =  "( x1 x2 x3 x4 -- x1 x2 x3 x4 x1 x2)")
+  val `2OVER` = dataStack {
+    for {
+      x4 <- pop
+      x3 <- pop
+      x2 <- pop
+      x1 <- pop
+      _ <- push(x1)
+      _ <- push(x2)
+      _ <- push(x3)
+      _ <- push(x4)
+      _ <- push(x1)
+      _ <- push(x2)
     } yield ()
   }
 
@@ -98,6 +115,20 @@ object StackManipulation {
     } yield ()
   }
 
+  @Documentation("exchange the top two cell pairs", stackEffect = "( x1 x2 x3 x4 -- x3 x4 x2 x1)")
+  val `2SWAP` = dataStack {
+    for {
+      x4 <- pop
+      x3 <- pop
+      x2 <- pop
+      x1 <- pop
+      _ <- push(x3)
+      _ <- push(x4)
+      _ <- push(x2)
+      _ <- push(x1)
+    } yield ()
+  }
+
   @Documentation("duplicate top stack element", stackEffect = "( x -- x x )")
   val DUP = dataStack {
     for {
@@ -106,9 +137,31 @@ object StackManipulation {
     } yield ()
   }
 
+  @Documentation("duplicate cell pair x1 x2", stackEffect = "( x1 x2 -- x1 x2 x1 x2 )")
+  val `2DUP` = dataStack {
+    for {
+      x2 <- pop
+      x1 <- pop
+      _ <- push(x1)
+      _ <- push(x2)
+      _ <- push(x1)
+      _ <- push(x2)
+    } yield ()
+  }
+
   @Documentation("duplicate top stack element if it is non-zero", stackEffect = "( x -- 0 | x x )")
   val `?DUP` = dataStack {
     peek.flatMap(x => if (x == 0) pure(()) else push(x))
+  }
+
+  @Documentation("remove u. Copy the xu to the top of the stack", stackEffect = "( xu ... x1 x0 u -- xu ... x1 x0 xu )")
+  val PICK = dataStack {
+    for {
+      u <- pop
+      stack <- get[Try, Stack[Int]]
+      xu = Try(stack(u)).getOrElse(throw Error(-11)) // result out of range
+      _ <- push(xu)
+    } yield ()
   }
 
   @Documentation("the number of single-cell values contained in the return stack", stackEffect = "( -- n )")
@@ -117,6 +170,11 @@ object StackManipulation {
     n = stack.length
     _ <- dataStack(push(n))
   } yield ()
+
+  @Documentation("drop top return stack element", "( -- ) ( R:  x -- )")
+  val RDROP = returnStack {
+    pop.map(_ => ())
+  }
 
   @Documentation("move x to the return stack", stackEffect = "( x -- )  ( R:  -- x)")
   val `>R` = for {
