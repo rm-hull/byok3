@@ -37,8 +37,9 @@ object Memory {
   @Documentation("Adds x to the single cell number at a-addr", stackEffect = "( x a-addr -- )")
   val +! = for {
     addr <- dataStack(pop)
+    x <- dataStack(pop)
     data <- memory(peek(addr))
-    _ <- memory(poke(addr, data + 1))
+    _ <- memory(poke(addr, data + x))
   } yield ()
 
   @Documentation("Reserve one cell of data space and store x in the cell", stackEffect = "( x -- )")

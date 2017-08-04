@@ -60,8 +60,9 @@ class MemoryTest extends PrimitivesTestBase {
     ex.getMessage shouldEqual f"0x${emptyContext.mem.size + 5}%08X"
   }
 
-  test("should increment a value in memory") {
+  test("should accumulate a value in memory") {
     val ops = sequence(
+      dataStack(push(0x2)),
       dataStack(push(0x77)),
       dataStack(push(0x1000)),
       Memory.`!`,
@@ -69,7 +70,7 @@ class MemoryTest extends PrimitivesTestBase {
       Memory.`+!`)
 
     val ctx = ops.runS(emptyContext).get
-    ctx.mem.peek(0x1000) shouldEqual 0x78
+    ctx.mem.peek(0x1000) shouldEqual 0x79
   }
 
   test("should parse a string to the next delimiter") {
