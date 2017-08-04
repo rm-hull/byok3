@@ -105,28 +105,4 @@ class MemoryTest extends PrimitivesTestBase {
     ctx.reg.dp shouldEqual emptyContext.reg.dp + 1
     ctx.mem.peek(emptyContext.reg.dp) shouldEqual 19
   }
-
-  test("should post-increment IP and push to the stack") {
-    val ctx = Memory.`(LIT)`.runS(emptyContext).get
-    ctx.ds shouldEqual List(emptyContext.reg.ip)
-    ctx.reg.ip shouldEqual emptyContext.reg.ip + 1
-  }
-
-  test("should throw an error") {
-    val ops = sequence(dataStack(push(3)), dataStack(push(-3)), returnStack(push(9)), Memory.THROW)
-    val ex = ops.runS(emptyContext).failed.get
-    ex shouldEqual Error(-3)
-  }
-
-  test("should conditionally throw an error when NOS non-zero") {
-    val ops = sequence(dataStack(push(3)), dataStack(push(-6)), Memory.`?ERROR`)
-    val ex = ops.runS(emptyContext).failed.get
-    ex shouldEqual Error(-6)
-  }
-
-  test("should not throw an error when NOS zero") {
-    val ops = sequence(dataStack(push(0)), dataStack(push(-6)), Memory.`?ERROR`, dataStack(push(19)))
-    val ctx = ops.runS(emptyContext).get
-    ctx.ds shouldEqual List(19)
-  }
 }

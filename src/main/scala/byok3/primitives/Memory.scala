@@ -1,17 +1,17 @@
 package byok3.primitives
 
-import byok3.annonation.{Documentation, Immediate}
+import byok3.annonation.Documentation
 import byok3.data_structures.Context._
 import byok3.data_structures.Dictionary._
 import byok3.data_structures.Memory.{peek, poke}
 import byok3.data_structures.Registers._
 import byok3.data_structures.Stack.{pop, push}
 import byok3.data_structures._
-import byok3.types.{AppState, Data}
+import byok3.types.Data
 import cats.data.StateT._
 import cats.implicits._
 
-import scala.util.{Failure, Try}
+import scala.util.Try
 
 object Memory {
 
@@ -47,10 +47,6 @@ object Memory {
     _ <- comma(data)
   } yield ()
 
-  val `(LIT)` = for {
-    ip <- register(postIncIP)
-    _ <- dataStack(push(ip))
-  } yield ()
 
   @Documentation(
     """
@@ -116,13 +112,4 @@ object Memory {
 
   @Documentation("addr is the data-space pointer.", stackEffect = "( -- addr )")
   val HERE = DP
-
-  @Documentation("TODO", stackEffect = "( i*x -- )")
-  val THROW: AppState[Unit] =
-    dataStack(pop).flatMapF(err => Failure(Error(err)))
-
-  val `?ERROR` = for {
-    err <- dataStack(pop)
-    cond <- dataStack(pop)
-  } yield if (cond == 0) () else throw Error(err)
 }
