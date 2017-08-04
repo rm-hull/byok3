@@ -87,4 +87,11 @@ object IO {
       println(ctx.dictionary.keys.toList.sorted.mkString(" "))
     }
   } yield ()
+
+  val DUMP = for {
+    addr <- dataStack(pop)
+    len <- dataStack(pop)
+    hexdump <- memory(inspect(_.hexDump))
+    _ <- output(hexdump.print(addr, len))
+  } yield ()
 }

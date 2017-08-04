@@ -1,5 +1,6 @@
 package byok3.data_structures
 
+import byok3.HexDump
 import byok3.types.{Address, AddressSpace, Data}
 import cats.data.StateT
 import cats.data.StateT._
@@ -8,7 +9,7 @@ import cats.implicits._
 import scala.annotation.tailrec
 import scala.util.Try
 
-protected case class Memory(size: Int, private val mem: AddressSpace) {
+case class Memory(size: Int, private val mem: AddressSpace) {
 
   private val empty: Data = 0
 
@@ -48,6 +49,8 @@ protected case class Memory(size: Int, private val mem: AddressSpace) {
 
     fetch0(addr, len, "")
   }
+
+  lazy val hexDump = new HexDump(this)
 }
 
 case object Memory {
