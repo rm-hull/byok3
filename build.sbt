@@ -1,12 +1,8 @@
 name := "byok3"
-
 version := "0.1.0"
-
 scalaVersion := "2.12.3"
 scalacOptions := Seq("-unchecked", "-deprecation", "-feature")
-
 mainClass in (Compile, run) := Some("byok3.REPL")
-mainClass in (Compile, packageBin) := Some("byok3.REPL")
 
 libraryDependencies ++= Seq(
   "org.typelevel" %% "cats" % "0.9.0",
