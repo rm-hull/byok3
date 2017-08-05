@@ -33,10 +33,10 @@ object Control {
 
   @Internal
   val __EXEC = for {
-    currXT <- inspectF[Try, Context, ExecutionToken](_.currentXT.toTry(Error(3)))
+    current <- inspectF[Try, Context, ExecutionToken](_.currentXT.toTry(Error(3)))
 
-    opcode <- memory(peek(currXT.addr))
-    exeTok <- dictionary(instruction(opcode))
+    xt <- memory(peek(current.addr))
+    exeTok <- dictionary(instruction(xt))
     _ <- setCurrentXT(Some(exeTok))
     _ <- exec(exeTok.name)
   } yield ()
