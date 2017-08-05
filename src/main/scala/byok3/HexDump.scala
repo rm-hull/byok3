@@ -29,7 +29,7 @@ class HexDump(mem: Memory) {
     val start = align(offset)
     val end = align(offset + len + extraLine)
 
-    Range(start, end, bytesPerLine).foreach { addr =>
+    for (addr <- Range(start, end, bytesPerLine)) {
       pr(f"$addr%08X:  ")
       printRow(addr) { n => if (valid(n)) f"${mem.char_peek(n)}%02X " else "   " }
       pr(" |")
