@@ -42,7 +42,7 @@ object IO {
   @Documentation("outputs u space characters", stackEffect = "( u -- )")
   val SPACES = for {
     n <- dataStack(pop)
-    _ <- output(print(' ' * n))
+    _ <- output(print(" " * n))
   } yield ()
 
   @Documentation("outputs the contents of addr for n bytes", stackEffect = "( addr n -- )")
