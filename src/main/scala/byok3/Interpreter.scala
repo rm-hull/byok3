@@ -13,11 +13,8 @@ import scala.util.{Failure, Success, Try}
 
 object Interpreter {
 
-  private def toNumber(value: String, radix: Int) = try {
-    Integer.parseInt(value, radix)
-  } catch {
-    case _: NumberFormatException => throw Error(-13, value)
-  }
+  private def toNumber(value: String, radix: Int) =
+    Try(Integer.parseInt(value, radix)).getOrElse(throw Error(-13, value))
 
   private def pushNumber(token: Word) = for {
     base <- deref("BASE")
