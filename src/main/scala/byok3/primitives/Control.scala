@@ -58,14 +58,14 @@ object Control {
     cond <- dataStack(pop)
   } yield if (cond == 0) () else throw Error(err)
 
-  @Documentation("Skip leading space delimiters. Parse name delimited by a space. Find name and return xt, the execution token for name.", stackEffect = "( \"<spaces>name\" -- xt )")
+  @Documentation("Skip leading space delimiters. Parse name delimited by a space. Find name and return xt, the execution token for name", stackEffect = "( \"<spaces>name\" -- xt )")
   val `'` = for {
     token <- nextToken()
     xt <- dictionary(addressOf(token.value.toUpperCase))
     _ <- dataStack(push(xt))
   } yield ()
 
-  @Documentation("Remove xt from the stack and perform the semantics identified by it. Other stack effects are due to the word EXECUTEd.", stackEffect = "( i*x xt -- j*x )")
+  @Documentation("Remove xt from the stack and perform the semantics identified by it. Other stack effects are due to the word EXECUTEd", stackEffect = "( i*x xt -- j*x )")
   val EXECUTE = for {
     xt <- dataStack(pop)
     exeTok <- dictionary(instruction(xt))

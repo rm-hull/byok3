@@ -69,7 +69,7 @@ object Memory {
     _ <- comma(x)
   } yield ()
 
-  @Documentation("Store char at c-addr.", stackEffect = "( char c-addr -- )")
+  @Documentation("Store char at c-addr", stackEffect = "( char c-addr -- )")
   val `C!` = for {
     addr <- dataStack(pop)
     char <- dataStack(pop)
@@ -110,7 +110,7 @@ object Memory {
     _ <- memory(poke(tin, token.offset))
   } yield ()
 
-  @Documentation("a-addr is the address of a cell containing the offset in characters from the start of the input buffer to the start of the parse area.", stackEffect = "( -- a-addr )")
+  @Documentation("a-addr is the address of a cell containing the offset in characters from the start of the input buffer to the start of the parse area", stackEffect = "( -- a-addr )")
   val `>IN` = Constant(">IN", 0x000C).effect
 
   @Documentation("c-addr is the address of, and u is the number of characters in, the input buffer", stackEffect = "( -- c-addr u )")
