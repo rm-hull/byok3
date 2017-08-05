@@ -9,29 +9,55 @@ import cats.implicits._
 import scala.annotation.tailrec
 import scala.util.Try
 
-case class Memory(size: Int, private val mem: AddressSpace) {
+case class Memory(size: Int, private val addressSpace: AddressSpace) {
 
   private val empty: Data = 0
 
+  private def align(addr: Address) = addr - offset(addr)
+
+  private def offset(addr: Address) = addr % 4
+
   private def boundsCheck(addr: Address): Unit = {
     if (addr < 0 || addr >= size)
-      throw new IndexOutOfBoundsException(f"0x$addr%08X")
+      throw Error(-9, f"0x$addr%08X") // invalid memory address
+  }
+
+  private def alignmentCheck(addr: Address): Unit = {
+    if (offset(addr) != 0)
+      throw Error(-23, f"0x$addr%08X") // address alignment exception
   }
 
   def poke(addr: Address, data: Data): Memory = {
     boundsCheck(addr)
-    copy(mem = mem.updated(addr, data))
+    alignmentCheck(addr)
+    copy(addressSpace = addressSpace.updated(addr, data))
   }
 
   def peek(addr: Address): Data = {
     boundsCheck(addr)
-    mem.getOrElse(addr, empty)
+    alignmentCheck(addr)
+    addressSpace.getOrElse(addr, empty)
+  }
+
+  def char_peek(addr: Address): Data = {
+    boundsCheck(addr)
+    val word = addressSpace.getOrElse(align(addr), empty)
+    (word >> (offset(addr) << 3)) & 0xFF
+  }
+
+  def char_poke(addr: Address, data: Data): Memory = {
+    boundsCheck(addr)
+    val alignedAddr = align(addr)
+    val shifted = offset(addr) << 3
+    val mask = 0xFF << shifted
+    val newValue = (data & 0xFF) << shifted
+    poke(alignedAddr, (peek(alignedAddr) & ~mask) | (newValue & mask))
   }
 
   @tailrec
   final def memcpy(addr: Address, data: String): Memory = {
     data.headOption match {
-      case Some(ch) => poke(addr, ch).memcpy(addr + 1, data.tail)
+      case Some(ch) => char_poke(addr, ch).memcpy(addr + 1, data.tail)
       case None => this
     }
   }
@@ -44,7 +70,7 @@ case class Memory(size: Int, private val mem: AddressSpace) {
     @tailrec
     def fetch0(addr: Address, len: Int, acc: String): String = {
       if (len == 0) acc
-      else fetch0(addr + 1, len - 1, acc + peek(addr).toChar)
+      else fetch0(addr + 1, len - 1, acc + char_peek(addr).toChar)
     }
 
     fetch0(addr, len, "")
@@ -57,8 +83,11 @@ case object Memory {
 
   def apply(size: Int): Memory = {
     require(size > 0)
+    require(size % 4 == 0)
     Memory(size = size, Map.empty)
   }
+
+  def align(addr: Address) = (addr + 3) & ~3
 
   def poke(addr: Address, data: Data): StateT[Try, Memory, Unit] =
     modify(_.poke(addr, data))

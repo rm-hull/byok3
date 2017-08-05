@@ -71,7 +71,7 @@ class InterpreterTest extends FunSuite with Matchers {
     ctx.ds shouldEqual List(42, 12, offset)
 
     Stream.from(offset).zip("BEYOND SPACE").foreach {
-      case (addr, ch) => ctx.mem.peek(addr) shouldEqual ch
+      case (addr, ch) => ctx.mem.char_peek(addr) shouldEqual ch
     }
   }
 

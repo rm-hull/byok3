@@ -77,8 +77,8 @@ object Dictionary {
         getExecutionTokens(StackManipulation) ++
         Seq(
           Constant("BASE", 0x0000),
-          Constant("ECHO", 0x0001),
-          Constant("TIB", 0x0002))
+          Constant("ECHO", 0x0004),
+          Constant("TIB", 0x0008))
 
     tokens.foldLeft[Dict](Dictionary.empty) {
       (m, a) => m.add(a.name, a)

@@ -31,9 +31,9 @@ class HexDump(mem: Memory) {
 
     Range(start, end, bytesPerLine).foreach { addr =>
       pr(f"$addr%08X:  ")
-      printRow(addr) { n => if (valid(n)) f"${mem.peek(n)}%02X " else "   " }
+      printRow(addr) { n => if (valid(n)) f"${mem.char_peek(n)}%02X " else "   " }
       pr(" |")
-      printRow(addr) { n => if (valid(n)) printable(mem.peek(n)) else " " }
+      printRow(addr) { n => if (valid(n)) printable(mem.char_peek(n)) else " " }
       pr("|\n")
     }
   }

@@ -7,7 +7,7 @@ import org.scalatest.FunSuite
 class HexDumpTest extends FunSuite {
 
   val mem = Range(0x00, 0xFF).foldLeft(Memory(0x10000)) {
-    (mem, i) => mem.poke(i + 17, i)
+    (mem, i) => mem.char_poke(i + 17, i)
   }
 
   val hexdump = new HexDump(mem)
