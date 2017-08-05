@@ -12,7 +12,9 @@ sealed trait ExecutionToken {
   val immediate: Boolean = false
   val internal: Boolean = false
 
-  def markImmediate: ExecutionToken = ???
+  def markAsImmediate: ExecutionToken =
+    throw Error(-21) // unsupported operation
+
   def addr: Address = ???
 }
 
@@ -35,5 +37,5 @@ case class UserDefined(name: Word,
                        override val immediate: Boolean = false) extends ExecutionToken {
 
   override val effect = Control.__EXEC
-  override def markImmediate = copy(immediate = true)
+  override def markAsImmediate = copy(immediate = true)
 }
