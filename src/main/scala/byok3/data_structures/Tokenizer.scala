@@ -13,7 +13,7 @@ object Tokenizer {
   val delimiters = "[ \t\n]"
 
   def apply(in: String, delim: String = delimiters): Tokenizer =
-    Token("", -1, in).next(delim)
+    Token("", -1, Option(in).getOrElse("")).next(delim)
 }
 
 case object EndOfData extends Tokenizer {
