@@ -31,6 +31,8 @@ object Compiler {
 
   @Documentation("Enter compilation state and start the current definition, producing colon-sys", stackEffect = "( C: \"<spaces>name\" -- colon-sys )")
   val `:` = for {
+    _ <- requires[Context](_.status != Smudge, Error(-29)) // compiler nesting
+    _ <- machineState(Smudge)
     token <- nextToken()
     nest <- dictionary(addressOf("__NEST"))
     addr <- comma(nest)

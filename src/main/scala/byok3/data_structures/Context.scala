@@ -46,8 +46,7 @@ case class Context(mem: Memory,
   def exec(token: Word) = getEffect(token).runS(this)
 
   def beginCompilation(token: Word, addr: Address) = {
-    if (status == Smudge) throw Error(-29) // compiler nesting
-    else copy(status = Smudge, compiling = Some(UserDefined(token, addr)))
+    copy(compiling = Some(UserDefined(token, addr)))
   }
 }
 
