@@ -27,6 +27,12 @@ object Memory {
 
   val CELL = Constant("CELL", 4)
 
+  @Documentation("n2 is the size in address units of n1 cells", "( n1 -- n2 )")
+  val CELLS = for {
+    n1 <- dataStack(pop)
+    n2 = if (n1 < 0) 0 else ((n1 - 1) / CELL_SIZE) + 1
+    _ <- dataStack(push(n2))
+  } yield ()
 
   @Documentation("Store x at a-addr", stackEffect = "( x a-addr -- )")
   val `!` = for {
