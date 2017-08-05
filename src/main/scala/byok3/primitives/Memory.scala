@@ -25,7 +25,7 @@ object Memory {
     _ <- register(modify(_.copy(dp = aligned + CELL_SIZE)))
   } yield aligned
 
-  val CELL = Constant("CELL", 4)
+  val CELL = Constant("CELL", CELL_SIZE)
 
   val `(LIT)` = for {
     addr <- register(inspect(_.ip))
