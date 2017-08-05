@@ -21,13 +21,14 @@ object Control {
     addr <- register(inspect[Try, Registers, Address](_.ip))
     _ <- returnStack(push(addr))
     next = -1 // FIXME - this should be the address of the currentXT's param
-    _ <- register(setIP(next))
+    _ <- register(ip(next))
   } yield ()
 
   @Internal
   val __UNNEST = for {
+    _ <- returnStackNotEmpty
     addr <- returnStack(pop)
-    _ <- register(setIP(addr))
+    _ <- register(ip(addr))
   } yield ()
 
   @Internal
