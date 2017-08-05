@@ -3,20 +3,30 @@ package byok3.primitives
 import byok3.annonation.{Documentation, Immediate}
 import byok3.data_structures.Context._
 import byok3.data_structures.Dictionary.{add, addressOf, last}
-import byok3.data_structures.Registers.postIncIP
-import byok3.data_structures.Stack.push
-import byok3.data_structures.{Context, OK, UserDefined}
+import byok3.data_structures.Stack.pop
+import byok3.data_structures._
+import byok3.helpers._
 import byok3.primitives.Memory.comma
-import cats.data.StateT.{inspect, modify}
+import cats.data.StateT._
 import cats.implicits._
 
 import scala.util.Try
 
 object Compiler {
 
-  val `(LIT)` = for {
-    ip <- register(postIncIP)
-    _ <- dataStack(push(ip))
+  def compile(ns: Int*) = sequence(ns.map(comma): _*)
+
+  def literal(n: Int) = for {
+    lit <- dictionary(addressOf("(LIT)"))
+    _ <- compile(lit, n)
+  } yield ()
+
+  @Immediate
+  @Documentation("Append the run-time semantics to the current definition.", "Compilation: ( x -- ), Runtime: ( -- x )")
+  val LITERAL = for {
+    _ <- requires[Context](_.status == Smudge, Error(-14)) // used only during compilation
+    x <- dataStack(pop)
+    _ <- literal(x)
   } yield ()
 
   @Documentation("Enter compilation state and start the current definition, producing colon-sys", stackEffect = "( C: \"<spaces>name\" -- colon-sys )")
@@ -27,8 +37,8 @@ object Compiler {
     _ <- modify[Try, Context](_.beginCompilation(token.value.toUpperCase, addr))
   } yield ()
 
-  @Documentation("End the current definition, allow it to be found in the dictionary and enter interpretation state, consuming colon-sys", stackEffect = "( C: colon-sys -- )")
   @Immediate
+  @Documentation("End the current definition, allow it to be found in the dictionary and enter interpretation state, consuming colon-sys", stackEffect = "( C: colon-sys -- )")
   val `;` = for {
     addr <- dictionary(addressOf("UNNEST"))
     _ <- comma(addr)

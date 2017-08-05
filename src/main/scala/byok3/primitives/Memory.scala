@@ -27,6 +27,13 @@ object Memory {
 
   val CELL = Constant("CELL", 4)
 
+  val `(LIT)` = for {
+    addr <- register(inspect(_.ip))
+    data <- memory(peek(addr))
+    _ <- dataStack(push(data))
+    _ <- register(modify(_.copy(ip = addr + CELL_SIZE)))
+  } yield ()
+
   @Documentation("n2 is the size in address units of n1 cells", "( n1 -- n2 )")
   val CELLS = for {
     n1 <- dataStack(pop)

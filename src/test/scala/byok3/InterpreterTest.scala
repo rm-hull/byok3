@@ -106,4 +106,14 @@ class InterpreterTest extends FunSuite with Matchers {
     assertOutput(ctx.output)("HELLO, WORLD\nTHAT IS ALL")
   }
 
+//  test("should compile a user defined word") {
+//    val ctx = Interpreter(": SQR DUP * ;").runS(emptyContext).get
+//    ctx.mem.size shouldEqual 23
+//  }
+
+  test("should record error when LITERAL when not in compile mode") {
+    val ctx = Interpreter("10 LITERAL").runS(emptyContext).get
+    ctx.status shouldEqual Error(-14)
+  }
+
 }
