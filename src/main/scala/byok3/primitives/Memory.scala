@@ -118,11 +118,10 @@ object Memory {
   } yield ()
 
   @Documentation("addr is the data-space pointer", stackEffect = "( -- addr )")
-  val DP = for {
+  val HERE = for {
     dp <- register(inspect(_.dp))
     _ <- dataStack(push(dp))
   } yield ()
 
-  @Documentation("addr is the data-space pointer", stackEffect = "( -- addr )")
-  val HERE = DP
+
 }
