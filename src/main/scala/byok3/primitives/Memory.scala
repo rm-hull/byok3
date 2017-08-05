@@ -37,15 +37,15 @@ object Memory {
   @Documentation("Store x at a-addr", stackEffect = "( x a-addr -- )")
   val `!` = for {
     addr <- dataStack(pop)
-    data <- dataStack(pop)
-    _ <- memory(poke(addr, data))
+    x <- dataStack(pop)
+    _ <- memory(poke(addr, x))
   } yield ()
 
   @Documentation("x is the value stored at a-addr", stackEffect = "( a-addr -- x )")
   val `@` = for {
     addr <- dataStack(pop)
-    data <- memory(peek(addr))
-    _ <- dataStack(push(data))
+    x <- memory(peek(addr))
+    _ <- dataStack(push(x))
   } yield ()
 
   @Documentation("Adds x to the single cell number at a-addr", stackEffect = "( x a-addr -- )")
@@ -58,8 +58,9 @@ object Memory {
 
   @Documentation("Reserve one cell of data space and store x in the cell", stackEffect = "( x -- )")
   val `,` = for {
-    data <- dataStack(pop)
-    _ <- comma(data)
+    x <- dataStack(pop)
+    _ <- comma(x)
+  } yield ()
 
   @Documentation("Store char at c-addr.", stackEffect = "( char c-addr -- )")
   val `C!` = for {
