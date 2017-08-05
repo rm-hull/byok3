@@ -2,6 +2,8 @@ package byok3.data_structures
 
 import byok3.types.Word
 
+import scala.annotation.tailrec
+
 sealed trait Tokenizer {
   val value: Word
   val offset: Int
@@ -24,11 +26,13 @@ case object EndOfData extends Tokenizer {
 }
 
 case class Token(value: String, offset: Int, in: String) extends Tokenizer {
-  override def next(delim: String) = {
+  @tailrec
+  override final def next(delim: String) = {
     val nextOffset = value.length + offset + 1
     if (nextOffset >= in.length) EndOfData
     else in.substring(nextOffset).split(delim).headOption match {
       case None => EndOfData
+      case Some(t) if t.isEmpty => Token(t, nextOffset, in).next(delim)
       case Some(t) => Token(t, nextOffset, in)
     }
   }

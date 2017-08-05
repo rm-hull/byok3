@@ -29,10 +29,10 @@ class TokenizerTest extends FunSuite with Matchers {
     val in = "3 ( this is a comment ) 4"
     Tokenizer(in).next("\\)") shouldEqual Token("( this is a comment ", 2, in)
   }
-
-  test("should not squash multiple delimiters") {
+  
+  test("should greedily consume multiple delimiters") {
     val in = "10  20 +"
-    assert(Tokenizer(in).next(delimiters) === Token("", 3, in))
+    Tokenizer(in).next(delimiters) shouldEqual Token("20", 4, in)
   }
 
   test("should return no token if delimiter not found") {

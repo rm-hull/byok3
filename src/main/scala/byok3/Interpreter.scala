@@ -38,8 +38,7 @@ object Interpreter {
   private def assemble: AppState[Unit] =
     get[Try, Context].flatMap { ctx =>
       ctx.input match {
-        case Token(token, _, _) if token.nonEmpty =>
-          processEffect(token)(ctx).getOrElse(pushNumber(token))
+        case Token(token, _, _) => processEffect(token)(ctx).getOrElse(pushNumber(token))
         case _ => pure(ctx)
       }
     }
