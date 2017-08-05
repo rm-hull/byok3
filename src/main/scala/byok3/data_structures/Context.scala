@@ -70,12 +70,17 @@ object Context {
   //          (ctx, stack) => ctx.copy(ds = stack)
   //    })
 
+  def requires[S](predicate: S => Boolean, onFail: Error): StateT[Try, S, Unit] =
+    inspectF[Try, S, Unit](s => Try(if (!predicate(s)) throw onFail))
 
   def dataStack[A](block: StateT[Try, Stack[Int], A]): AppState[A] =
     block.transformS(_.ds, (ctx, stack) => ctx.copy(ds = stack))
 
   def returnStack[A](block: StateT[Try, Stack[Int], A]): AppState[A] =
     block.transformS(_.rs, (ctx, stack) => ctx.copy(rs = stack))
+
+  def returnStackNotEmpty =
+    requires[Context](_.rs.nonEmpty, Error(-6))
 
   def memory[A](block: StateT[Try, Memory, A]): AppState[A] =
     block.transformS[Context](_.mem, (ctx, mem) => ctx.copy(mem = mem))

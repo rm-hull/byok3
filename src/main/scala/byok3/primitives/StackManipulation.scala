@@ -45,7 +45,7 @@ object StackManipulation {
     } yield ()
   }
 
-  @Documentation("copy cell pair x1 x2 to the top of the stack", stackEffect =  "( x1 x2 x3 x4 -- x1 x2 x3 x4 x1 x2)")
+  @Documentation("copy cell pair x1 x2 to the top of the stack", stackEffect = "( x1 x2 x3 x4 -- x1 x2 x3 x4 x1 x2)")
   val `2OVER` = dataStack {
     for {
       x4 <- pop
@@ -172,9 +172,10 @@ object StackManipulation {
   } yield ()
 
   @Documentation("drop top return stack element", "( -- ) ( R:  x -- )")
-  val RDROP = returnStack {
-    pop.map(_ => ())
-  }
+  val RDROP = for {
+    _ <- returnStackNotEmpty
+    _ <- returnStack(pop)
+  } yield ()
 
   @Documentation("move x to the return stack", stackEffect = "( x -- )  ( R:  -- x)")
   val `>R` = for {
@@ -184,12 +185,14 @@ object StackManipulation {
 
   @Documentation("move x from the return stack to the data stack", stackEffect = "( -- x ) ( R:  x -- )")
   val `R>` = for {
+    _ <- returnStackNotEmpty
     x <- returnStack(pop)
     _ <- dataStack(push(x))
   } yield ()
 
   @Documentation("copy x from the return stack to the data stack", stackEffect = "( -- x ) ( R:  x -- x)")
-  val `R@`= for {
+  val `R@` = for {
+    _ <- returnStackNotEmpty
     x <- returnStack(peek)
     _ <- dataStack(push(x))
   } yield ()
