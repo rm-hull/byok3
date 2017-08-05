@@ -1,7 +1,6 @@
 FROM frolvlad/alpine-oraclejdk8:latest
 MAINTAINER Richard Hull <rm_hull@yahoo.co.uk>
 
-ARG APP_VERSION=0.1.0
 ARG SCALA_VERSION=2.12
 ARG SBT_DOWNLOAD_URL=https://cocl.us/sbt01316tgz
 
@@ -19,8 +18,8 @@ WORKDIR /usr/src/app
 COPY . /usr/src/app
 RUN \
   sbt assembly && \
-  mv target/scala-$SCALA_VERSION/byok3-assembly-$APP_VERSION.jar . && \
+  mv target/scala-$SCALA_VERSION/byok3-assembly-0.1.0.jar byok3-assembly.jar && \
   rm -rf target project/target ~/.ivy2
 
 EXPOSE 3000
-ENTRYPOINT ["java", "-jar", "byok3-assembly-$APP_VERSION.jar"]
+ENTRYPOINT ["java", "-jar", "byok3-assembly.jar"]
