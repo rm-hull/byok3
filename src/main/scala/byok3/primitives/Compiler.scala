@@ -32,7 +32,7 @@ object Compiler {
   @Documentation("Enter compilation state and start the current definition, producing colon-sys", stackEffect = "( C: \"<spaces>name\" -- colon-sys )")
   val `:` = for {
     token <- nextToken()
-    nest <- dictionary(addressOf("NEST"))
+    nest <- dictionary(addressOf("__NEST"))
     addr <- comma(nest)
     _ <- modify[Try, Context](_.beginCompilation(token.value.toUpperCase, addr))
   } yield ()
@@ -40,8 +40,8 @@ object Compiler {
   @Immediate
   @Documentation("End the current definition, allow it to be found in the dictionary and enter interpretation state, consuming colon-sys", stackEffect = "( C: colon-sys -- )")
   val `;` = for {
-    addr <- dictionary(addressOf("UNNEST"))
-    _ <- comma(addr)
+    unnest <- dictionary(addressOf("__UNNEST"))
+    _ <- comma(unnest)
     userDefinedWord <- inspect[Try, Context, UserDefined](_.compiling.get)
     _ <- dictionary(add(userDefinedWord))
     _ <- machineState(OK)
