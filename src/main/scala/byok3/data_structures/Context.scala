@@ -20,7 +20,6 @@ case class Context(mem: Memory,
                    output: IO[Unit] = IO.unit,
                    ds: Stack[Int] = List.empty, // data stack
                    rs: Stack[Int] = List.empty, // return stack
-                   currentXT: Option[ExecutionToken] = None,
                    compiling: Option[UserDefined] = None) {
 
   def updateState(newStatus: MachineState) = newStatus match {
@@ -42,7 +41,7 @@ case class Context(mem: Memory,
 
   def reset = {
     val newStatus = if (status == Smudge) Smudge else OK
-    updateState(newStatus).copy(output = IO.unit, currentXT = None)
+    updateState(newStatus).copy(output = IO.unit)
   }
 
   def exec(token: Word) =
@@ -102,9 +101,6 @@ object Context {
 
   def machineState: AppState[MachineState] =
     inspect(_.status)
-
-  def setCurrentXT(token: Option[ExecutionToken] = None): AppState[Unit] =
-    modify(_.copy(currentXT = token))
 
   def exec(token: Word): AppState[Unit] =
     modifyF(_.exec(token))

@@ -19,7 +19,6 @@ object Interpreter {
 
   private def pushNumber(status: MachineState, token: Word) = for {
     base <- deref("BASE")
-    _ <- setCurrentXT(None)
     n = toNumber(token, base)
     _ <- if (status == Smudge) literal(n) else dataStack(push(n))
   } yield ()

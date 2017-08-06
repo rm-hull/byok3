@@ -24,10 +24,7 @@ sealed trait ExecutionToken { self =>
     _ <- Compiler.compile(addr)
   } yield ()
 
-  val run = for {
-    _ <- setCurrentXT(Some(self))
-    _ <- effect
-  } yield ()
+  def run = effect
 }
 
 case class Primitive(name: Word,
