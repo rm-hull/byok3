@@ -60,7 +60,7 @@ case class Context(mem: CoreMemory,
   }
 
   def beginCompilation(token: Word, addr: Address) =
-    if (token.isEmpty) throw Error(-32) // invalid name argument
+    if (token.isEmpty) throw Error(-16) // attempt to use zero-length string as name
     else copy(compiling = Some(UserDefined(token, addr)))
 
   lazy val disassembler = new Disassembler(this)

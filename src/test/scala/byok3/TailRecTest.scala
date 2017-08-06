@@ -2,8 +2,9 @@ package byok3
 
 import byok3.data_structures.Context
 import cats.implicits._
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.{FunSuite, Ignore, Matchers}
 
+@Ignore
 class TailRecTest extends FunSuite with Matchers {
 
   val emptyContext = Context(0x10000)
