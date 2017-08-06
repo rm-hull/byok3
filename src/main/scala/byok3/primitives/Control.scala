@@ -2,24 +2,25 @@ package byok3.primitives
 
 import byok3.annonation.{Documentation, Internal}
 import byok3.data_structures.Context._
+import byok3.data_structures.CoreMemory._
 import byok3.data_structures.Dictionary._
+import byok3.data_structures.Error
 import byok3.data_structures.Registers._
 import byok3.data_structures.Stack.{pop, push}
-import byok3.data_structures.{Error, Registers}
-import byok3.types.{Address, AppState}
+import byok3.types.AppState
 import cats.data.StateT._
 import cats.implicits._
 
-import scala.util.{Failure, Try}
+import scala.util.Failure
 
 object Control {
 
   @Internal
   val __NEST = for {
-    addr <- register(inspect[Try, Registers, Address](_.ip))
+    addr <- register(inspect(_.ip))
+    next <- register(inspect(_.w))
+    _ <- register(ip(inc(next)))
     _ <- returnStack(push(addr))
-    next = -1 // FIXME - this should be the address of the currentXT's param
-    _ <- register(ip(next))
   } yield ()
 
   @Internal
