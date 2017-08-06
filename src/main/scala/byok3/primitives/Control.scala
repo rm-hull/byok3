@@ -50,8 +50,8 @@ object Control {
   @Documentation("Skip leading space delimiters. Parse name delimited by a space. Find name and return xt, the execution token for name", stackEffect = "( \"<spaces>name\" -- xt )")
   val `'` = for {
     token <- nextToken()
-    // TODO consider an implicit pimp String -> Word that does is automatically
-    name = if (token.value.isEmpty) throw Error(-32) else token.value.toUpperCase
+    name = token.value.toUpperCase
+    _ <- guard(name.nonEmpty, Error(-16))
     xt <- dictionary(addressOf(name))
     _ <- dataStack(push(xt))
   } yield ()
