@@ -56,12 +56,16 @@ case object Error {
     new Error(errno, if (additionalInfo.trim.isEmpty) msg else s"$msg: $additionalInfo")
   }
 
-  def apply(ex: Throwable): Error = ex match {
-    case _: NoSuchElementException => Error(-4)
-    case _: IndexOutOfBoundsException => Error(-9, ex.getMessage)
-    case ar: ArithmeticException if ar.getMessage == "/ by zero" => Error(-10)
-    case err: Error => err
-    case _ => Error(0, s"[${ex.getClass.getName}] ${ex.getMessage}")
+  def apply(ex: Throwable): Error = {
+    ex.printStackTrace()
+    ex match {
+      case err: Error => err
+      case _: NotImplementedError => Error(-21)
+      case _: NoSuchElementException => Error(-4)
+      case _: IndexOutOfBoundsException => Error(-9, ex.getMessage)
+      case ar: ArithmeticException if ar.getMessage == "/ by zero" => Error(-10)
+      case _ => Error(0, s"[${ex.getClass.getName}] ${ex.getMessage}")
+    }
   }
 }
 
