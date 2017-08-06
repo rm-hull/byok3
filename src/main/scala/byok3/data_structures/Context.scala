@@ -134,6 +134,7 @@ object Context {
 
   def input(text: String): AppState[Boolean] = for {
   // TODO: check to make sure text.len < TIB size
+    _ <- guard(text.length < 0x100, Error(-9, "input string too long"))
     tib <- deref("TIB")
     _ <- modify[Try, Context](_.copy(input = Tokenizer(text)))
     _ <- memory(copy(tib, text))
