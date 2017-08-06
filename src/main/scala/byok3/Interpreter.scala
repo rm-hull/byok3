@@ -3,6 +3,7 @@ package byok3
 import byok3.data_structures.Context._
 import byok3.data_structures.Stack._
 import byok3.data_structures._
+import byok3.primitives.Compiler._
 import byok3.types.{AppState, Word}
 import cats.data.StateT._
 import cats.implicits._
@@ -16,26 +17,24 @@ object Interpreter {
   private def toNumber(value: String, radix: Int) =
     Try(Integer.parseInt(value, radix)).getOrElse(throw Error(-13, value))
 
-  private def pushNumber(token: Word) = for {
+  private def pushNumber(status: MachineState, token: Word) = for {
     base <- deref("BASE")
     _ <- setCurrentXT(None)
     n = toNumber(token, base)
-    _ <- dataStack(push(n))
+    _ <- if (status == Smudge) literal(n) else dataStack(push(n))
   } yield ()
 
-  private def processEffect(token: Word)(ctx: Context) =
-    ctx.dictionary
-      .get(token.toUpperCase)
-      .filterNot(_.internal)
-      .map(xt => for {
-        _ <- setCurrentXT(Some(xt))
-        _ <- xt.effect
-      } yield ())
+  private def runOrCompile(status: MachineState, xt: ExecutionToken) =
+    if (xt.immediate || status != Smudge) xt.run else xt.compile
 
   private def assemble: AppState[Unit] =
     get[Try, Context].flatMap { ctx =>
+      val status = ctx.status
       ctx.input match {
-        case Token(token, _, _) => processEffect(token)(ctx).getOrElse(pushNumber(token))
+        case Token(token, _, _) =>
+          ctx.find(token)
+            .map(xt => runOrCompile(status, xt))
+            .getOrElse(pushNumber(status, token))
         case _ => pure(ctx)
       }
     }

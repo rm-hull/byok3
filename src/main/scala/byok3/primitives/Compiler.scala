@@ -3,9 +3,10 @@ package byok3.primitives
 import byok3.annonation.{Documentation, Immediate}
 import byok3.data_structures.Context._
 import byok3.data_structures.Dictionary.{add, addressOf, last}
-import byok3.data_structures.Stack.pop
+import byok3.data_structures.Stack.{pop, push}
 import byok3.data_structures._
 import byok3.helpers._
+import byok3.implicits._
 import byok3.primitives.Memory.comma
 import cats.data.StateT._
 import cats.implicits._
@@ -32,7 +33,6 @@ object Compiler {
   @Documentation("Enter compilation state and start the current definition, producing colon-sys", stackEffect = "( C: \"<spaces>name\" -- colon-sys )")
   val `:` = for {
     _ <- requires[Context](_.status != Smudge, Error(-29)) // compiler nesting
-    _ <- machineState(Smudge)
     token <- nextToken()
     nest <- dictionary(addressOf("__NEST"))
     addr <- comma(nest)
@@ -44,7 +44,7 @@ object Compiler {
   val `;` = for {
     unnest <- dictionary(addressOf("__UNNEST"))
     _ <- comma(unnest)
-    userDefinedWord <- inspect[Try, Context, UserDefined](_.compiling.get)
+    userDefinedWord <- inspectF[Try, Context, UserDefined](_.compiling.toTry(Error(-14))) // used only during compilation
     _ <- dictionary(add(userDefinedWord))
     _ <- machineState(OK)
   } yield ()
@@ -54,4 +54,12 @@ object Compiler {
     lastWord <- dictionary(last)
     _ <- dictionary(add(lastWord.markAsImmediate))
   } yield ()
+
+  @Documentation("", stackEffect = "( -- xt )")
+  val LATEST = for {
+    xt <- dictionary(inspect(_.length - 1))
+    _ <- dataStack(push(xt))
+  } yield ()
+
+
 }

@@ -61,7 +61,6 @@ object Control {
   @Documentation("Skip leading space delimiters. Parse name delimited by a space. Find name and return xt, the execution token for name", stackEffect = "( \"<spaces>name\" -- xt )")
   val `'` = for {
     token <- nextToken()
-    xt <- dictionary(addressOf(token.value.toUpperCase))
     _ <- dataStack(push(xt))
   } yield ()
 

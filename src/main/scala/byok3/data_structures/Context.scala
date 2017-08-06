@@ -9,7 +9,7 @@ import cats.data.StateT._
 import cats.effect.IO
 import cats.implicits._
 
-import scala.util.Try
+import scala.util.{Failure, Try}
 
 
 case class Context(mem: Memory,
@@ -24,31 +24,36 @@ case class Context(mem: Memory,
                    compiling: Option[UserDefined] = None) {
 
   def updateState(newStatus: MachineState) = newStatus match {
+    case _ if status == newStatus => this
     // drain the data and return stacks if there was an error
     case err: Error => copy(status = err, ds = List.empty, rs = List.empty)
-    case other => copy(status = other)
+    case OK => copy(status = OK, compiling = None)
+    case Smudge => copy(status = Smudge)
   }
 
-  def nextToken(delim: String) = copy(input = input.next(delim))
-
-  def append(out: IO[Unit]) = copy(output = output.flatMap(_ => out))
-
-  def reset =
-    copy(
-      output = IO.unit,
-      currentXT = None,
-      status = if (status == Smudge) Smudge else OK)
-
-  def getEffect(token: Word) =
+  def find(token: Word) =
     dictionary.get(token.toUpperCase)
-      .map(_.effect)
-      .getOrElse(throw Error(-13, token))
+      .filterNot(_.internal)
 
-  def exec(token: Word) = getEffect(token).runS(this)
+  def nextToken(delim: String) =
+    copy(input = input.next(delim))
 
-  def beginCompilation(token: Word, addr: Address) = {
-    copy(compiling = Some(UserDefined(token, addr)))
+  def append(out: IO[Unit]) =
+    copy(output = output.flatMap(_ => out))
+
+  def reset = {
+    val newStatus = if (status == Smudge) Smudge else OK
+    updateState(newStatus).copy(output = IO.unit, currentXT = None)
   }
+
+  def exec(token: Word) =
+    find(token).fold[Try[Context]](Failure(Error(-13, token))) {
+      xt => xt.effect.runS(this)
+    }
+
+  def beginCompilation(token: Word, addr: Address) =
+    if (token.isEmpty) throw Error(-32) // invalid name argument
+    else updateState(Smudge).copy(compiling = Some(UserDefined(token, addr)))
 
   lazy val disassembler = new Disassembler(this)
 }
@@ -96,6 +101,9 @@ object Context {
   def machineState(newStatus: MachineState): AppState[Unit] =
     modify(_.updateState(newStatus))
 
+  def machineState: AppState[MachineState] =
+    inspect(_.status)
+
   def setCurrentXT(token: Option[ExecutionToken] = None): AppState[Unit] =
     modify(_.copy(currentXT = token))
 
@@ -125,5 +133,4 @@ object Context {
     modify(_.append(IO {
       block
     }))
-
 }
