@@ -3,11 +3,9 @@ package byok3.primitives
 import byok3.annonation.{Documentation, Internal}
 import byok3.data_structures.Context._
 import byok3.data_structures.Dictionary._
-import byok3.data_structures.Memory.peek
 import byok3.data_structures.Registers._
 import byok3.data_structures.Stack.{pop, push}
-import byok3.data_structures.{Context, Error, ExecutionToken, Registers}
-import byok3.implicits._
+import byok3.data_structures.{Error, Registers}
 import byok3.types.{Address, AppState}
 import cats.data.StateT._
 import cats.implicits._
@@ -31,16 +29,6 @@ object Control {
     _ <- register(ip(addr))
   } yield ()
 
-  @Internal
-  val __EXEC = for {
-    current <- inspectF[Try, Context, ExecutionToken](_.currentXT.toTry(Error(3)))
-
-    xt <- memory(peek(current.addr))
-    exeTok <- dictionary(instruction(xt))
-    _ <- setCurrentXT(Some(exeTok))
-    _ <- exec(exeTok.name)
-  } yield ()
-
   @Documentation(
     """
       | Return control to the calling definition specified by nest-sys. Before
@@ -61,13 +49,17 @@ object Control {
   @Documentation("Skip leading space delimiters. Parse name delimited by a space. Find name and return xt, the execution token for name", stackEffect = "( \"<spaces>name\" -- xt )")
   val `'` = for {
     token <- nextToken()
+    // TODO consider an implicit pimp String -> Word that does is automatically
+    name = if (token.value.isEmpty) throw Error(-32) else token.value.toUpperCase
+    xt <- dictionary(addressOf(name))
     _ <- dataStack(push(xt))
   } yield ()
 
   @Documentation("Remove xt from the stack and perform the semantics identified by it. Other stack effects are due to the word EXECUTEd", stackEffect = "( i*x xt -- j*x )")
   val EXECUTE = for {
-    xt <- dataStack(pop)
-    exeTok <- dictionary(instruction(xt))
-    _ <- exec(exeTok.name)
+    addr <- dataStack(pop)
+    xt <- dictionary(instruction(addr))
+    _ <- setCurrentXT(Some(xt))
+    _ <- exec(xt.name)
   } yield ()
 }
