@@ -61,7 +61,7 @@ class MemoryTest extends PrimitivesTestBase {
   }
 
   test("should parse a string to the next delimiter") {
-    val offset = 32 + 9
+    val offset = 9
     val ops = sequence(
       input("IGNORED: HELLO WORLD").map(_ => ()),
       dataStack(push('R'.toInt)),
@@ -71,7 +71,7 @@ class MemoryTest extends PrimitivesTestBase {
   }
 
   test("should return zero length if unable parse to the next delimiter") {
-    val offset = 32 + 9
+    val offset = 9
     val ops = sequence(
       input("IGNORED: HELLO WORLD").map(_ => ()),
       dataStack(push('!'.toInt)),
