@@ -50,6 +50,7 @@ object Compiler {
     _ <- comma(unnest)
     userDefinedWord <- inspectF[Try, Context, UserDefined](_.compiling.toTry(Error(-14))) // used only during compilation
     _ <- dictionary(add(userDefinedWord))
+    _ <- modify[Try, Context](_.copy(compiling = None))
     _ <- machineState(OK)
   } yield ()
 
