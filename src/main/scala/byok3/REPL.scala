@@ -1,6 +1,7 @@
 package byok3
 
-import byok3.data_structures.{Context, Error, OK, Smudge}
+import byok3.data_structures.MachineState._
+import byok3.data_structures.{Context, Error}
 import byok3.repl.AnsiColor._
 import byok3.repl.{Banner, UpperCaseParser, WordCompleter}
 import cats.effect.IO
@@ -37,9 +38,9 @@ object REPL {
 
   private def read(ctx: Context) = {
     val prompt = ctx.status match {
-      case Smudge => s"${LIGHT_GREY}|  "
-      case OK => s"  ${WHITE}${BOLD}ok${LIGHT_GREY}${stackDepthIndicator(ctx)}\n"
-      case err: Error => s"${RED}${BOLD}Error ${err.errno}:${RESET} ${err.message}\n"
+      case Right(Smudge) => s"${LIGHT_GREY}|  "
+      case Right(OK) => s"  ${WHITE}${BOLD}ok${LIGHT_GREY}${stackDepthIndicator(ctx)}\n"
+      case Left(err) => s"${RED}${BOLD}Error ${err.errno}:${RESET} ${err.message}\n"
     }
 
     IO {

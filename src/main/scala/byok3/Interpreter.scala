@@ -7,6 +7,7 @@ import byok3.primitives.Compiler._
 import byok3.types.{AppState, Word}
 import cats.data.StateT._
 import cats.implicits._
+import byok3.data_structures.MachineState._
 
 import scala.util.Try
 
@@ -19,23 +20,25 @@ object Interpreter extends Executor {
   private def toNumber(value: String, radix: Int) =
     Try(Integer.parseInt(value, radix)).getOrElse(throw Error(-13, value))
 
-  private def pushNumber(status: MachineState, token: Word) = for {
+  private def pushNumber(token: Word) = for {
+    status <- machineState
     base <- deref("BASE")
     n = toNumber(token, base)
     _ <- if (status == Smudge) literal(n) else dataStack(push(n))
   } yield ()
 
-  private def runOrCompile(status: MachineState, xt: ExecutionToken) =
-    if (xt.immediate || status != Smudge) xt.run else xt.compile
+  private def runOrCompile(xt: ExecutionToken) = for {
+    status <- machineState
+    _ <- if (xt.immediate || status != Smudge) xt.run else xt.compile
+  } yield ()
 
   private def assemble: AppState[Unit] =
     get[Try, Context].flatMap { ctx =>
-      val status = ctx.status
       ctx.input match {
         case Token(token, _, _) =>
           ctx.find(token)
-            .map(xt => runOrCompile(status, xt))
-            .getOrElse(pushNumber(status, token))
+            .map(xt => runOrCompile(xt))
+            .getOrElse(pushNumber(token))
         case _ => pure(ctx)
       }
     }
@@ -47,6 +50,7 @@ object Interpreter extends Executor {
 
   def apply(text: String): AppState[Unit] = for {
     _ <- input(text)
+    _ <- machineState(OK)
     _ <- modify[Try, Context](_.reset)
     _ <- modify(run)
   } yield ()

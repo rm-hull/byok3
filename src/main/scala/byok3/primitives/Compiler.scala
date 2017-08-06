@@ -2,6 +2,7 @@ package byok3.primitives
 
 import byok3.annonation.{Documentation, Immediate}
 import byok3.data_structures.Context._
+import byok3.data_structures.MachineState._
 import byok3.data_structures.Dictionary.{add, addressOf, last, instruction}
 import byok3.data_structures.Stack.{pop, push}
 import byok3.data_structures._
@@ -25,18 +26,21 @@ object Compiler {
   @Immediate
   @Documentation("Append the run-time semantics to the current definition.", "Compilation: ( x -- ), Runtime: ( -- x )")
   val LITERAL = for {
-    _ <- requires[Context](_.status == Smudge, Error(-14)) // used only during compilation
+    status <- machineState
+    _ <- guard(status == Smudge, Error(-14)) // used only during compilation
     x <- dataStack(pop)
     _ <- literal(x)
   } yield ()
 
   @Documentation("Enter compilation state and start the current definition, producing colon-sys", stackEffect = "( C: \"<spaces>name\" -- colon-sys )")
   val `:` = for {
-    _ <- requires[Context](_.status != Smudge, Error(-29)) // compiler nesting
+    status <- machineState
+    _ <- guard(status != Smudge, Error(-29)) // compiler nesting
     token <- nextToken()
     nest <- dictionary(addressOf("__NEST"))
     addr <- comma(nest)
     _ <- modify[Try, Context](_.beginCompilation(token.value.toUpperCase, addr))
+    _ <- machineState(Smudge)
   } yield ()
 
   @Immediate

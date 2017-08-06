@@ -14,7 +14,7 @@ import scala.util.{Failure, Try}
 
 case class Context(mem: CoreMemory,
                    dictionary: Dict = Dictionary(),
-                   status: MachineState = OK,
+                   error: Option[Error] = None,
                    reg: Registers = Registers(),
                    input: Tokenizer = EndOfData,
                    output: IO[Unit] = IO.unit,
@@ -22,13 +22,9 @@ case class Context(mem: CoreMemory,
                    rs: Stack[Int] = List.empty, // return stack
                    compiling: Option[UserDefined] = None) {
 
-  def updateState(newStatus: MachineState) = newStatus match {
-    case _ if status == newStatus => this
-    // drain the data and return stacks if there was an error
-    case err: Error => copy(status = err, ds = List.empty, rs = List.empty)
-    case OK => copy(status = OK, compiling = None)
-    case Smudge => copy(status = Smudge)
-  }
+  def updateState(err: Error) =
+  // drain the data and return stacks if there was an error
+    copy(error = Some(err), ds = List.empty, rs = List.empty)
 
   def find(token: Word) =
     dictionary.get(token.toUpperCase)
@@ -39,19 +35,31 @@ case class Context(mem: CoreMemory,
   def append(out: IO[Unit]) =
     copy(output = output.flatMap(_ => out))
 
-  def reset = {
-    val newStatus = if (status == Smudge) Smudge else OK
-    updateState(newStatus).copy(output = IO.unit)
-  }
+  def reset =
+    copy(output = IO.unit, error = None)
 
   def exec(token: Word) =
     find(token).fold[Try[Context]](Failure(Error(-13, token))) {
       xt => xt.effect.runS(this)
     }
 
+  def status: Either[Error, MachineState.Value] = {
+    val state = Context.deref("STATE")
+      .runA(this)
+      .map(MachineState.apply)
+      .toEither
+      .left
+      .map(Error(_))
+
+    error match {
+      case None => state
+      case Some(err) => Left(err)
+    }
+  }
+
   def beginCompilation(token: Word, addr: Address) =
     if (token.isEmpty) throw Error(-32) // invalid name argument
-    else updateState(Smudge).copy(compiling = Some(UserDefined(token, addr)))
+    else copy(compiling = Some(UserDefined(token, addr)))
 
   lazy val disassembler = new Disassembler(this)
 }
@@ -78,6 +86,9 @@ object Context {
   def requires[S](predicate: S => Boolean, onFail: Error): StateT[Try, S, Unit] =
     inspectF[Try, S, Unit](s => Try(if (!predicate(s)) throw onFail))
 
+  def guard[S](predicate: => Boolean, onFail: Error): StateT[Try, S, Unit] =
+    inspectF[Try, S, Unit](_ => Try(if (!predicate) throw onFail))
+
   def dataStack[A](block: StateT[Try, Stack[Int], A]): AppState[A] =
     block.transformS(_.ds, (ctx, stack) => ctx.copy(ds = stack))
 
@@ -96,11 +107,15 @@ object Context {
   def dictionary[A](block: StateT[Try, Dict, A]): AppState[A] =
     block.transformS[Context](_.dictionary, (ctx, dict) => ctx.copy(dictionary = dict))
 
-  def machineState(newStatus: MachineState): AppState[Unit] =
-    modify(_.updateState(newStatus))
+  def machineState(newStatus: MachineState.Value): AppState[Unit] = for {
+    _ <- exec("STATE")
+    addr <- dataStack(pop)
+    _ <- memory(poke(addr, newStatus.id))
+  } yield ()
 
-  def machineState: AppState[MachineState] =
-    inspect(_.status)
+  def machineState: AppState[MachineState.Value] = for {
+    state <- deref("STATE")
+  } yield MachineState(state)
 
   def exec(token: Word): AppState[Unit] =
     modifyF(_.exec(token))

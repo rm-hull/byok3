@@ -30,14 +30,14 @@ class InterpreterTest extends FunSuite with Matchers {
 
   test("should record an error when stack underflow occurs") {
     val ctx = Interpreter("10 +").runS(emptyContext).get
-    assert(ctx.status == Error(-4))
+    assert(ctx.status == Left(Error(-4)))
     ctx.ds shouldEqual List.empty
     ctx.rs shouldEqual List.empty
   }
 
   test("should record an error when accessing invalid memory") {
     val ctx = Interpreter("-2 @").runS(emptyContext).get
-    assert(ctx.status == Error(-9, "0xFFFFFFFE"))
+    assert(ctx.status == Left(Error(-9, "0xFFFFFFFE")))
     ctx.ds shouldEqual List.empty
     ctx.rs shouldEqual List.empty
   }
@@ -77,14 +77,14 @@ class InterpreterTest extends FunSuite with Matchers {
 
   test("should record an error on unfound word") {
     val ctx = Interpreter("10 4 + SAUSAGES 19 4 -").runS(emptyContext).get
-    ctx.status shouldEqual Error(-13, "SAUSAGES")
+    ctx.status shouldEqual Left(Error(-13, "SAUSAGES"))
     ctx.ds shouldEqual List.empty
     ctx.rs shouldEqual List.empty
   }
 
   test("should record an error when user-defined throw occurs") {
     val ctx = Interpreter("10 4 + THROW 19 4 -").runS(emptyContext).get
-    ctx.status shouldEqual Error(14)
+    ctx.status shouldEqual Left(Error(14))
     ctx.ds shouldEqual List.empty
     ctx.rs shouldEqual List.empty
   }
@@ -118,7 +118,7 @@ class InterpreterTest extends FunSuite with Matchers {
 
   test("should record error when LITERAL when not in compile mode") {
     val ctx = Interpreter("10 LITERAL").runS(emptyContext).get
-    ctx.status shouldEqual Error(-14)
+    ctx.status shouldEqual Left(Error(-14))
   }
 
 }
