@@ -88,10 +88,12 @@ object IO {
     }
   } yield ()
 
+  @Documentation("Prints a hex dump of memory at the given address block", "( len a-addr -- )")
   val DUMP = for {
-    n <- dataStack(pop)
+    len <- dataStack(pop)
     addr <- dataStack(pop)
     hexdump <- memory(inspect(_.hexDump))
-    _ <- output(hexdump.print(addr, n))
+    _ <- output(hexdump.print(addr, len))
+  } yield ()
   } yield ()
 }
