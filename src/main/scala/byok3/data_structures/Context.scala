@@ -1,5 +1,6 @@
 package byok3.data_structures
 
+import byok3.Disassembler
 import byok3.data_structures.Memory.{copy, peek}
 import byok3.data_structures.Stack.{pop, push}
 import byok3.types.{Address, AppState, Dict, Stack, Word}
@@ -48,6 +49,8 @@ case class Context(mem: Memory,
   def beginCompilation(token: Word, addr: Address) = {
     copy(compiling = Some(UserDefined(token, addr)))
   }
+
+  lazy val disassembler = new Disassembler(this)
 }
 
 object Context {

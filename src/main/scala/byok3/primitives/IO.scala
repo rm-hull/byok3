@@ -2,12 +2,13 @@ package byok3.primitives
 
 import java.time.LocalDate
 
+import byok3.Disassembler
 import byok3.annonation.Documentation
 import byok3.data_structures.Context
 import byok3.data_structures.Context._
 import byok3.data_structures.Memory._
 import byok3.data_structures.Stack.pop
-import byok3.types.Stack
+import byok3.types.{AppState, Stack}
 import cats.data.StateT._
 import cats.implicits._
 
@@ -95,5 +96,12 @@ object IO {
     hexdump <- memory(inspect(_.hexDump))
     _ <- output(hexdump.print(addr, len))
   } yield ()
+
+  @Documentation("Instruction disassembly at the given address block", "( len a-addr -- )")
+  val DISASSEMBLE = for {
+    len <- dataStack(pop)
+    addr <- dataStack(pop)
+    disassembler <- inspect[Try, Context, Disassembler](_.disassembler)
+    _ <- output(disassembler.print(addr, len))
   } yield ()
 }
