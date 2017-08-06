@@ -2,7 +2,7 @@ package byok3.primitives
 
 import byok3.annonation.{Documentation, Immediate}
 import byok3.data_structures.Context._
-import byok3.data_structures.Dictionary.{add, addressOf, last}
+import byok3.data_structures.Dictionary.{add, addressOf, last, instruction}
 import byok3.data_structures.Stack.{pop, push}
 import byok3.data_structures._
 import byok3.helpers._
@@ -61,5 +61,14 @@ object Compiler {
     _ <- dataStack(push(xt))
   } yield ()
 
-
+  @Documentation("pfa is the parameter field address corresponding to xt", stackEffect = "( xt -- pfa )")
+  val `>BODY` = for {
+    addr <- dataStack(pop)
+    xt <- dictionary(instruction(addr))
+    pfa = xt match {
+      case ud: UserDefined => ud.addr
+      case _ => throw Error(-31)
+    }
+    _ <- dataStack(push(pfa))
+  } yield ()
 }
