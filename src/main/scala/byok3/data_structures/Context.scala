@@ -33,7 +33,6 @@ case class Context(mem: Memory,
 
   def find(token: Word) =
     dictionary.get(token.toUpperCase)
-      .filterNot(_.internal)
 
   def nextToken(delim: String) =
     copy(input = input.next(delim))
