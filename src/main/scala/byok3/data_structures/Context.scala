@@ -1,7 +1,7 @@
 package byok3.data_structures
 
 import byok3.Disassembler
-import byok3.data_structures.Memory.{copy, peek}
+import byok3.data_structures.CoreMemory.{copy, peek}
 import byok3.data_structures.Stack.{pop, push}
 import byok3.types.{Address, AppState, Dict, Stack, Word}
 import cats.data.StateT
@@ -12,7 +12,7 @@ import cats.implicits._
 import scala.util.{Failure, Try}
 
 
-case class Context(mem: Memory,
+case class Context(mem: CoreMemory,
                    dictionary: Dict = Dictionary(),
                    status: MachineState = OK,
                    reg: Registers = Registers(),
@@ -68,7 +68,7 @@ object Context {
   } yield ()
 
   def apply(memSize: Int): Context =
-    bootstrap.runS(Context(Memory(memSize))).get
+    bootstrap.runS(Context(CoreMemory(memSize))).get
 
   //  def dataStack2[A](block: StateT[Try, Stack[Int], A]): AppState[Unit] =
   //    modify[Try, Context](ctx => block.runS(ctx.ds).foldLeft[Context](ctx.updateState(Error(-4))) {
@@ -87,7 +87,7 @@ object Context {
   def returnStackNotEmpty =
     requires[Context](_.rs.nonEmpty, Error(-6))
 
-  def memory[A](block: StateT[Try, Memory, A]): AppState[A] =
+  def memory[A](block: StateT[Try, CoreMemory, A]): AppState[A] =
     block.transformS[Context](_.mem, (ctx, mem) => ctx.copy(mem = mem))
 
   def register[A](block: StateT[Try, Registers, A]): AppState[A] =

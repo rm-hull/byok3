@@ -9,13 +9,11 @@ import cats.implicits._
 import scala.annotation.tailrec
 import scala.util.Try
 
-case class Memory(size: Int, private val addressSpace: AddressSpace) {
+case class CoreMemory(size: Int, private val addressSpace: AddressSpace) {
+
+  import CoreMemory._
 
   private val empty: Data = 0
-
-  private def align(addr: Address) = addr - offset(addr)
-
-  private def offset(addr: Address) = addr % 4
 
   private def boundsCheck(addr: Address): Unit = {
     if (addr < 0 || addr >= size)
@@ -27,7 +25,7 @@ case class Memory(size: Int, private val addressSpace: AddressSpace) {
       throw Error(-23, f"0x$addr%08X") // address alignment exception
   }
 
-  def poke(addr: Address, data: Data): Memory = {
+  def poke(addr: Address, data: Data): CoreMemory = {
     boundsCheck(addr)
     alignmentCheck(addr)
     copy(addressSpace = addressSpace.updated(addr, data))
@@ -45,7 +43,7 @@ case class Memory(size: Int, private val addressSpace: AddressSpace) {
     (word >> (offset(addr) << 3)) & 0xFF
   }
 
-  def char_poke(addr: Address, data: Data): Memory = {
+  def char_poke(addr: Address, data: Data): CoreMemory = {
     boundsCheck(addr)
     val alignedAddr = align(addr)
     val shifted = offset(addr) << 3
@@ -55,7 +53,7 @@ case class Memory(size: Int, private val addressSpace: AddressSpace) {
   }
 
   @tailrec
-  final def memcpy(addr: Address, data: String): Memory = {
+  final def memcpy(addr: Address, data: String): CoreMemory = {
     data.headOption match {
       case Some(ch) => char_poke(addr, ch).memcpy(addr + 1, data.tail)
       case None => this
@@ -79,25 +77,31 @@ case class Memory(size: Int, private val addressSpace: AddressSpace) {
   lazy val hexDump = new HexDump(this)
 }
 
-case object Memory {
+case object CoreMemory {
 
-  def apply(size: Int): Memory = {
+  val CELL_SIZE = 4
+
+  def align(addr: Address) = addr - offset(addr)
+
+  def offset(addr: Address) = addr % CELL_SIZE
+
+  def inc(addr: Address) = addr + CELL_SIZE
+
+  def apply(size: Int): CoreMemory = {
     require(size > 0)
-    require(size % 4 == 0)
-    Memory(size = size, Map.empty)
+    require(offset(size) == 0)
+    CoreMemory(size = size, Map.empty)
   }
 
-  def align(addr: Address) = (addr + 3) & ~3
-
-  def poke(addr: Address, data: Data): StateT[Try, Memory, Unit] =
+  def poke(addr: Address, data: Data): StateT[Try, CoreMemory, Unit] =
     modify(_.poke(addr, data))
 
-  def peek(addr: Address): StateT[Try, Memory, Data] =
+  def peek(addr: Address): StateT[Try, CoreMemory, Data] =
     inspect(_.peek(addr))
 
-  def copy(addr: Address, data: String): StateT[Try, Memory, Unit] =
+  def copy(addr: Address, data: String): StateT[Try, CoreMemory, Unit] =
     modify(_.memcpy(addr, data))
 
-  def fetch(addr: Address, len: Int): StateT[Try, Memory, String] =
+  def fetch(addr: Address, len: Int): StateT[Try, CoreMemory, String] =
     inspect(_.fetch(addr, len))
 }

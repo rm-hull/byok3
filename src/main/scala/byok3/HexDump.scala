@@ -1,11 +1,11 @@
 package byok3
 
-import byok3.data_structures.Memory
+import byok3.data_structures.CoreMemory
 import byok3.types.Address
 
 import scala.Predef.{print => pr}
 
-class HexDump(mem: Memory) {
+class HexDump(mem: CoreMemory) {
 
   private val BYTES_PER_BLOCK = 8
 

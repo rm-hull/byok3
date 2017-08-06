@@ -1,6 +1,7 @@
 package byok3
 
 import byok3.data_structures.Context
+import byok3.data_structures.CoreMemory._
 import byok3.types.Address
 
 import scala.Predef.{print => pr}
@@ -15,7 +16,7 @@ class Disassembler(ctx: Context) {
     def printable(i: Int) = if (i >= 32 && i < 127) i.toChar.toString else "."
 
     def bytes(addr: Address)(block: Int => String) = {
-      Range(0, 4).map(i => block(addr + i)).mkString("")
+      Range(0, CELL_SIZE).map(i => block(addr + i)).mkString("")
     }
 
     def printRow(addr: Address) = {
@@ -25,7 +26,7 @@ class Disassembler(ctx: Context) {
       pr(bytes(addr) { n => printable(ctx.mem.char_peek(n)) })
       pr("|  ")
 
-      if (addr > offset && ctx.mem.peek(addr - 4) == lit) {
+      if (addr > offset && ctx.mem.peek(addr - CELL_SIZE) == lit) {
         pr(ctx.mem.peek(addr))
       } else {
         val ptr = ctx.mem.peek(addr)
@@ -34,6 +35,6 @@ class Disassembler(ctx: Context) {
       pr("\n")
     }
 
-    Range(offset, offset + len, 4).foreach(printRow)
+    Range(offset, offset + len, CELL_SIZE).foreach(printRow)
   }
 }

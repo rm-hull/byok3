@@ -1,9 +1,10 @@
 package byok3.primitives
 
 import byok3.annonation.Documentation
+import byok3.data_structures
 import byok3.data_structures.Context._
+import byok3.data_structures.CoreMemory.{peek, poke, _}
 import byok3.data_structures.Dictionary._
-import byok3.data_structures.Memory.{peek, poke}
 import byok3.data_structures.Stack.{pop, push}
 import byok3.data_structures._
 import byok3.types.{Address, Data}
@@ -14,24 +15,22 @@ import scala.util.Try
 
 object Memory {
 
-  private val CELL_SIZE = 4
-
   private def align(addr: Address) = (addr + (CELL_SIZE - 1)) & ~(CELL_SIZE - 1)
 
   def comma(value: Data) = for {
     addr <- register(inspect(_.dp))
     aligned = align(addr)
     _ <- memory(poke(aligned, value))
-    _ <- register(modify(_.copy(dp = aligned + CELL_SIZE)))
+    _ <- register(modify(_.copy(dp = inc(aligned))))
   } yield aligned
 
   val CELL = Constant("CELL", CELL_SIZE)
 
   val `(LIT)` = for {
-    addr <- register(inspect(_.ip))
-    data <- memory(peek(addr))
+    ip <- register(inspect(_.ip))
+    data <- memory(peek(ip))
     _ <- dataStack(push(data))
-    _ <- register(modify(_.copy(ip = addr + CELL_SIZE)))
+    _ <- register(modify(_.copy(ip = inc(ip))))
   } yield ()
 
   @Documentation("n2 is the size in address units of n1 cells", "( n1 -- n2 )")

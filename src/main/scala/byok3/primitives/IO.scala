@@ -6,7 +6,7 @@ import byok3.Disassembler
 import byok3.annonation.Documentation
 import byok3.data_structures.Context
 import byok3.data_structures.Context._
-import byok3.data_structures.Memory._
+import byok3.data_structures.CoreMemory._
 import byok3.data_structures.Stack.pop
 import byok3.types.{AppState, Stack}
 import cats.data.StateT._

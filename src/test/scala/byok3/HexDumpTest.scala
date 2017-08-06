@@ -1,12 +1,12 @@
 package byok3
 
-import byok3.data_structures.Memory
+import byok3.data_structures.CoreMemory
 import cats.effect.IO
 import org.scalatest.FunSuite
 
 class HexDumpTest extends FunSuite {
 
-  val mem = Range(0x00, 0xFF).foldLeft(Memory(0x10000)) {
+  val mem = Range(0x00, 0xFF).foldLeft(CoreMemory(0x10000)) {
     (mem, i) => mem.char_poke(i + 17, i)
   }
 

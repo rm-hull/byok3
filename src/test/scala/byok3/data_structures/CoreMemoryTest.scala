@@ -6,7 +6,7 @@ import scala.util.Try
 
 class CoreMemoryTest extends FunSuite with Matchers {
 
-  val mem = Memory(0x2000)
+  val mem = CoreMemory(0x2000)
 
   test("should poke and peek on aligned memory") {
     val result = mem.poke(0x24, 0x12345678)
