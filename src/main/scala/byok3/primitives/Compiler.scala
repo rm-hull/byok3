@@ -63,9 +63,9 @@ object Compiler {
 
   @Documentation("pfa is the parameter field address corresponding to xt", stackEffect = "( xt -- pfa )")
   val `>BODY` = for {
-    addr <- dataStack(pop)
-    xt <- dictionary(instruction(addr))
-    pfa = xt match {
+    xt <- dataStack(pop)
+    instr <- dictionary(instruction(xt))
+    pfa = instr match {
       case ud: UserDefined => ud.addr
       case _ => throw Error(-31)
     }

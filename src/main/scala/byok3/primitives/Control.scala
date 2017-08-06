@@ -57,9 +57,8 @@ object Control {
 
   @Documentation("Remove xt from the stack and perform the semantics identified by it. Other stack effects are due to the word EXECUTEd", stackEffect = "( i*x xt -- j*x )")
   val EXECUTE = for {
-    addr <- dataStack(pop)
-    xt <- dictionary(instruction(addr))
-    _ <- setCurrentXT(Some(xt))
-    _ <- exec(xt.name)
+    xt <- dataStack(pop)
+    instr <- dictionary(instruction(xt))
+    _ <- exec(instr.name)
   } yield ()
 }
