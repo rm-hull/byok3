@@ -109,9 +109,6 @@ object Memory {
     _ <- memory(poke(tin, token.offset))
   } yield ()
 
-  @Documentation("a-addr is the address of a cell containing the offset in characters from the start of the input buffer to the start of the parse area", stackEffect = "( -- a-addr )")
-  val `>IN` = Constant(">IN", 0x000C).effect
-
   @Documentation("c-addr is the address of, and u is the number of characters in, the input buffer", stackEffect = "( -- c-addr u )")
   val SOURCE = for {
     tib <- deref("TIB")

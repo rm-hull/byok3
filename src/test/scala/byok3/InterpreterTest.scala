@@ -61,16 +61,14 @@ class InterpreterTest extends FunSuite with Matchers {
 
     val ctx = ops.runS(emptyContext).get
     ctx.ds shouldEqual List(15)
-    ctx.mem.peek(0x100) shouldEqual 12
   }
 
   test("should parse the input stream") {
-    val offset = 32 + 9
     val ops = Interpreter("33 PARSE BEYOND SPACE! 42")
     val ctx = ops.runS(emptyContext).get
-    ctx.ds shouldEqual List(42, 12, offset)
+    ctx.ds shouldEqual List(42, 12, 9)
 
-    Stream.from(offset).zip("BEYOND SPACE").foreach {
+    Stream.from(9).zip("BEYOND SPACE").foreach {
       case (addr, ch) => ctx.mem.char_peek(addr) shouldEqual ch
     }
   }

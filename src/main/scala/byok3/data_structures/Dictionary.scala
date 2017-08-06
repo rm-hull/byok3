@@ -2,7 +2,7 @@ package byok3.data_structures
 
 import byok3.annonation.{Documentation, Immediate, Internal}
 import byok3.implicits._
-import byok3.primitives.{Arithmetics, Compiler, Control, IO, StackManipulation, Memory => Mem}
+import byok3.primitives.{Arithmetics, Compiler, Control, IO, Memory, StackManipulation}
 import byok3.types.{AppState, Dict, Word}
 import cats.data.StateT
 import cats.data.StateT._
@@ -69,16 +69,12 @@ object Dictionary {
 
   def apply(): Dict = {
     val tokens =
-        getExecutionTokens(Arithmetics) ++
+      getExecutionTokens(Arithmetics) ++
         getExecutionTokens(Control) ++
         getExecutionTokens(Compiler) ++
         getExecutionTokens(IO) ++
-        getExecutionTokens(Mem) ++
-        getExecutionTokens(StackManipulation) ++
-        Seq(
-          Constant("BASE", 0x0000),
-          Constant("ECHO", 0x0004),
-          Constant("TIB", 0x0008))
+        getExecutionTokens(Memory) ++
+        getExecutionTokens(StackManipulation)
 
     tokens.foldLeft[Dict](Dictionary.empty) {
       (m, a) => m.add(a.name, a)

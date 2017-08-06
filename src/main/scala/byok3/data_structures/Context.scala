@@ -1,9 +1,11 @@
 package byok3.data_structures
 
 import byok3.Disassembler
-import byok3.data_structures.CoreMemory.{copy, peek}
-import byok3.data_structures.Stack.{pop, push}
-import byok3.types.{Address, AppState, Dict, Stack, Word}
+import byok3.data_structures.CoreMemory.{copy, peek, poke}
+import byok3.data_structures.Dictionary.add
+import byok3.data_structures.Stack.pop
+import byok3.primitives.Memory.comma
+import byok3.types.{Address, AppState, Data, Dict, Stack, Word}
 import cats.data.StateT
 import cats.data.StateT._
 import cats.effect.IO
@@ -67,12 +69,11 @@ case class Context(mem: CoreMemory,
 object Context {
 
   private val bootstrap = for {
-    _ <- dataStack(push(10))
-    _ <- exec("BASE")
-    _ <- exec("!")
-    _ <- dataStack(push(0x20))
-    _ <- exec("TIB")
-    _ <- exec("!")
+    _ <- initialize("BASE", 10)
+    _ <- initialize("TIB", 0)
+    _ <- initialize(">IN", 0) // FIXME: add @Documentation("a-addr is the address of a cell containing the offset in characters from the start of the input buffer to the start of the parse area", stackEffect = "( -- a-addr )")
+    _ <- initialize("ECHO", 0)
+    _ <- initialize("STATE", 0)
   } yield ()
 
   def apply(memSize: Int): Context =
@@ -82,6 +83,11 @@ object Context {
   //    modify[Try, Context](ctx => block.runS(ctx.ds).foldLeft[Context](ctx.updateState(Error(-4))) {
   //          (ctx, stack) => ctx.copy(ds = stack)
   //    })
+
+  def initialize(name: Word, value: Data): AppState[Unit] = for {
+    addr <- comma(value)
+    _ <- dictionary(add(Constant(name, addr)))
+  } yield ()
 
   def requires[S](predicate: S => Boolean, onFail: Error): StateT[Try, S, Unit] =
     inspectF[Try, S, Unit](s => Try(if (!predicate(s)) throw onFail))
