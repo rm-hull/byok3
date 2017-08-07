@@ -34,7 +34,7 @@ object REPL {
     println("exiting...")
   }
 
-  private def stackDepthIndicator(ctx: Context) = "." * ctx.ds.length
+  private def stackDepthIndicator(ctx: Context) = "." * math.min(16, ctx.ds.length)
 
   private def read(ctx: Context) = {
     val prompt = ctx.status match {
