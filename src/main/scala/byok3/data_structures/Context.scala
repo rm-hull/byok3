@@ -46,9 +46,8 @@ case class Context(mem: CoreMemory,
     }
 
   def status: Either[Error, MachineState.Value] = {
-    val state = Context.deref("STATE")
+    val state = machineState
       .runA(this)
-      .map(MachineState.apply)
       .toEither
       .left
       .map(Error(_))
