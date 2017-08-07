@@ -17,19 +17,19 @@ object Memory {
   private def align(addr: Address) = (addr + (CELL_SIZE - 1)) & ~(CELL_SIZE - 1)
 
   def comma(value: Data) = for {
-    addr <- register(inspect(_.dp))
-    aligned = align(addr)
+    dp <- DP()
+    aligned = align(dp)
     _ <- memory(poke(aligned, value))
-    _ <- register(modify(_.copy(dp = inc(aligned))))
+    _ <- DP(inc(aligned))
   } yield aligned
 
   val CELL = Constant("CELL", CELL_SIZE).effect
 
   val `(LIT)` = for {
-    ip <- register(inspect(_.ip))
+    ip <- IP()
     data <- memory(peek(ip))
     _ <- dataStack(push(data))
-    _ <- register(modify(_.copy(ip = inc(ip))))
+    _ <- IP(inc(ip))
   } yield ()
 
   @Documentation("n2 is the size in address units of n1 cells", "( n1 -- n2 )")
@@ -139,7 +139,7 @@ object Memory {
 
   @Documentation("addr is the data-space pointer", stackEffect = "( -- addr )")
   val HERE = for {
-    dp <- register(inspect(_.dp))
+    dp <- DP()
     _ <- dataStack(push(dp))
   } yield ()
 

@@ -1,29 +1,32 @@
 package byok3.data_structures
 
-import byok3.types.Address
-import cats.data.StateT
-import cats.data.StateT._
+import byok3.data_structures.Context._
+import byok3.data_structures.CoreMemory._
+import byok3.data_structures.Dictionary._
+import byok3.types.{AppState, Data, Word}
 import cats.implicits._
 
-import scala.util.Try
 
-case class Registers(dp: Address = 0x100,
-                     ip: Address = 0x100,
-                     w: Address = 0x100,
-                     xt: Int = 0x00)
+sealed abstract class Register(name: Word) {
 
+  private def set(data: Data): AppState[Unit] = for {
+    xt <- dictionary(instruction(name))
+    addr = xt.asInstanceOf[Constant].value
+    _ <- memory(poke(addr, data))
+  } yield ()
 
-object Registers {
+  private def get: AppState[Data] = for {
+    xt <- dictionary(instruction(name))
+    addr = xt.asInstanceOf[Constant].value
+    data <- memory(peek(addr))
+  } yield data
 
-  def dp(addr: Address): StateT[Try, Registers, Unit] =
-    modify[Try, Registers](_.copy(dp = addr))
+  def apply() = get
 
-  def ip(addr: Address): StateT[Try, Registers, Unit] =
-    modify[Try, Registers](_.copy(ip = addr))
-
-  def w(addr: Address): StateT[Try, Registers, Unit] =
-    modify[Try, Registers](_.copy(w = addr))
-
-  def xt(xt: Int): StateT[Try, Registers, Unit] =
-    modify[Try, Registers](_.copy(xt = xt))
+  def apply(data: Data) = set(data)
 }
+
+object DP extends Register("DP")
+object IP extends Register("IP")
+object W extends Register("W")
+object XT extends Register("XT")

@@ -4,11 +4,9 @@ import byok3.annonation.{Documentation, Internal}
 import byok3.data_structures.Context._
 import byok3.data_structures.CoreMemory._
 import byok3.data_structures.Dictionary._
-import byok3.data_structures.Error
-import byok3.data_structures.Registers._
 import byok3.data_structures.Stack.{pop, push}
+import byok3.data_structures.{Error, IP, W}
 import byok3.types.AppState
-import cats.data.StateT._
 import cats.implicits._
 
 import scala.util.Failure
@@ -17,9 +15,9 @@ object Control {
 
   @Internal
   val __NEST = for {
-    addr <- register(inspect(_.ip))
-    next <- register(inspect(_.w))
-    _ <- register(ip(inc(next)))
+    addr <- IP()
+    next <- W()
+    _ <- IP(inc(next))
     _ <- returnStack(push(addr))
   } yield ()
 
@@ -27,7 +25,7 @@ object Control {
   val __UNNEST = for {
     _ <- returnStackNotEmpty
     addr <- returnStack(pop)
-    _ <- register(ip(addr))
+    _ <- IP(addr)
   } yield ()
 
   @Documentation(

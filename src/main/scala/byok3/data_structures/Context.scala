@@ -2,7 +2,7 @@ package byok3.data_structures
 
 import byok3.Disassembler
 import byok3.data_structures.Context._
-import byok3.data_structures.CoreMemory.{copy, peek, poke}
+import byok3.data_structures.CoreMemory.{copy, peek, poke, inc, offset}
 import byok3.data_structures.Dictionary.add
 import byok3.data_structures.MachineState.OK
 import byok3.data_structures.Stack.pop
@@ -19,7 +19,6 @@ import scala.util.{Failure, Try}
 case class Context(mem: CoreMemory,
                    dictionary: Dict = Dictionary(),
                    error: Option[Error] = None,
-                   reg: Registers = Registers(),
                    input: Tokenizer = EndOfData,
                    output: IO[Unit] = IO.unit,
                    ds: Stack[Int] = List.empty, // data stack
@@ -71,16 +70,29 @@ case class Context(mem: CoreMemory,
 
 object Context {
 
-  private val bootstrap = for {
-    _ <- initialize("BASE", 10)
-    _ <- initialize("TIB", 0)
-    _ <- initialize(">IN", 0) // FIXME: add @Documentation("a-addr is the address of a cell containing the offset in characters from the start of the input buffer to the start of the parse area", stackEffect = "( -- a-addr )")
-    _ <- initialize("ECHO", 0)
-    _ <- initialize("STATE", 0)
-  } yield ()
+  private def bootstrap(dp: Address) = {
+    for {
+      // Can't initialise DP as init requires DP to already be set up:
+      // poke the DP with the next cell's address
+      _ <- memory(poke(dp, inc(dp)))
+      _ <- dictionary(add(Constant("DP", dp)))
+      // Now set up the other core registers
+      _ <- initialize("IP", 0)
+      _ <- initialize("W", 0)
+      _ <- initialize("XT", 0)
+      _ <- initialize("STATE", 0)
+      _ <- initialize("BASE", 10)
+      // aux registers
+      _ <- initialize("TIB", 0)
+      _ <- initialize(">IN", 0) // FIXME: add @Documentation("a-addr is the address of a cell containing the offset in characters from the start of the input buffer to the start of the parse area", stackEffect = "( -- a-addr )")
+      _ <- initialize("ECHO", 0)
+    } yield ()
+  }
 
-  def apply(memSize: Int): Context =
-    bootstrap.runS(Context(CoreMemory(memSize))).get
+  def apply(memSize: Int): Context = {
+    require(offset(memSize) == 0)
+    bootstrap(dp = 0x100).runS(Context(CoreMemory(memSize))).get
+  }
 
   //  def dataStack2[A](block: StateT[Try, Stack[Int], A]): AppState[Unit] =
   //    modify[Try, Context](ctx => block.runS(ctx.ds).foldLeft[Context](ctx.updateState(Error(-4))) {
@@ -109,9 +121,6 @@ object Context {
 
   def memory[A](block: StateT[Try, CoreMemory, A]): AppState[A] =
     block.transformS[Context](_.mem, (ctx, mem) => ctx.copy(mem = mem))
-
-  def register[A](block: StateT[Try, Registers, A]): AppState[A] =
-    block.transformS[Context](_.reg, (ctx, reg) => ctx.copy(reg = reg))
 
   def dictionary[A](block: StateT[Try, Dict, A]): AppState[A] =
     block.transformS[Context](_.dictionary, (ctx, dict) => ctx.copy(dictionary = dict))

@@ -51,17 +51,19 @@ case class UserDefined(name: Word, addr: Address, override val immediate: Boolea
 
   override val effect = for {
     xt <- memory(peek(addr))
-    _ <- register(modify(_.copy(w = addr, xt = xt)))
+    _ <- W(addr)
+    _ <- XT(xt)
     _ <- modify(run)
   } yield ()
 
   override def step = for {
-    xt <- register(inspect(_.xt))
+    xt <- XT()
     instr <- dictionary(instruction(xt))
     _ <- exec(instr.name)
-    ip <- register(inspect(_.ip))
+    ip <- IP()
     next <- memory(peek(ip))
-    _ <- register(modify(_.copy(ip = inc(ip), xt = next)))
+    _ <- IP(inc(ip))
+    _ <- XT(next)
     rsEmpty <- returnStack(inspect(_.isEmpty))
   } yield rsEmpty
 }

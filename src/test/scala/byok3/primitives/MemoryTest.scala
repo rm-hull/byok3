@@ -2,12 +2,14 @@ package byok3.primitives
 
 import byok3.primitives.Memory._
 import byok3.data_structures.Context._
+import byok3.data_structures.CoreMemory._
 import byok3.data_structures.Error
 import byok3.data_structures.Stack._
 import byok3.helpers.sequence
 import cats.implicits._
 
 class MemoryTest extends PrimitivesTestBase {
+
 
   test("should poke a value in memory") {
     val ops = sequence(
@@ -82,7 +84,8 @@ class MemoryTest extends PrimitivesTestBase {
 
   test("should push HERE to the stack") {
     val ctx = HERE.runS(emptyContext).get
-    ctx.ds shouldEqual List(ctx.reg.dp)
+    val dp = ctx.mem.peek(DP)
+    ctx.ds shouldEqual List(dp)
   }
 
   test("should store TOS in memory at the DP") {
@@ -90,22 +93,27 @@ class MemoryTest extends PrimitivesTestBase {
       dataStack(push(19)), `,`,
       dataStack(push(34)), `,`)
     val ctx = ops.runS(emptyContext).get
+    val origDp = emptyContext.mem.peek(DP)
+    val dp = ctx.mem.peek(DP)
     ctx.ds shouldEqual List.empty
-    ctx.reg.dp shouldEqual emptyContext.reg.dp + 4 + 4
-    ctx.mem.peek(emptyContext.reg.dp + 0) shouldEqual 19
-    ctx.mem.peek(emptyContext.reg.dp + 4) shouldEqual 34
-    ctx.mem.peek(emptyContext.reg.dp + 8) shouldEqual 0
+    dp shouldEqual origDp + 4 + 4
+    ctx.mem.peek(origDp + 0) shouldEqual 19
+    ctx.mem.peek(origDp + 4) shouldEqual 34
+    ctx.mem.peek(origDp + 8) shouldEqual 0
   }
 
   test("should post-increment IP and push to the stack") {
     val ops = sequence(
-      dataStack(push(27)),
-      dataStack(push(emptyContext.reg.ip)),
+      dataStack(push(19)),
+      dataStack(push(28)),
+      `!`,
+      dataStack(push(28)),
+      dataStack(push(IP)),
       `!`,
       `(LIT)`)
 
     val ctx = ops.runS(emptyContext).get
-    ctx.ds shouldEqual List(27)
-    ctx.reg.ip shouldEqual emptyContext.reg.ip + 4
+    ctx.mem.peek(IP) shouldEqual 32
+    ctx.ds shouldEqual List(19)
   }
 }
