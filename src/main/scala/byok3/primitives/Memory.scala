@@ -1,7 +1,6 @@
 package byok3.primitives
 
 import byok3.annonation.Documentation
-import byok3.data_structures
 import byok3.data_structures.Context._
 import byok3.data_structures.CoreMemory.{peek, poke, _}
 import byok3.data_structures.Dictionary._
@@ -24,7 +23,7 @@ object Memory {
     _ <- register(modify(_.copy(dp = inc(aligned))))
   } yield aligned
 
-  val CELL = Constant("CELL", CELL_SIZE)
+  val CELL = Constant("CELL", CELL_SIZE).effect
 
   val `(LIT)` = for {
     ip <- register(inspect(_.ip))
@@ -80,6 +79,23 @@ object Memory {
     addr <- dataStack(pop)
     x <- memory(inspect(_.char_peek(addr)))
     _ <- dataStack(push(x))
+  } yield ()
+
+  @Documentation("", "( a1 a2 u --  )")
+  val MOVE = for {
+    u <- dataStack(pop)
+    a2 <- dataStack(pop)
+    a1 <- dataStack(pop)
+    _ <- memory(modify(_.move(a2, a1, u * CELL_SIZE)))
+  } yield ()
+
+
+  @Documentation("", "( a1 a2 u --  )")
+  val CMOVE = for {
+    u <- dataStack(pop)
+    a2 <- dataStack(pop)
+    a1 <- dataStack(pop)
+    _ <- memory(modify(_.char_move(a2, a1, u)))
   } yield ()
 
   @Documentation("Skip leading space delimiters. Parse name delimited by a space. Create a definition for name with the execution semantics: `name Execution: ( -- a-addr )`. Reserve one cell of data space at an aligned address", stackEffect = "( \"<spaces>name\" -- )")

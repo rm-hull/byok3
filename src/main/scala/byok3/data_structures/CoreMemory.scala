@@ -53,12 +53,51 @@ case class CoreMemory(size: Int, private val addressSpace: AddressSpace) {
   }
 
   @tailrec
-  final def memcpy(addr: Address, data: String): CoreMemory = {
+  final def memcpy(addr: Address, data: String): CoreMemory =
     data.headOption match {
       case Some(ch) => char_poke(addr, ch).memcpy(addr + 1, data.tail)
       case None => this
     }
+
+  final def move(dest: Address, src: Address, len: Int): CoreMemory = {
+    require(len >= 0)
+    boundsCheck(src)
+    boundsCheck(src + len)
+    boundsCheck(dest)
+    boundsCheck(dest + dec(len))
+
+    if (dest < src) move_fwd(dest, src, len) else move_back(dest, src, len)
   }
+
+  @tailrec
+  private def move_fwd(dest: Address, src: Address, len: Int): CoreMemory =
+    if (len <= 0) this
+    else poke(dest, peek(src)).move_fwd(inc(dest), inc(src), dec(len))
+
+  @tailrec
+  private def move_back(dest: Address, src: Address, len: Int): CoreMemory =
+    if (len < 0) this
+    else poke(dest + len, peek(src + len)).move_back(dest, src, dec(len))
+
+  final def char_move(dest: Address, src: Address, len: Int): CoreMemory = {
+    require(len >= 0)
+    boundsCheck(src)
+    boundsCheck(src + len)
+    boundsCheck(dest)
+    boundsCheck(dest + dec(len))
+
+    if (dest < src) cmove_fwd(dest, src, len) else cmove_back(dest, src, len)
+  }
+
+  @tailrec
+  private def cmove_fwd(dest: Address, src: Address, len: Int): CoreMemory =
+    if (len <= 0) this
+    else char_poke(dest, char_peek(src)).cmove_fwd(dest + 1, src + 1, len - 1)
+
+  @tailrec
+  private def cmove_back(dest: Address, src: Address, len: Int): CoreMemory =
+    if (len < 0) this
+    else char_poke(dest + len, char_peek(src + len)).cmove_back(dest, src, len - 1)
 
   final def fetch(addr: Address, len: Int): String = {
     require(len >= 0)
@@ -86,6 +125,8 @@ case object CoreMemory {
   def offset(addr: Address) = addr % CELL_SIZE
 
   def inc(addr: Address) = addr + CELL_SIZE
+
+  def dec(addr: Address) = addr - CELL_SIZE
 
   def apply(size: Int): CoreMemory = {
     require(size > 0)
