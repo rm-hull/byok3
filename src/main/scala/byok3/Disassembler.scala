@@ -1,8 +1,8 @@
 package byok3
 
-import byok3.data_structures.Context
+import byok3.data_structures.{Context, UserDefined}
 import byok3.data_structures.CoreMemory._
-import byok3.types.Address
+import byok3.types.{Address, Word}
 
 import scala.Predef.{print => pr}
 
@@ -10,6 +10,11 @@ import scala.Predef.{print => pr}
 class Disassembler(ctx: Context) {
 
   val lit = ctx.dictionary.indexOf("(LIT)").get
+  val nest = ctx.dictionary.indexOf("__NEST").get
+  val defns = ctx.dictionary.toMap.values.map {
+    case UserDefined(name, address, _) => Some((address, name))
+    case _ => None
+  }.flatten.toMap
 
   def print(offset: Address, len: Int): Unit = {
 
@@ -27,10 +32,14 @@ class Disassembler(ctx: Context) {
       pr("|  ")
 
       if (addr > offset && ctx.mem.peek(addr - CELL_SIZE) == lit) {
-        pr(ctx.mem.peek(addr))
+        pr("  " + ctx.mem.peek(addr))
       } else {
         val ptr = ctx.mem.peek(addr)
-        pr(ctx.dictionary.get(ptr).fold(ptr.toString)(_.name))
+        if (ptr == nest) {
+          pr(defns.get(addr).getOrElse("<unknown>") + " ::")
+        }
+
+        pr("  " + ctx.dictionary.get(ptr).fold(ptr.toString)(_.name))
       }
       pr("\n")
     }
