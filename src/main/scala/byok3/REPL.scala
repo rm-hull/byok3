@@ -6,7 +6,8 @@ import byok3.repl.AnsiColor._
 import byok3.repl.{Banner, UpperCaseParser, WordCompleter}
 import cats.effect.IO
 import cats.implicits._
-import org.jline.reader.{EndOfFileException, LineReader, LineReaderBuilder, UserInterruptException}
+import org.jline.reader.LineReader.Option._
+import org.jline.reader.{EndOfFileException, LineReaderBuilder, UserInterruptException}
 import org.jline.terminal.TerminalBuilder
 
 import scala.annotation.tailrec
@@ -24,8 +25,9 @@ object REPL {
     .completer(wordCompleter)
     .build
 
-  lineReader.setOpt(LineReader.Option.CASE_INSENSITIVE)
-  lineReader.setOpt(LineReader.Option.GROUP)
+  lineReader.setOpt(DISABLE_EVENT_EXPANSION)
+  lineReader.setOpt(CASE_INSENSITIVE)
+  lineReader.setOpt(GROUP)
 
   def main(args: Array[String]): Unit = {
     println(Banner())
