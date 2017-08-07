@@ -24,9 +24,9 @@ case class Context(mem: CoreMemory,
                    rs: Stack[Int] = List.empty, // return stack
                    compiling: Option[UserDefined] = None) {
 
-  def updateState(err: Error) =
   // drain the data and return stacks if there was an error
     copy(error = Some(err), ds = List.empty, rs = List.empty)
+  def error(err: Error) =
 
   def find(token: Word) =
     dictionary.get(token.toUpperCase)

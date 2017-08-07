@@ -14,7 +14,7 @@ trait Executor {
   @tailrec
   final def run(ctx: Context): Context = {
     step.run(ctx) match {
-      case Failure(ex: Throwable) => ctx.updateState(Error(ex))
+      case Failure(ex: Throwable) => ctx.error(Error(ex))
       case Success((next, false)) => run(next)
       case Success((next, true)) => next
     }
