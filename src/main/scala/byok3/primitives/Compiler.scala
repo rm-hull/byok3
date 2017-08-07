@@ -2,8 +2,8 @@ package byok3.primitives
 
 import byok3.annonation.{Documentation, Immediate}
 import byok3.data_structures.Context._
-import byok3.data_structures.MachineState._
-import byok3.data_structures.Dictionary.{add, addressOf, last, instruction}
+import byok3.data_structures.Dictionary.{add, addressOf, instruction, last}
+import byok3.data_structures.MachineState.{OK, Smudge}
 import byok3.data_structures.Stack.{pop, push}
 import byok3.data_structures._
 import byok3.helpers._

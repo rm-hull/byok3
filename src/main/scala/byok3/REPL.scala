@@ -1,6 +1,6 @@
 package byok3
 
-import byok3.data_structures.MachineState._
+import byok3.data_structures.MachineState.{OK, Smudge}
 import byok3.data_structures.{Context, Error}
 import byok3.repl.AnsiColor._
 import byok3.repl.{Banner, UpperCaseParser, WordCompleter}

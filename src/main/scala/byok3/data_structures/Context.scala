@@ -1,12 +1,11 @@
 package byok3.data_structures
 
 import byok3.Disassembler
-import byok3.data_structures.CoreMemory.{copy, peek, poke}
-import byok3.data_structures.MachineState._
-import byok3.data_structures.Dictionary.add
 import byok3.data_structures.Context._
+import byok3.data_structures.CoreMemory.{copy, peek, poke}
+import byok3.data_structures.Dictionary.add
+import byok3.data_structures.MachineState.OK
 import byok3.data_structures.Stack.pop
-import byok3.primitives.Memory.comma
 import byok3.primitives.Memory.comma
 import byok3.types.{Address, AppState, Data, Dict, Stack, Word}
 import cats.data.StateT
@@ -120,7 +119,7 @@ object Context {
   def machineState(newStatus: MachineState.Value): AppState[Unit] = for {
     _ <- exec("STATE")
     addr <- dataStack(pop)
-    _ <- memory(poke(addr, newStatus.id))
+    _ <- memory(poke(addr, newStatus.value))
   } yield ()
 
   def machineState: AppState[MachineState.Value] = for {
