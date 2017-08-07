@@ -2,8 +2,11 @@ package byok3.data_structures
 
 import byok3.Disassembler
 import byok3.data_structures.CoreMemory.{copy, peek, poke}
+import byok3.data_structures.MachineState._
 import byok3.data_structures.Dictionary.add
+import byok3.data_structures.Context._
 import byok3.data_structures.Stack.pop
+import byok3.primitives.Memory.comma
 import byok3.primitives.Memory.comma
 import byok3.types.{Address, AppState, Data, Dict, Stack, Word}
 import cats.data.StateT
@@ -24,9 +27,11 @@ case class Context(mem: CoreMemory,
                    rs: Stack[Int] = List.empty, // return stack
                    compiling: Option[UserDefined] = None) {
 
-  // drain the data and return stacks if there was an error
-    copy(error = Some(err), ds = List.empty, rs = List.empty)
   def error(err: Error) =
+    // reset the STATE to interpreter mode and then
+    // drain the data and return stacks if there was an error
+    machineState(OK).runS(this).get
+      .copy(error = Some(err), ds = List.empty, rs = List.empty)
 
   def find(token: Word) =
     dictionary.get(token.toUpperCase)
