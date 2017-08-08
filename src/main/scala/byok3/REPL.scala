@@ -31,7 +31,7 @@ object REPL {
 
   def main(args: Array[String]): Unit = {
     println(Banner())
-    val emptyContext = Context(0x500000)
+    val emptyContext = load("forth/system.fth", Context(0x500000))
     loop(read)(emptyContext)
     println("exiting...")
   }
@@ -66,6 +66,7 @@ object REPL {
   private def loop(reader: Context => IO[String])(ctx: Context): Context = {
     val program: IO[Context] = for {
       in <- reader(ctx)
+      //_ = println(in)
       next = eval(ctx)(in)
       _ <- print(next)
     } yield next
@@ -79,9 +80,20 @@ object REPL {
   }
 
   private def load(filename: String, ctx: Context): Context = {
-    val in = IO {
-      Source.fromFile(filename).mkString
+    val lines = Source.fromResource(filename).getLines().zip(Stream.from(1).toIterator)
+    def read(ctx: Context): IO[String] = IO {
+      if (lines.hasNext) {
+        val (text, line) = lines.next()
+        ctx.error.foreach { err =>
+          println(s"${RED}${BOLD}Error ${err.errno}:${RESET} ${err.message} occurred in ${BOLD}$filename, line: ${line-1}${RESET}")
+          throw new EndOfFileException()
+          //sys.exit(-1)
+        }
+        text
+      }
+      else throw new EndOfFileException()
     }
-    loop(_ => in)(ctx)
+
+    loop(read)(ctx)
   }
 }
