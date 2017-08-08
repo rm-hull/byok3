@@ -22,11 +22,11 @@ class DisassemblerTest extends FunSuite {
       disassembler.print(0x0124, 0x2C)
     }
     val expected =
-      s"""${MID_GREY}00000124:  27 00 00 00  |'...|  ${WHITE}${BOLD}<unknown>: ${RESET}${MID_GREY}__NEST
+      s"""${MID_GREY}00000124:  27 00 00 00  |'...|  ${CYAN}${BOLD}<unknown>: ${RESET}${MID_GREY}__NEST
          |${MID_GREY}00000128:  54 00 00 00  |T...|  DUP
          |${MID_GREY}0000012C:  02 00 00 00  |....|  *
          |${MID_GREY}00000130:  28 00 00 00  |(...|  __UNNEST
-         |${MID_GREY}00000134:  27 00 00 00  |'...|  ${WHITE}${BOLD}SQR: ${RESET}${MID_GREY}__NEST
+         |${MID_GREY}00000134:  27 00 00 00  |'...|  ${CYAN}${BOLD}SQR: ${RESET}${MID_GREY}__NEST
          |${MID_GREY}00000138:  3A 00 00 00  |:...|  (LIT)
          |${MID_GREY}0000013C:  09 00 00 00  |....|  9
          |${MID_GREY}00000140:  3A 00 00 00  |:...|  (LIT)

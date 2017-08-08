@@ -9,7 +9,6 @@ import scala.Predef.{print => pr}
 
 class Disassembler(ctx: Context) {
 
-  val lit = ctx.dictionary.indexOf("(LIT)").get
   val nest = ctx.dictionary.indexOf("__NEST").get
   val defns = ctx.dictionary.toMap.values.map {
     case UserDefined(name, address, _) => Some((address, name))
@@ -17,6 +16,13 @@ class Disassembler(ctx: Context) {
   }.flatten.toMap
 
   def print(offset: Address, len: Int): Unit = {
+    def prevInstr(addr: Address) = {
+      if (addr > offset) {
+        val data = ctx.mem.peek(dec(addr))
+        ctx.dictionary.get(data).map(_.name)
+      }
+      else None
+    }
 
     def printable(i: Int) = if (i >= 32 && i < 127) i.toChar.toString else "."
 
@@ -31,15 +37,17 @@ class Disassembler(ctx: Context) {
       pr(bytes(addr) { n => printable(ctx.mem.char_peek(n)) })
       pr("|  ")
 
-      if (addr > offset && ctx.mem.peek(addr - CELL_SIZE) == lit) {
-        pr(ctx.mem.peek(addr))
-      } else {
-        val ptr = ctx.mem.peek(addr)
-        if (ptr == nest) {
-          pr(s"${WHITE}${BOLD}${defns.get(addr).getOrElse("<unknown>")}: ${RESET}${MID_GREY}")
+      val data = ctx.mem.peek(addr)
+      val x = prevInstr(addr)
+      x match {
+        case Some("(LIT)") => pr(data)
+        case Some("BRANCH") | Some("0BRANCH") => pr(f"$data ${YELLOW}(==> 0x${addr + data}%08X)${RESET}${MID_GREY}")
+        case _ => {
+          if (data == nest) {
+            pr(s"${CYAN}${BOLD}${defns.get(addr).getOrElse("<unknown>")}: ${RESET}${MID_GREY}")
+          }
+          pr(ctx.dictionary.get(data).fold(data.toString)(_.name))
         }
-
-        pr(ctx.dictionary.get(ptr).fold(ptr.toString)(_.name))
       }
       pr("\n")
     }
