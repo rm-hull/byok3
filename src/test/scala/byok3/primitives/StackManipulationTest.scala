@@ -27,8 +27,8 @@ class StackManipulationTest extends PrimitivesTestBase {
   }
 
   test("should swap the top two pairs on the stack") {
-    val presets =  sequence(dataStack(push(3)), dataStack(push(4)), dataStack(push(2)), dataStack(push(0)))
-    assertDataStack(`2SWAP`, List(3, 4, 0, 2), presets)
+    val presets =  sequence(dataStack(push(4)), dataStack(push(3)), dataStack(push(2)), dataStack(push(1)))
+    assertDataStack(`2SWAP`, List(3, 4, 1, 2), presets)
   }
 
   test("should duplicate the top element on the stack") {

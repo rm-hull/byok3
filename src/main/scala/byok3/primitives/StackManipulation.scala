@@ -115,7 +115,7 @@ object StackManipulation {
     } yield ()
   }
 
-  @Documentation("exchange the top two cell pairs", stackEffect = "( x1 x2 x3 x4 -- x3 x4 x2 x1)")
+  @Documentation("exchange the top two cell pairs", stackEffect = "( x1 x2 x3 x4 -- x3 x4 x1 x2)")
   val `2SWAP` = dataStack {
     for {
       x4 <- pop
@@ -124,8 +124,8 @@ object StackManipulation {
       x1 <- pop
       _ <- push(x3)
       _ <- push(x4)
-      _ <- push(x2)
       _ <- push(x1)
+      _ <- push(x2)
     } yield ()
   }
 
