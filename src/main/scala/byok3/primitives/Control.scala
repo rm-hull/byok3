@@ -60,4 +60,22 @@ object Control {
     instr <- dictionary(instruction(xt))
     _ <- exec(instr.name)
   } yield ()
+
+  @Documentation("", stackEffect = "( -- )")
+  val BRANCH = for {
+    ip <- IP()
+    jmp <- memory(peek(ip))
+    _ <- IP(ip + jmp)
+  } yield ()
+
+  @Documentation("", stackEffect = "( x -- )")
+  val `0BRANCH` = for {
+    x <- dataStack(pop)
+    _ <- if (x == 0) BRANCH else `ip++`
+  } yield ()
+
+  private def `ip++` = for {
+    ip <- IP()
+    _ <- IP(inc(ip))
+  } yield ()
 }
