@@ -93,8 +93,9 @@ object IO {
   val DUMP = for {
     len <- dataStack(pop)
     addr <- dataStack(pop)
+    aligned = align(addr)
     hexdump <- memory(inspect(_.hexDump))
-    _ <- output(hexdump.print(addr, len))
+    _ <- output(hexdump.print(aligned, len))
   } yield ()
 
   @Documentation("Instruction disassembly at the given address block", "( len a-addr -- )")
