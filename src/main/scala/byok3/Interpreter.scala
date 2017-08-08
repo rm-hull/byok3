@@ -39,7 +39,7 @@ object Interpreter extends Executor {
           ctx.find(token)
             .map(xt => runOrCompile(xt))
             .getOrElse(pushNumber(token))
-        case _ => pure(ctx)
+        case _ => pure(())
       }
     }
 
