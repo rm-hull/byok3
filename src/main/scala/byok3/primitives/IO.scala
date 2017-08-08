@@ -102,7 +102,8 @@ object IO {
   val DISASSEMBLE = for {
     len <- dataStack(pop)
     addr <- dataStack(pop)
+    aligned = align(addr)
     disassembler <- inspect[Try, Context, Disassembler](_.disassembler)
-    _ <- output(disassembler.print(addr, len))
+    _ <- output(disassembler.print(aligned, len))
   } yield ()
 }
