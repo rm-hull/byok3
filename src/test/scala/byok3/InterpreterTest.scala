@@ -114,6 +114,17 @@ class InterpreterTest extends FunSuite with Matchers {
     ctx.ds shouldEqual List(9)
   }
 
+  test("should compile and run a user defined word over several sessions") {
+    val ops = for {
+      _ <- Interpreter(": SQR ")
+      _ <- Interpreter("DUP * ;")
+      _ <- Interpreter("3 SQR")
+    } yield ()
+
+    val ctx = ops.runS(emptyContext).get
+    ctx.ds shouldEqual List(9)
+  }
+
   test("should record error when LITERAL when not in compile mode") {
     val ctx = Interpreter("10 LITERAL").runS(emptyContext).get
     ctx.status shouldEqual Left(Error(-14))
