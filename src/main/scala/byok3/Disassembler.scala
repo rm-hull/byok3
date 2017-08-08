@@ -1,11 +1,11 @@
 package byok3
 
-import byok3.data_structures.{Context, UserDefined}
 import byok3.data_structures.CoreMemory._
-import byok3.types.{Address, Word}
+import byok3.data_structures.{Context, UserDefined}
+import byok3.repl.AnsiColor._
+import byok3.types.Address
 
 import scala.Predef.{print => pr}
-
 
 class Disassembler(ctx: Context) {
 
@@ -25,21 +25,21 @@ class Disassembler(ctx: Context) {
     }
 
     def printRow(addr: Address) = {
-      pr(f"$addr%08X:  ")
+      pr(f"${MID_GREY}$addr%08X:  ")
       pr(bytes(addr) { n => f"${ctx.mem.char_peek(n)}%02X " })
       pr(" |")
       pr(bytes(addr) { n => printable(ctx.mem.char_peek(n)) })
       pr("|  ")
 
       if (addr > offset && ctx.mem.peek(addr - CELL_SIZE) == lit) {
-        pr("  " + ctx.mem.peek(addr))
+        pr(ctx.mem.peek(addr))
       } else {
         val ptr = ctx.mem.peek(addr)
         if (ptr == nest) {
-          pr(defns.get(addr).getOrElse("<unknown>") + " ::")
+          pr(s"${WHITE}${BOLD}${defns.get(addr).getOrElse("<unknown>")}: ${RESET}${MID_GREY}")
         }
 
-        pr("  " + ctx.dictionary.get(ptr).fold(ptr.toString)(_.name))
+        pr(ctx.dictionary.get(ptr).fold(ptr.toString)(_.name))
       }
       pr("\n")
     }
