@@ -1,13 +1,13 @@
 package byok3
 
 import byok3.data_structures.Context._
+import byok3.data_structures.MachineState._
 import byok3.data_structures.Stack._
 import byok3.data_structures._
 import byok3.primitives.Compiler._
 import byok3.types.{AppState, Word}
 import cats.data.StateT._
 import cats.implicits._
-import byok3.data_structures.MachineState._
 
 import scala.util.Try
 
@@ -50,7 +50,6 @@ object Interpreter extends Executor {
 
   def apply(text: String): AppState[Unit] = for {
     _ <- input(text)
-    _ <- machineState(OK)
     _ <- modify[Try, Context](_.reset)
     _ <- modify(run)
   } yield ()
