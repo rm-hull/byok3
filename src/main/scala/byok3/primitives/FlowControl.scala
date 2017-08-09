@@ -4,14 +4,20 @@ import byok3.annonation.{Documentation, Internal}
 import byok3.data_structures.Context._
 import byok3.data_structures.CoreMemory._
 import byok3.data_structures.Dictionary._
-import byok3.data_structures.Stack.{pop, push}
+import byok3.data_structures.Stack.{pop, push, peek => speek}
 import byok3.data_structures.{Error, IP, W}
 import byok3.types.AppState
 import cats.implicits._
+import cats.data.StateT._
 
 import scala.util.Failure
 
-object Control {
+object FlowControl {
+
+  private def `ip++` = for {
+    ip <- IP()
+    _ <- IP(inc(ip))
+  } yield ()
 
   @Internal
   val __NEST = for {
@@ -74,8 +80,23 @@ object Control {
     _ <- if (x == 0) BRANCH else `ip++`
   } yield ()
 
-  private def `ip++` = for {
-    ip <- IP()
-    _ <- IP(inc(ip))
+  val `(DO)` = for {
+    index <- dataStack(pop)
+    control <- dataStack(pop)
+    _ <- returnStack(push(control))
+    _ <- returnStack(push(index))
+    _ <- `ip++`
+  } yield ()
+
+  @Documentation("n | u is a copy of the current (innermost) loop index. An ambiguous condition exists if the loop control parameters are unavailable", stackEffect = "( -- n | u ) ( R: loop-sys -- loop-sys )")
+  val I = for {
+    n <- returnStack(speek)
+    _ <- dataStack(push(n))
+  } yield ()
+
+  @Documentation("n | u is a copy of the next-outer loop index. An ambiguous condition exists if the loop control parameters of the next-outer loop, loop-sys1, are unavailable", stackEffect = "( -- n | u ) ( R: loop-sys1 loop-sys2 -- loop-sys1 loop-sys2 )")
+  val J = for {
+    n <- returnStack(inspect(_(2)))
+    _ <- dataStack(push(n))
   } yield ()
 }
