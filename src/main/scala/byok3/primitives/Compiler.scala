@@ -76,4 +76,16 @@ object Compiler {
     }
     _ <- dataStack(push(pfa))
   } yield ()
+
+  @Documentation("the address and length of the name of the execution token", stackEffect = "( xt -- len a-addr)")
+  val `NAME>` = for {
+    dp <- DP()
+    xt <- dataStack(pop)
+    instr <- dictionary(instruction(xt))
+    _ <- memory(copy(dp, instr.name))
+    len = instr.name.length
+    _ <- dataStack(push(dp))
+    _ <- dataStack(push(len))
+    _ <- DP(dp + align(len))
+  } yield ()
 }
