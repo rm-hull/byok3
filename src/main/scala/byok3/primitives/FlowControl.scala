@@ -82,8 +82,8 @@ object FlowControl {
 
   val `(DO)` = for {
     index <- dataStack(pop)
-    control <- dataStack(pop)
-    _ <- returnStack(push(control))
+    limit <- dataStack(pop)
+    _ <- returnStack(push(limit))
     _ <- returnStack(push(index))
     _ <- `ip++`
   } yield ()
