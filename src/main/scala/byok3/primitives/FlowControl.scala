@@ -99,4 +99,10 @@ object FlowControl {
     n <- returnStack(inspect(_(2)))
     _ <- dataStack(push(n))
   } yield ()
+
+  val `(LEAVE)` = for {
+    _ <- returnStack(pop)
+    nos <- returnStack(speek)
+    _ <- returnStack(push(nos - 1))
+  } yield ()
 }
