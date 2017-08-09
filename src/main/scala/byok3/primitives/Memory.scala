@@ -14,8 +14,6 @@ import scala.util.Try
 
 object Memory {
 
-  private def align(addr: Address) = (addr + (CELL_SIZE - 1)) & ~(CELL_SIZE - 1)
-
   def comma(value: Data) = for {
     dp <- DP()
     aligned = align(dp)

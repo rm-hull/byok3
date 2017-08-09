@@ -25,6 +25,8 @@ case class CoreMemory(size: Int, private val addressSpace: AddressSpace) {
       throw Error(-23, f"0x$addr%08X") // address alignment exception
   }
 
+  private def floor(addr: Address) = addr - offset(addr)
+
   def poke(addr: Address, data: Data): CoreMemory = {
     boundsCheck(addr)
     alignmentCheck(addr)
@@ -39,13 +41,13 @@ case class CoreMemory(size: Int, private val addressSpace: AddressSpace) {
 
   def char_peek(addr: Address): Data = {
     boundsCheck(addr)
-    val word = addressSpace.getOrElse(align(addr), empty)
+    val word = addressSpace.getOrElse(floor(addr), empty)
     (word >> (offset(addr) << 3)) & 0xFF
   }
 
   def char_poke(addr: Address, data: Data): CoreMemory = {
     boundsCheck(addr)
-    val alignedAddr = align(addr)
+    val alignedAddr = floor(addr)
     val shifted = offset(addr) << 3
     val mask = 0xFF << shifted
     val newValue = (data & 0xFF) << shifted
@@ -120,7 +122,7 @@ case object CoreMemory {
 
   val CELL_SIZE = 4
 
-  def align(addr: Address) = addr - offset(addr)
+  def align(addr: Address) = (addr + (CELL_SIZE - 1)) & ~(CELL_SIZE - 1)
 
   def offset(addr: Address) = addr % CELL_SIZE
 
