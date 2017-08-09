@@ -107,7 +107,7 @@ object FlowControl {
     index <- returnStack(pop)
     limit <- returnStack(speek)
     _ <- returnStack(push(index + 1))
-    _ <- if (index < limit) {
+    _ <- if (index + 1 < limit) {
       for {
         ip <- IP()
         jmp <- memory(peek(ip))
