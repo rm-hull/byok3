@@ -8,7 +8,7 @@ import byok3.data_structures.Context
 import byok3.data_structures.Context._
 import byok3.data_structures.CoreMemory._
 import byok3.data_structures.Stack.pop
-import byok3.types.{AppState, Stack}
+import byok3.types.Stack
 import cats.data.StateT._
 import cats.implicits._
 
@@ -93,9 +93,8 @@ object IO {
   val DUMP = for {
     len <- dataStack(pop)
     addr <- dataStack(pop)
-    aligned = align(addr)
     hexdump <- memory(inspect(_.hexDump))
-    _ <- output(hexdump.print(aligned, len))
+    _ <- output(hexdump.print(addr, len))
   } yield ()
 
   @Documentation("Instruction disassembly at the given address block", stackEffect = "( len a-addr -- )")
