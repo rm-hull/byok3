@@ -41,7 +41,7 @@ class Disassembler(ctx: Context) {
       val x = prevInstr(addr)
       x match {
         case Some("(LIT)") => pr(data)
-        case Some("BRANCH") | Some("0BRANCH") => pr(f"$data ${YELLOW}(==> 0x${addr + data}%08X)${RESET}${MID_GREY}")
+        case Some("BRANCH") | Some("0BRANCH") | Some("(LOOP)") => pr(f"$data ${YELLOW}(==> 0x${addr + data}%08X)${RESET}${MID_GREY}")
         case _ => {
           if (data == nest) {
             pr(s"${CYAN}${BOLD}${defns.get(addr).getOrElse("<unknown>")}: ${RESET}${MID_GREY}")
