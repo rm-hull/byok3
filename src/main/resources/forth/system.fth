@@ -197,3 +197,148 @@ variable pictured_output_len \ hidden?
     REPEAT
     digit hold ;
 
+: (DOES>)  ( xt -- , modify previous definition to execute code at xt )
+        latest >body \ get address of code for new word
+        cell + \ offset to second cell in create word
+        !      \ store execution token of DOES> code in new word
+;
+
+: DOES>   ( -- , define execution code for CREATE word )
+        0 [compile] literal \ dummy literal to hold xt
+        here cell-          \ address of zero in literal
+        compile (does>)     \ call (DOES>) from new creation word
+		>r                  \ move addrz to return stack so ; doesn't see stack garbage
+        [compile] ;         \ terminate part of code before does>
+		r>
+        :noname       ( addrz xt )
+        swap !              \ save execution token in literal
+; immediate
+
+: 2! ( x1 x2 addr -- , store x2 followed by x1 )
+        swap over ! cell+ ! ;
+: 2@ ( addr -- x1 x2 )
+        dup cell+ @ swap @ ;
+
+
+\ Stack data structure ----------------------------------------
+\ This is a general purpose stack utility used to implement necessary
+\ stacks for the compiler or the user.  Not real fast.
+\ These stacks grow up which is different then normal.
+\   cell 0 - stack pointer, offset from pfa of word
+\   cell 1 - limit for range checking
+\   cell 2 - first data location
+
+: :STACK   ( #cells -- )
+        CREATE  2 cells ,          ( offset of first data location )
+                dup ,              ( limit for range checking, not currently used )
+                cells cell+ allot  ( allot an extra cell for safety )
+;
+
+: >STACK  ( n stack -- , push onto stack, postincrement )
+        dup @ 2dup cell+ swap ! ( -- n stack offset )
+        + !
+;
+
+: STACK>  ( stack -- n , pop , predecrement )
+        dup @ cell- 2dup swap !
+        + @
+;
+
+: STACK@ ( stack -- n , copy )
+        dup @ cell- + @
+;
+
+: STACK.PICK ( index stack -- n , grab Nth from top of stack )
+        dup @ cell- +
+        swap cells -   \ offset for index
+        @
+;
+: STACKP ( stack -- ptr , to next empty location on stack )
+	dup @ +
+;
+
+: 0STACKP  ( stack -- , clear stack)
+    8 swap !
+;
+
+32 :stack ustack
+ustack 0stackp
+
+\ Define JForth like words.
+: >US ustack >stack ;
+: US> ustack stack> ;
+: US@ ustack stack@ ;
+: 0USP ustack 0stackp ;
+
+
+
+\ DO LOOP ------------------------------------------------
+
+3 constant do_flag
+4 constant leave_flag
+5 constant ?do_flag
+
+: DO    ( -- , loop-back do_flag jump-from ?do_flag )
+        ?comp
+        compile  (do)
+        here >us do_flag  >us  ( for backward branch )
+; immediate
+
+\ : ?DO    ( -- , loop-back do_flag jump-from ?do_flag  , on user stack )
+\        ?comp
+\        ( leave address to set for forward branch )
+\        compile  (?do)
+\        here 0 ,
+\        here >us do_flag  >us  ( for backward branch )
+\        >us ( for forward branch ) ?do_flag >us
+\ ; immediate
+
+: LEAVE  ( -- addr leave_flag )
+        compile (leave)
+        here 0 , >us
+        leave_flag >us
+; immediate
+
+: LOOP-FORWARD  ( -us- jump-from ?do_flag -- )
+        BEGIN
+                us@ leave_flag =
+                us@ ?do_flag =
+                OR
+        WHILE
+                us> leave_flag =
+                IF
+                        us> here over - cell+ swap !
+                ELSE
+                        us> dup
+                        here swap -
+                        cell+ swap !
+                THEN
+        REPEAT
+;
+
+: LOOP-BACK  (  loop-addr do_flag -us- )
+        us> do_flag ?pairs
+        us> here -  here
+        !
+        cell allot
+;
+
+: LOOP    ( -- , loop-back do_flag jump-from ?do_flag )
+   compile  (loop)
+   loop-forward loop-back
+; immediate
+
+\ : DOTEST 5 0 do 333 . loop 888 . ;
+\ : ?DOTEST0 0 0 ?do 333 . loop 888 . ;
+\ : ?DOTEST1 5 0 ?do 333 . loop 888 . ;
+
+: +LOOP    ( -- , loop-back do_flag jump-from ?do_flag )
+   compile  (+loop)
+   loop-forward loop-back
+; immediate
+
+: UNLOOP ( loop-sys -r- )
+        r> \ save return pointer
+        rdrop rdrop
+        >r
+;
