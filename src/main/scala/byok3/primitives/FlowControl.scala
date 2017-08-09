@@ -82,7 +82,6 @@ object FlowControl {
     limit <- dataStack(pop)
     _ <- returnStack(push(limit))
     _ <- returnStack(push(index))
-    _ <- `ip++`
   } yield ()
 
   @Documentation("n | u is a copy of the current (innermost) loop index. An ambiguous condition exists if the loop control parameters are unavailable", stackEffect = "( -- n | u ) ( R: loop-sys -- loop-sys )")
