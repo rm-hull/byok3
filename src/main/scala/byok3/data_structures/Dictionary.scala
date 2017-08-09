@@ -2,7 +2,7 @@ package byok3.data_structures
 
 import byok3.annonation.{Documentation, Immediate, Internal}
 import byok3.implicits._
-import byok3.primitives.{Arithmetics, BitLogic, Comparison, Compiler, Control, IO, Memory, StackManipulation}
+import byok3.primitives.{Arithmetics, BitLogic, Comparison, Compiler, FlowControl, IO, Memory, StackManipulation}
 import byok3.types.{AppState, Dict, Word}
 import cats.data.StateT
 import cats.data.StateT._
@@ -73,7 +73,7 @@ object Dictionary {
         getExecutionTokens(BitLogic) ++
         getExecutionTokens(Comparison) ++
         getExecutionTokens(Compiler) ++
-        getExecutionTokens(Control) ++
+        getExecutionTokens(FlowControl) ++
         getExecutionTokens(IO) ++
         getExecutionTokens(Memory) ++
         getExecutionTokens(StackManipulation) ++
