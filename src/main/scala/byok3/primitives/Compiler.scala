@@ -2,6 +2,7 @@ package byok3.primitives
 
 import byok3.annonation.{Documentation, Immediate}
 import byok3.data_structures.Context._
+import byok3.data_structures.CoreMemory._
 import byok3.data_structures.Dictionary.{add, addressOf, instruction, last}
 import byok3.data_structures.MachineState.{OK, Smudge}
 import byok3.data_structures.Stack.{pop, push}
@@ -87,5 +88,18 @@ object Compiler {
     _ <- dataStack(push(dp))
     _ <- dataStack(push(len))
     _ <- DP(dp + align(len))
+  } yield ()
+
+  @Documentation("Skip leading space delimiters. Parse name delimited by a space. Create a definition for name with the execution semantics: name Execution: ( -- a-addr )", stackEffect = "( \"<spaces>name\" -- )")
+  val CREATE = for {
+    token <- nextToken()
+    name = token.value.toUpperCase
+    _ <- guard(name.nonEmpty, Error(-16))
+    nest <- dictionary(addressOf("__NEST"))
+    addr <- comma(nest)
+    _ <- literal(addr + (4 * CELL_SIZE))
+    unnest <- dictionary(addressOf("__UNNEST"))
+    _ <- compile(unnest)
+    _ <- dictionary(add(UserDefined(name, addr)))
   } yield ()
 }
