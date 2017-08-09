@@ -80,10 +80,12 @@ object REPL {
   }
 
   private def load(filename: String, ctx: Context): Context = {
+    val indicator = List("|", "/", "-", "\\")
     val lines = Source.fromResource(filename).getLines().zip(Stream.from(1).toIterator)
     def read(ctx: Context): IO[String] = IO {
       if (lines.hasNext) {
         val (text, line) = lines.next()
+        Predef.print(s"${indicator(line / 10 % indicator.length)}\r")
         ctx.error.foreach { err =>
           println(s"${RED}${BOLD}Error ${err.errno}:${RESET} ${err.message} occurred in ${BOLD}$filename, line: ${line-1}${RESET}")
           throw new EndOfFileException()
