@@ -105,4 +105,23 @@ object FlowControl {
     nos <- returnStack(speek)
     _ <- returnStack(push(nos - 1))
   } yield ()
+
+  val `(LOOP)` = for {
+    index <- returnStack(pop)
+    limit <- returnStack(speek)
+    _ <- returnStack(push(index + 1))
+    _ <- if (index < limit) {
+      for {
+        ip <- IP()
+        jmp <- memory(peek(ip))
+        _ <- IP(ip + jmp)
+      } yield ()
+    } else {
+      for {
+        _ <- `ip++`
+        _ <- returnStack(pop)
+        _ <- returnStack(pop)
+      } yield ()
+    }
+  } yield ()
 }
