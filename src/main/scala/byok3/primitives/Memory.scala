@@ -32,7 +32,7 @@ object Memory {
     _ <- IP(inc(ip))
   } yield ()
 
-  @Documentation("n2 is the size in address units of n1 cells", "( n1 -- n2 )")
+  @Documentation("n2 is the size in address units of n1 cells", stackEffect = "( n1 -- n2 )")
   val CELLS = for {
     n1 <- dataStack(pop)
     n2 = if (n1 < 0) 0 else ((n1 - 1) / CELL_SIZE) + 1
@@ -81,7 +81,7 @@ object Memory {
     _ <- dataStack(push(x))
   } yield ()
 
-  @Documentation("", "( a1 a2 u --  )")
+  @Documentation("", stackEffect = "( a1 a2 u --  )")
   val MOVE = for {
     u <- dataStack(pop)
     a2 <- dataStack(pop)
@@ -90,7 +90,7 @@ object Memory {
   } yield ()
 
 
-  @Documentation("", "( a1 a2 u --  )")
+  @Documentation("", stackEffect = "( a1 a2 u --  )")
   val CMOVE = for {
     u <- dataStack(pop)
     a2 <- dataStack(pop)

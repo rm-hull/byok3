@@ -89,7 +89,7 @@ object IO {
     }
   } yield ()
 
-  @Documentation("Prints a hex dump of memory at the given address block", "( len a-addr -- )")
+  @Documentation("Prints a hex dump of memory at the given address block", stackEffect="( len a-addr -- )")
   val DUMP = for {
     len <- dataStack(pop)
     addr <- dataStack(pop)
@@ -98,7 +98,7 @@ object IO {
     _ <- output(hexdump.print(aligned, len))
   } yield ()
 
-  @Documentation("Instruction disassembly at the given address block", "( len a-addr -- )")
+  @Documentation("Instruction disassembly at the given address block", stackEffect = "( len a-addr -- )")
   val DISASSEMBLE = for {
     len <- dataStack(pop)
     addr <- dataStack(pop)

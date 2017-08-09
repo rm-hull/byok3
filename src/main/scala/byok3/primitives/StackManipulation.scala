@@ -171,7 +171,7 @@ object StackManipulation {
     _ <- dataStack(push(n))
   } yield ()
 
-  @Documentation("drop top return stack element", "( -- ) ( R:  x -- )")
+  @Documentation("drop top return stack element", stackEffect = "( -- ) ( R:  x -- )")
   val RDROP = for {
     _ <- returnStackNotEmpty
     _ <- returnStack(pop)

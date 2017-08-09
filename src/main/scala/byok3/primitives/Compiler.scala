@@ -24,7 +24,7 @@ object Compiler {
   } yield ()
 
   @Immediate
-  @Documentation("Append the run-time semantics to the current definition.", "Compilation: ( x -- ), Runtime: ( -- x )")
+  @Documentation("Append the run-time semantics to the current definition", stackEffect = "Compilation: ( x -- ), Runtime: ( -- x )")
   val LITERAL = for {
     status <- machineState
     _ <- guard(status == Smudge, Error(-14)) // used only during compilation

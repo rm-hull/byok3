@@ -14,7 +14,7 @@ object Comparison {
   @Documentation("compares top two stack elements, returns true flag if different, false otherwise", stackEffect =  "( x1 x2 -- f )")
   val `<>` = dataStack(arity2stackOp(_ != _))
 
-  @Documentation("compares signed numbers n1 with n2, returns true if n1 is less then n2.", stackEffect = "( n1 n2 -- f )")
+  @Documentation("compares signed numbers n1 with n2, returns true if n1 is less then n2", stackEffect = "( n1 n2 -- f )")
   val `<` = dataStack(arity2stackOp(_ < _))
 
   @Documentation("compares signed numbers n1 with n2, returns true if n1 is greater then n2", stackEffect = "( n1 n2 -- f )")
