@@ -47,8 +47,8 @@ object Compiler {
   @Immediate
   @Documentation("End the current definition, allow it to be found in the dictionary and enter interpretation state, consuming colon-sys", stackEffect = "( C: colon-sys -- )")
   val `;` = for {
-    unnest <- dictionary(addressOf("__UNNEST"))
-    _ <- comma(unnest)
+    exit <- dictionary(addressOf("EXIT"))
+    _ <- comma(exit)
     userDefinedWord <- inspectF[Try, Context, UserDefined](_.compiling.toTry(Error(-14))) // used only during compilation
     _ <- dictionary(add(userDefinedWord))
     _ <- modify[Try, Context](_.copy(compiling = None))
@@ -98,8 +98,8 @@ object Compiler {
     nest <- dictionary(addressOf("__NEST"))
     addr <- comma(nest)
     _ <- literal(addr + (4 * CELL_SIZE))
-    unnest <- dictionary(addressOf("__UNNEST"))
-    _ <- compile(unnest)
+    exit <- dictionary(addressOf("EXIT"))
+    _ <- compile(exit)
     _ <- dictionary(add(UserDefined(name, addr)))
   } yield ()
 }

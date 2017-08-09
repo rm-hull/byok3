@@ -27,20 +27,17 @@ object FlowControl {
     _ <- returnStack(push(addr))
   } yield ()
 
-  @Internal
-  val __UNNEST = for {
-    _ <- returnStackNotEmpty
-    addr <- returnStack(pop)
-    _ <- IP(addr)
-  } yield ()
-
   @Documentation(
     """
       | Return control to the calling definition specified by nest-sys. Before
       | executing EXIT within a do-loop, a program shall discard the loop-control
       | parameters by executing UNLOOP.
     """, stackEffect = "Execution: ( -- ) ( R: nest-sys -- )")
-  val EXIT = __UNNEST
+  val EXIT = for {
+  _ <- returnStackNotEmpty
+  addr <- returnStack(pop)
+  _ <- IP(addr)
+  } yield ()
 
   @Documentation("TODO", stackEffect = "( i*x -- )")
   val THROW: AppState[Unit] =
