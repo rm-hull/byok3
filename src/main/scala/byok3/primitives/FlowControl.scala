@@ -34,9 +34,9 @@ object FlowControl {
       | parameters by executing UNLOOP.
     """, stackEffect = "Execution: ( -- ) ( R: nest-sys -- )")
   val EXIT = for {
-  _ <- returnStackNotEmpty
-  addr <- returnStack(pop)
-  _ <- IP(addr)
+    _ <- returnStackNotEmpty
+    addr <- returnStack(pop)
+    _ <- IP(addr)
   } yield ()
 
   @Documentation("TODO", stackEffect = "( i*x -- )")
