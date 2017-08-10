@@ -98,8 +98,9 @@ object FlowControl {
 
   val `(LEAVE)` = for {
     _ <- returnStack(pop)
-    nos <- returnStack(speek)
-    _ <- returnStack(push(nos - 1))
+    limit <- returnStack(speek)
+    index = limit - 1
+    _ <- returnStack(push(index))
   } yield ()
 
   val `(LOOP)` = for {
