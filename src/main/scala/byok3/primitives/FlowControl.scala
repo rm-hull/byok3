@@ -91,6 +91,18 @@ object FlowControl {
     _ <- returnStack(push(index))
   } yield ()
 
+  val `(?DO)` = for {
+    index <- dataStack(pop)
+    limit <- dataStack(pop)
+    _ <- if (index == limit) jump else {
+      for {
+        _ <- returnStack(push(limit))
+        _ <- returnStack(push(index))
+      } yield ()
+    }
+  } yield ()
+
+
   @Documentation("n | u is a copy of the current (innermost) loop index. An ambiguous condition exists if the loop control parameters are unavailable", stackEffect = "( -- n | u ) ( R: loop-sys -- loop-sys )")
   val I = for {
     n <- returnStack(speek)
