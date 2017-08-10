@@ -1,7 +1,6 @@
 package byok3
 
 import byok3.data_structures.CoreMemory
-import cats.effect.IO
 import org.scalatest.FunSuite
 
 class HexDumpTest extends FunSuite {
@@ -13,9 +12,6 @@ class HexDumpTest extends FunSuite {
   val hexdump = new HexDump(mem)
 
   test("should print 2 column hex-dump") {
-    val prog = IO {
-      hexdump.print(0x0000, 0x120)
-    }
     val expected =
       """00000000:  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |........ ........|
         |00000010:  00 00 01 02 03 04 05 06  07 08 09 0A 0B 0C 0D 0E  |........ ........|
@@ -37,13 +33,11 @@ class HexDumpTest extends FunSuite {
         |00000110:  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |........ ........|
         |""".stripMargin
 
-    assertOutput(prog)(expected)
+    val actual = capturingOutput(hexdump.print(0x0000, 0x120))
+    actual shouldEqual expected
   }
 
   test("should print aligned hex-dump") {
-    val prog = IO {
-      hexdump.print(0x0023, 0x77)
-    }
     val expected =
       """00000020:           12 13 14 15 16  17 18 19 1A 1B 1C 1D 1E  |   ..... ........|
         |00000030:  1F 20 21 22 23 24 25 26  27 28 29 2A 2B 2C 2D 2E  |. !"#$%& '()*+,-.|
@@ -55,13 +49,11 @@ class HexDumpTest extends FunSuite {
         |00000090:  7F 80 81 82 83 84 85 86  87 88                    |........ ..      |
         |""".stripMargin
 
-    assertOutput(prog)(expected)
+    val actual = capturingOutput(hexdump.print(0x0023, 0x77))
+    actual shouldEqual expected
   }
 
   test("should print 1 column hex-dump") {
-    val prog = IO {
-      hexdump.print(0x0000, 0x120, columns = 1)
-    }
     val expected =
       """00000000:  00 00 00 00 00 00 00 00  |........|
         |00000008:  00 00 00 00 00 00 00 00  |........|
@@ -101,6 +93,7 @@ class HexDumpTest extends FunSuite {
         |00000118:  00 00 00 00 00 00 00 00  |........|
         |""".stripMargin
 
-    assertOutput(prog)(expected)
+    val actual = capturingOutput(hexdump.print(0x0000, 0x120, columns = 1))
+    actual shouldEqual expected
   }
 }
