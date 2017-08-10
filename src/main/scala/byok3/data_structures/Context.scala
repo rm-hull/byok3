@@ -20,7 +20,7 @@ case class Context(mem: CoreMemory,
                    dictionary: Dict = Dictionary(),
                    error: Option[Error] = None,
                    input: Tokenizer = EndOfData,
-                   output: IO[Unit] = IO.unit,
+                   io: IO[AppState[Unit]] = IO { pure(()) },
                    ds: Stack[Int] = List.empty, // data stack
                    rs: Stack[Int] = List.empty, // return stack
                    compiling: Option[UserDefined] = None) {
@@ -37,11 +37,11 @@ case class Context(mem: CoreMemory,
   def nextToken(delim: String) =
     copy(input = input.next(delim))
 
-  def append(out: IO[Unit]) =
-    copy(output = output.flatMap(_ => out))
+  def append(action: IO[AppState[Unit]]) =
+    copy(io = io.flatMap(_ => action))
 
   def reset =
-    copy(output = IO.unit, error = None)
+    copy(io = IO { pure(()) }, error = None)
 
   def exec(token: Word) =
     find(token).fold[Try[Context]](Failure(Error(-13, token))) {
@@ -158,7 +158,7 @@ object Context {
     ctx <- get[Try, Context]
   } yield ctx.input
 
-  def output(block: => Unit): AppState[Unit] =
+  def performIO[A](block: => AppState[Unit]): AppState[Unit] =
     modify(_.append(IO {
       block
     }))

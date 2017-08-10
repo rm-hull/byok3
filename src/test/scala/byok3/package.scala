@@ -5,7 +5,7 @@ import org.scalatest.Matchers
 
 
 package object byok3 extends Matchers {
-  def assertOutput(program: IO[Unit])(expected: String): Unit = {
+  def assertOutput(program: IO[_])(expected: String): Unit = {
     val baos = new ByteArrayOutputStream()
     Console.withOut(baos) {
       program.unsafeRunSync()

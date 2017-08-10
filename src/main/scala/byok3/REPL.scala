@@ -4,6 +4,7 @@ import byok3.data_structures.MachineState.{OK, Smudge}
 import byok3.data_structures.{Context, Error}
 import byok3.repl.AnsiColor._
 import byok3.repl.{Banner, UpperCaseParser, WordCompleter}
+import byok3.types.AppState
 import cats.effect.IO
 import cats.implicits._
 import org.jline.reader.LineReader.Option._
@@ -58,7 +59,7 @@ object REPL {
     IO {
       Console.withOut(terminal.output) {
         Predef.print(MID_GREY)
-        ctx.output.unsafeRunSync()
+        ctx.io.unsafeRunSync()
       }
     }
 
@@ -68,8 +69,8 @@ object REPL {
       in <- reader(ctx)
       //_ = println(in)
       next = eval(ctx)(in)
-      _ <- print(next)
-    } yield next
+      effect <- print(next)
+    } yield effect.runS(next).get
 
     Try(program.unsafeRunSync) match {
       case Success(next) => loop(reader)(next)

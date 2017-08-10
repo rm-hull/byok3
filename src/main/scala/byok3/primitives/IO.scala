@@ -2,15 +2,17 @@ package byok3.primitives
 
 import java.time.LocalDate
 
+import biz.source_code.utils.RawConsoleInput
 import byok3.Disassembler
 import byok3.annonation.Documentation
 import byok3.data_structures.Context
 import byok3.data_structures.Context._
 import byok3.data_structures.CoreMemory._
-import byok3.data_structures.Stack.pop
+import byok3.data_structures.Stack.{pop, push}
 import byok3.types.Stack
 import cats.data.StateT._
 import cats.implicits._
+import org.jline.terminal.{Terminal, TerminalBuilder}
 
 import scala.util.Try
 
@@ -23,27 +25,44 @@ object IO {
   val `.` = for {
     base <- deref("BASE")
     n <- dataStack(pop)
-    _ <- output(print(num(base)(n) + " "))
+    _ <- performIO {
+      print(num(base)(n) + " ")
+      pure(())
+    }
   } yield ()
 
   @Documentation("display stack contents", stackEffect = "( -- )")
   val `.S` = for {
     base <- deref("BASE")
     stack <- dataStack(get[Try, Stack[Int]])
-    _ <- output(print(stack.reverse.map(num(base)).mkString(" ") + " "))
+    _ <- performIO {
+      print(stack.reverse.map(num(base)).mkString(" ") + " ")
+      pure(())
+    }
   } yield ()
 
   @Documentation("outputs ascii as character", stackEffect = "( ascii -- )")
   val EMIT = for {
     ascii <- dataStack(pop)
-    _ <- output(print(ascii.toChar))
+    _ <- performIO {
+      print(ascii.toChar)
+      pure(())
+    }
   } yield ()
 
+  @Documentation("waits for key, returns ascii", "( -- ascii )")
+  val KEY = performIO {
+    val ascii = RawConsoleInput.read(true)
+    dataStack(push(ascii))
+  }
 
   @Documentation("outputs u space characters", stackEffect = "( u -- )")
   val SPACES = for {
     n <- dataStack(pop)
-    _ <- output(print(" " * n))
+    _ <- performIO {
+      print(" " * n)
+      pure(())
+    }
   } yield ()
 
   @Documentation("outputs the contents of addr for n bytes", stackEffect = "( addr n -- )")
@@ -51,11 +70,14 @@ object IO {
     n <- dataStack(pop)
     addr <- dataStack(pop)
     data <- memory(fetch(addr, n))
-    _ <- output(print(data))
+    _ <- performIO {
+      print(data)
+      pure(())
+    }
   } yield ()
 
   @Documentation("displays the MIT license text", stackEffect = "( -- )")
-  val LICENSE = output {
+  val LICENSE = performIO {
     val now = LocalDate.now
     println(
       s"""|The MIT License (MIT)
@@ -79,13 +101,15 @@ object IO {
           |IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
           |CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
        """.stripMargin)
+    pure(())
   }
 
   @Documentation("List the definition names in alphabetical order", stackEffect = "( -- )")
   val WORDS = for {
     ctx <- get[Try, Context]
-    _ <- output {
+    _ <- performIO {
       println(ctx.dictionary.toMap.filterNot(_._2.internal).keys.toList.sorted.mkString(" "))
+      pure(())
     }
   } yield ()
 
@@ -94,7 +118,10 @@ object IO {
     len <- dataStack(pop)
     addr <- dataStack(pop)
     hexdump <- memory(inspect(_.hexDump))
-    _ <- output(hexdump.print(addr, len))
+    _ <- performIO {
+      hexdump.print(addr, len)
+      pure(())
+    }
   } yield ()
 
   @Documentation("Instruction disassembly at the given address block", stackEffect = "( len a-addr -- )")
@@ -103,6 +130,9 @@ object IO {
     addr <- dataStack(pop)
     aligned = align(addr)
     disassembler <- inspect[Try, Context, Disassembler](_.disassembler)
-    _ <- output(disassembler.print(aligned, len))
+    _ <- performIO {
+      disassembler.print(aligned, len)
+      pure(())
+    }
   } yield ()
 }

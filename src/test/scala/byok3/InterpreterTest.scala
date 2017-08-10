@@ -90,18 +90,18 @@ class InterpreterTest extends FunSuite with Matchers {
   test("should print the top stack item") {
     val ctx = Interpreter("1 2 3 5 7 + . . .").runS(emptyContext).get
     ctx.ds shouldEqual List(1)
-    assertOutput(ctx.output)("12 3 2 ")
+    assertOutput(ctx.io)("12 3 2 ")
   }
 
   test("should print the stack") {
     val ctx = Interpreter("1 2 3 5 7 + .S").runS(emptyContext).get
     ctx.ds shouldEqual List(12, 3, 2, 1)
-    assertOutput(ctx.output)("1 2 3 12 ")
+    assertOutput(ctx.io)("1 2 3 12 ")
   }
 
   test("should parse and print the message") {
     val ctx = Interpreter("33 PARSE HELLO, WORLD! TYPE 10 EMIT 33 PARSE THAT IS ALL! TYPE").runS(emptyContext).get
-    assertOutput(ctx.output)("HELLO, WORLD\nTHAT IS ALL")
+    assertOutput(ctx.io)("HELLO, WORLD\nTHAT IS ALL")
   }
 
   test("should compile and run a user defined word") {

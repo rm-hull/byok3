@@ -7,7 +7,8 @@ mainClass in (Compile, run) := Some("byok3.REPL")
 libraryDependencies ++= Seq(
   "org.typelevel" %% "cats" % "0.9.0",
   "org.typelevel" %% "cats-effect" % "0.3",
-  "org.jline" % "jline" % "3.4.0"
+  "org.jline" % "jline" % "3.4.0",
+  "net.java.dev.jna" % "jna-platform" % "4.4.0"
 )
 
 // test dependencies
