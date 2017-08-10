@@ -19,6 +19,13 @@ object FlowControl {
     _ <- IP(inc(ip))
   } yield ()
 
+  private def jump = for {
+    ip <- IP()
+    jmp <- memory(peek(ip))
+    _ <- IP(ip + jmp)
+  } yield ()
+
+
   @Internal
   val __NEST = for {
     addr <- IP()
@@ -106,14 +113,8 @@ object FlowControl {
   val `(LOOP)` = for {
     index <- returnStack(pop)
     limit <- returnStack(speek)
-    _ <- returnStack(push(index + 1))
-    _ <- if (index + 1 < limit) {
-      for {
-        ip <- IP()
-        jmp <- memory(peek(ip))
-        _ <- IP(ip + jmp)
-      } yield ()
-    } else {
+    _ <- returnStack(push(index + step))
+    _ <- if (index + step != limit) jump else {
       for {
         _ <- `ip++`
         _ <- returnStack(pop)
