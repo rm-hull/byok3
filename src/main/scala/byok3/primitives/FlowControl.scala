@@ -6,7 +6,9 @@ import byok3.data_structures.CoreMemory._
 import byok3.data_structures.Dictionary._
 import byok3.data_structures.Stack.{pop, push, peek => speek}
 import byok3.data_structures.{Error, IP, W}
+import byok3.primitives.StackManipulation.RDROP
 import byok3.types.AppState
+import byok3.helpers._
 import cats.data.StateT._
 import cats.implicits._
 
@@ -18,13 +20,6 @@ object FlowControl {
     ip <- IP()
     _ <- IP(inc(ip))
   } yield ()
-
-  private def jump = for {
-    ip <- IP()
-    jmp <- memory(peek(ip))
-    _ <- IP(ip + jmp)
-  } yield ()
-
 
   @Internal
   val __NEST = for {
@@ -94,12 +89,8 @@ object FlowControl {
   val `(?DO)` = for {
     index <- dataStack(pop)
     limit <- dataStack(pop)
-    _ <- if (index == limit) jump else {
-      for {
-        _ <- returnStack(push(limit))
-        _ <- returnStack(push(index))
-      } yield ()
-    }
+    _ <- if (index == limit) BRANCH
+         else returnStack(sequence(push(limit), push(index)))
   } yield ()
 
 
@@ -132,12 +123,7 @@ object FlowControl {
     index <- returnStack(pop)
     limit <- returnStack(speek)
     _ <- returnStack(push(index + step))
-    _ <- if (index + step != limit) jump else {
-      for {
-        _ <- `ip++`
-        _ <- returnStack(pop)
-        _ <- returnStack(pop)
-      } yield ()
-    }
+    _ <- if (index + step != limit) BRANCH
+         else sequence(`ip++`, RDROP, RDROP)
   } yield ()
 }
