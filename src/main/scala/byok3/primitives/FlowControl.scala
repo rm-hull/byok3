@@ -7,8 +7,8 @@ import byok3.data_structures.Dictionary._
 import byok3.data_structures.Stack.{pop, push, peek => speek}
 import byok3.data_structures.{Error, IP, W}
 import byok3.types.AppState
-import cats.implicits._
 import cats.data.StateT._
+import cats.implicits._
 
 import scala.util.Failure
 
