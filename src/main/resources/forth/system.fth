@@ -284,14 +284,14 @@ ustack 0stackp
         here >us do_flag  >us  ( for backward branch )
 ; immediate
 
-\ : ?DO    ( -- , loop-back do_flag jump-from ?do_flag  , on user stack )
-\        ?comp
-\        ( leave address to set for forward branch )
-\        compile  (?do)
-\        here 0 ,
-\        here >us do_flag  >us  ( for backward branch )
-\        >us ( for forward branch ) ?do_flag >us
-\ ; immediate
+: ?DO    ( -- , loop-back do_flag jump-from ?do_flag  , on user stack )
+        ?comp
+        ( leave address to set for forward branch )
+        compile  (?do)
+        here 0 ,
+        here >us do_flag  >us  ( for backward branch )
+        >us ( for forward branch ) ?do_flag >us
+; immediate
 
 : LEAVE  ( -- addr leave_flag )
         compile (leave)
