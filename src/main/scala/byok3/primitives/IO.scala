@@ -12,7 +12,6 @@ import byok3.data_structures.Stack.{pop, push}
 import byok3.types.Stack
 import cats.data.StateT._
 import cats.implicits._
-import org.jline.terminal.{Terminal, TerminalBuilder}
 
 import scala.util.Try
 
@@ -52,7 +51,7 @@ object IO {
 
   @Documentation("waits for key, returns ascii", "( -- ascii )")
   val KEY = performIO {
-    val ascii = RawConsoleInput.read(true)
+    val ascii = RawConsoleInput.read(true))
     dataStack(push(ascii))
   }
 
@@ -113,7 +112,7 @@ object IO {
     }
   } yield ()
 
-  @Documentation("Prints a hex dump of memory at the given address block", stackEffect="( len a-addr -- )")
+  @Documentation("Prints a hex dump of memory at the given address block", stackEffect = "( len a-addr -- )")
   val DUMP = for {
     len <- dataStack(pop)
     addr <- dataStack(pop)
