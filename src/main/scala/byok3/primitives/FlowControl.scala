@@ -123,6 +123,12 @@ object FlowControl {
   } yield ()
 
   val `(LOOP)` = for {
+    _ <- dataStack(push(1))
+    _ <- `(+LOOP)`
+  } yield ()
+
+  val `(+LOOP)` = for {
+    step <- dataStack(pop)
     index <- returnStack(pop)
     limit <- returnStack(speek)
     _ <- returnStack(push(index + step))
