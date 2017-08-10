@@ -29,6 +29,12 @@
 : ON   ( addr -- , set true ) -1 swap ! ;
 : OFF  ( addr -- , set false ) 0 swap ! ;
 
+: <= ( a b -- f , true if A <= b ) > 0= ;
+: >= ( a b -- f , true if A >= b ) < 0= ;
+: NOT ( n -- !n , logical negation ) 0= ;
+: DNEGATE ( d -- -d , negate by doing 0-d )
+        0 swap -
+;
 : CELL+  ( n -- n+cell )  cell + ;
 : CELL-  ( n -- n-cell )  cell - ;
 : CELL*  ( n -- n*cell )  cells ;
@@ -51,6 +57,11 @@
 : PAD ( -- addr ) here 128 + ;
 
 : MOVE$  ( a1 n a2 -- ) swap cmove ;
+
+: BETWEEN ( n lo hi -- flag , true if between lo & hi )
+        >r over r> > >r
+        < r> or 0=
+;
 
 : [  ( -- , enter interpreter mode )  0 state ! ; immediate
 : ]  ( -- , enter compile mode )      1 state ! ;
@@ -125,77 +136,6 @@
     ?comp ' [compile] literal
 ; immediate
 
-: RECURSE  ( ? -- ? , call the word currently being defined )
-    latest compile,
-; immediate
-
-: 2! ( x1 x2 addr -- , store x2 followed by x1 ) swap over ! cell+ ! ;
-: 2@ ( addr -- x1 x2 ) dup cell+ @ swap @ ;
-
-: /STRING  ( addr len n -- addr' len' ) over min rot over  + -rot - ;
-: PLACE    ( addr len to -- , move string ) 3dup 1+ swap cmove c! drop ;
-
-: ASCII ( <char> -- char, state smart )
-    bl parse drop c@
-    state @ 1 =
-    IF [compile] literal
-    ELSE
-    THEN
-; immediate
-
-: CHAR    ( <char> -- char , interpret mode ) bl parse drop c@ ;
-: [CHAR]  ( <char> -- char , for compile mode )
-    char [compile] literal
-; immediate
-
-: 'word  ( -- addr )  here ;
-
-: (C")  ( -- $addr ) r> dup count + aligned >r ;
-: (S")  ( -- c-addr cnt ) r> count 2dup + aligned >r ;
-: (.")  ( -- , type following string ) r> count 2dup + aligned >r type ;
-: ",    ( addr len -- , place string into dict ) tuck 'word place 1+ allot align ;
-: ,"    ( -- ) 34 parse ", ;
-
-: .(  ( <string> --, type string delimited by parens )
-    41 parse type
-; immediate
-
-: ."  ( <string> -- , type string )
-    state @ 1 =
-    IF compile (.")  ,"
-    ELSE 34 parse type
-    THEN
-; immediate
-
-: CLEARSTACK ( i*x -- )
-    BEGIN depth
-    WHILE drop
-    REPEAT ;
-
-variable pictured_output     \ hidden?
-variable pictured_output_len \ hidden?
-
-: <# ( -- ) pad pictured_output !  0 pictured_output_len ! ;
-: #> ( -- addr n ) drop pictured_output @ pictured_output_len @ ;
-
-: HOLD ( c -- )
-    pictured_output @ dup dup 1+ pictured_output_len @ cmove c!
-    1 pictured_output_len +!
-;
-
-: DIGIT ( n -- ascii )
-    dup 10 < IF 48 ELSE 87 THEN + ;
-
-: SIGN ( n -- ) < 0 IF 45 hold THEN
-;
-: # ( n -- n )
-    base @ /mod swap digit hold ;
-
-: #S ( n -- )
-    BEGIN base @ /mod dup
-    WHILE swap digit hold
-    REPEAT
-    digit hold ;
 
 : (DOES>)  ( xt -- , modify previous definition to execute code at xt )
         latest >body \ get address of code for new word
@@ -214,11 +154,26 @@ variable pictured_output_len \ hidden?
         swap !              \ save execution token in literal
 ; immediate
 
+0 1- constant -1
+0 2- constant -2
+
 : 2! ( x1 x2 addr -- , store x2 followed by x1 )
         swap over ! cell+ ! ;
 : 2@ ( addr -- x1 x2 )
         dup cell+ @ swap @ ;
 
+: 2* ( n -- n*2 )
+        1 lshift
+;
+: 2/ ( n -- n/2 )
+        1 rshift
+;
+
+
+\ define some useful constants ------------------------------
+1 0= constant FALSE
+0 0= constant TRUE
+32 constant BL
 
 \ Stack data structure ----------------------------------------
 \ This is a general purpose stack utility used to implement necessary
@@ -342,3 +297,187 @@ ustack 0stackp
         rdrop rdrop
         >r
 ;
+
+
+: RECURSE  ( ? -- ? , call the word currently being defined )
+    latest compile,
+; immediate
+
+: SPACE  bl emit ;
+: SPACES  512 min 0 max 0 ?DO space LOOP ;
+: 0SP depth 0 ?do drop loop ;
+
+\ : >NEWLINE ( -- , CR if needed )
+\         out @ 0>
+\         IF cr
+\         THEN
+\ ;
+
+
+: 2! ( x1 x2 addr -- , store x2 followed by x1 ) swap over ! cell+ ! ;
+: 2@ ( addr -- x1 x2 ) dup cell+ @ swap @ ;
+
+: DABS ( d -- |d| )
+        dup 0<
+        IF dnegate
+        THEN
+;
+
+: S>D  ( s -- d , extend signed single precision to double )
+        dup 0<
+        IF -1
+        ELSE 0
+        THEN
+;
+
+: D>S ( d -- s ) drop ;
+
+: /STRING  ( addr len n -- addr' len' ) over min rot over  + -rot - ;
+: PLACE    ( addr len to -- , move string ) 3dup 1+ swap cmove c! drop ;
+
+: ASCII ( <char> -- char, state smart )
+    bl parse drop c@
+    state @ 1 =
+    IF [compile] literal
+    ELSE
+    THEN
+; immediate
+
+: CHAR    ( <char> -- char , interpret mode ) bl parse drop c@ ;
+: [CHAR]  ( <char> -- char , for compile mode )
+    char [compile] literal
+; immediate
+
+: $TYPE  ( $string -- ) count type ;
+: 'word  ( -- addr )  here ;
+
+: EVEN    ( addr -- addr' )   dup 1 and +  ;
+
+: (C")  ( -- $addr ) r> dup count + aligned >r ;
+: (S")  ( -- c-addr cnt ) r> count 2dup + aligned >r ;
+: (.")  ( -- , type following string ) r> count 2dup + aligned >r type ;
+: ",    ( addr len -- , place string into dict ) tuck 'word place 1+ allot align ;
+: ,"    ( -- ) 34 parse ", ;
+
+: .(  ( <string> --, type string delimited by parens )
+    41 parse type
+; immediate
+
+: ."  ( <string> -- , type string )
+    state @ 1 =
+    IF compile (.")  ,"
+    ELSE 34 parse type
+    THEN
+; immediate
+
+: .'   ( <string> -- , type string delimited by single quote )
+        state @
+        IF    compile (.")  [char] ' parse ",
+        ELSE [char] ' parse type
+        THEN
+; immediate
+
+: C"    ( <string> -- addr , return string address, ANSI )
+        state @
+        IF compile (c")   ,"
+        ELSE [char] " parse pad place pad
+        THEN
+; immediate
+
+: S"    ( <string> -- , -- addr , return string address, ANSI )
+        state @
+        IF compile (s")   ,"
+        ELSE [char] " parse pad place pad count
+        THEN
+; immediate
+
+: "    ( <string> -- , -- addr , return string address )
+        [compile] C"
+; immediate
+: P"    ( <string> -- , -- addr , return string address )
+        [compile] C"
+; immediate
+
+\ : ""  ( <string> -- addr )
+\        state @
+\        IF
+\                compile (C")
+\                bl parse-word  ",
+\        ELSE
+\                bl parse-word pad place pad
+\        THEN
+\ ; immediate
+
+: SLITERAL ( addr cnt -- , compile string )
+	compile (S")
+	",
+; IMMEDIATE
+
+: $APPEND ( addr count $1 -- , append text to $1 )
+    over >r
+        dup >r
+    count +  ( -- a2 c2 end1 )
+    swap cmove
+    r> dup c@  ( a1 c1 )
+    r> + ( -- a1 totalcount )
+    swap c!
+;
+
+\ ANSI word to replace [COMPILE] and COMPILE ----------------
+\ : POSTPONE  ( <name> -- )
+\	bl word find
+\	dup 0=
+\	IF
+\		." Postpone could not find " count type cr abort
+\	ELSE
+\		0>
+\		IF compile,  \ immediate
+\		ELSE (compile)  \ normal
+\		THEN
+\	THEN
+\ ; immediate
+
+\ -----------------------------------------------------------------
+\ Auto Initialization
+: AUTO.INIT  ( -- )
+\ Kernel finds AUTO.INIT and executes it after loading dictionary.
+\	." Begin AUTO.INIT ------" cr
+;
+: AUTO.TERM  ( -- )
+\ Kernel finds AUTO.TERM and executes it on bye.
+\	." End AUTO.TERM ------" cr
+;
+
+
+: CLEARSTACK ( i*x -- )
+    BEGIN depth
+    WHILE drop
+    REPEAT ;
+
+variable pictured_output     \ hidden?
+variable pictured_output_len \ hidden?
+
+: <# ( -- ) pad pictured_output !  0 pictured_output_len ! ;
+: #> ( -- addr n ) drop pictured_output @ pictured_output_len @ ;
+
+: HOLD ( c -- )
+    pictured_output @ dup dup 1+ pictured_output_len @ cmove c!
+    1 pictured_output_len +!
+;
+
+\ ------------------------ INPUT -------------------------------
+
+: SIGN ( n -- ) < 0 IF 45 hold THEN
+;
+
+: DIGIT ( n -- ascii )
+   dup 10 < IF 48 ELSE 87 THEN + ;
+
+: # ( n -- n )
+    base @ /mod swap digit hold ;
+
+: #S ( n -- )
+    BEGIN base @ /mod dup
+    WHILE swap digit hold
+    REPEAT
+    digit hold ;
