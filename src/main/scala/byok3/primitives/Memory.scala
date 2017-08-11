@@ -21,8 +21,6 @@ object Memory {
     _ <- DP(inc(aligned))
   } yield aligned
 
-  val CELL = Constant("CELL", CELL_SIZE).effect
-
   val `(LIT)` = for {
     ip <- IP()
     data <- memory(peek(ip))

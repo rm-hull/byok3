@@ -86,6 +86,7 @@ object Context {
     // poke the DP with the next cell's address
       _ <- memory(poke(dp, inc(dp)))
       _ <- dictionary(add(Constant("DP", dp)))
+      _ <- dictionary(add(Constant("CELL", CELL_SIZE)))
       // Now set up the other core registers
       _ <- initialize("IP", 0)
       _ <- initialize("W", 0)
