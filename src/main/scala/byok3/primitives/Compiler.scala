@@ -80,14 +80,15 @@ object Compiler {
 
   @Documentation("the address and length of the name of the execution token", stackEffect = "( xt -- len a-addr)")
   val `NAME>` = for {
-    dp <- DP()
+    _ <- exec("PAD")
+    addr <- dataStack(pop)
     xt <- dataStack(pop)
     instr <- dictionary(instruction(xt))
-    _ <- memory(copy(dp, instr.name))
+    // TODO: copy to transient buffer instead of consuming heap
+    _ <- memory(copy(addr, instr.name))
     len = instr.name.length
-    _ <- dataStack(push(dp))
+    _ <- dataStack(push(addr))
     _ <- dataStack(push(len))
-    _ <- DP(dp + align(len))
   } yield ()
 
   @Documentation("Skip leading space delimiters. Parse name delimited by a space. Create a definition for name with the execution semantics: name Execution: ( -- a-addr )", stackEffect = "( \"<spaces>name\" -- )")
