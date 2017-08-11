@@ -2,7 +2,6 @@ package byok3
 
 import byok3.data_structures.Context
 import byok3.repl.AnsiColor._
-import cats.effect.IO
 import cats.implicits._
 import org.scalatest.FunSuite
 
@@ -18,9 +17,6 @@ class DisassemblerTest extends FunSuite {
   val disassembler = new Disassembler(ctx)
 
   test("should print disassembly") {
-    val prog = IO {
-      disassembler.print(0x0124, 0x2C)
-    }
     val expected =
       s"""${MID_GREY}00000124:  29 00 00 00  |)...|  ${CYAN}${BOLD}: <unknown>${RESET}${MID_GREY}
          |${MID_GREY}00000128:  5C 00 00 00  |\\...|  DUP
@@ -34,7 +30,8 @@ class DisassemblerTest extends FunSuite {
          |${MID_GREY}00000148:  02 00 00 00  |....|  *
          |${MID_GREY}0000014C:  2A 00 00 00  |*...|  EXIT
          |""".stripMargin
-    
-    assertOutput(prog)(expected)
+
+    val actual = capturingOutput(disassembler.print(0x0124, 0x2C))
+    actual shouldEqual expected
   }
 }

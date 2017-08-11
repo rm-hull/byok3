@@ -2,7 +2,7 @@ package byok3.data_structures
 
 import byok3.Disassembler
 import byok3.data_structures.Context._
-import byok3.data_structures.CoreMemory.{copy, peek, poke, inc, offset}
+import byok3.data_structures.CoreMemory._
 import byok3.data_structures.Dictionary.add
 import byok3.data_structures.MachineState.OK
 import byok3.data_structures.Stack.pop
@@ -10,7 +10,6 @@ import byok3.primitives.Memory.comma
 import byok3.types.{Address, AppState, Data, Dict, Stack, Word}
 import cats.data.StateT
 import cats.data.StateT._
-import cats.effect.IO
 import cats.implicits._
 
 import scala.util.{Failure, Try}
@@ -20,14 +19,14 @@ case class Context(mem: CoreMemory,
                    dictionary: Dict = Dictionary(),
                    error: Option[Error] = None,
                    input: Tokenizer = EndOfData,
-                   output: IO[Unit] = IO.unit,
                    ds: Stack[Int] = List.empty, // data stack
                    rs: Stack[Int] = List.empty, // return stack
-                   compiling: Option[UserDefined] = None) {
+                   compiling: Option[UserDefined] = None,
+                   rawConsoleInput: Option[RawInput] = None) {
 
   def error(err: Error) =
-    // reset the STATE to interpreter mode and then
-    // drain the data and return stacks if there was an error
+  // reset the STATE to interpreter mode and then
+  // drain the data and return stacks if there was an error
     machineState(OK).runS(this).get
       .copy(error = Some(err), ds = List.empty, rs = List.empty)
 
@@ -37,11 +36,8 @@ case class Context(mem: CoreMemory,
   def nextToken(delim: String) =
     copy(input = input.next(delim))
 
-  def append(out: IO[Unit]) =
-    copy(output = output.flatMap(_ => out))
-
   def reset =
-    copy(output = IO.unit, error = None)
+    copy(error = None)
 
   def exec(token: Word) =
     find(token).fold[Try[Context]](Failure(Error(-13, token))) {
@@ -72,8 +68,8 @@ object Context {
 
   private def bootstrap(dp: Address) = {
     for {
-      // Can't initialise DP as init requires DP to already be set up:
-      // poke the DP with the next cell's address
+    // Can't initialise DP as init requires DP to already be set up:
+    // poke the DP with the next cell's address
       _ <- memory(poke(dp, inc(dp)))
       _ <- dictionary(add(Constant("DP", dp)))
       // Now set up the other core registers
@@ -88,6 +84,8 @@ object Context {
       _ <- initialize("ECHO", 0)
     } yield ()
   }
+
+  def defaultRawInput(): Int = ???
 
   def apply(memSize: Int): Context = {
     require(offset(memSize) == 0)
@@ -157,9 +155,4 @@ object Context {
     _ <- modify[Try, Context](_.nextToken(delim))
     ctx <- get[Try, Context]
   } yield ctx.input
-
-  def output(block: => Unit): AppState[Unit] =
-    modify(_.append(IO {
-      block
-    }))
 }

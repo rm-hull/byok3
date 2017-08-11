@@ -4,17 +4,21 @@ import java.time.LocalDate
 
 import byok3.Disassembler
 import byok3.annonation.Documentation
-import byok3.data_structures.Context
+import byok3.data_structures.{Context, Error}
 import byok3.data_structures.Context._
 import byok3.data_structures.CoreMemory._
-import byok3.data_structures.Stack.pop
-import byok3.types.Stack
+import byok3.data_structures.Stack.{pop, push}
+import byok3.types.{AppState, Stack}
+import cats.data.StateT
 import cats.data.StateT._
 import cats.implicits._
 
 import scala.util.Try
 
 object IO {
+
+  private def unsafeIO[A](block: => A): AppState[A] =
+    StateT(s => Try((s, block)))
 
   private def num(base: Int)(n: Int) =
     BigInt(n).toString(base)
@@ -23,27 +27,44 @@ object IO {
   val `.` = for {
     base <- deref("BASE")
     n <- dataStack(pop)
-    _ <- output(print(num(base)(n) + " "))
+    _ <- unsafeIO {
+      print(num(base)(n) + " ")
+    }
   } yield ()
 
   @Documentation("display stack contents", stackEffect = "( -- )")
   val `.S` = for {
     base <- deref("BASE")
     stack <- dataStack(get[Try, Stack[Int]])
-    _ <- output(print(stack.reverse.map(num(base)).mkString(" ") + " "))
+    _ <- unsafeIO {
+      print(stack.reverse.map(num(base)).mkString(" ") + " ")
+    }
   } yield ()
 
   @Documentation("outputs ascii as character", stackEffect = "( ascii -- )")
   val EMIT = for {
     ascii <- dataStack(pop)
-    _ <- output(print(ascii.toChar))
+    _ <- unsafeIO {
+      print(ascii.toChar)
+    }
   } yield ()
 
+  @Documentation("waits for key, returns ascii", "( -- ascii )")
+  val KEY = for {
+    ctx <- get[Try, Context]
+    ascii <- unsafeIO {
+      val rawInput = ctx.rawConsoleInput.getOrElse(throw Error(-21))
+      rawInput.read()
+    }
+    _ <- dataStack(push(ascii))
+  } yield ()
 
   @Documentation("outputs u space characters", stackEffect = "( u -- )")
   val SPACES = for {
     n <- dataStack(pop)
-    _ <- output(print(" " * n))
+    _ <- unsafeIO {
+      print(" " * n)
+    }
   } yield ()
 
   @Documentation("outputs the contents of addr for n bytes", stackEffect = "( addr n -- )")
@@ -51,11 +72,13 @@ object IO {
     n <- dataStack(pop)
     addr <- dataStack(pop)
     data <- memory(fetch(addr, n))
-    _ <- output(print(data))
+    _ <- unsafeIO {
+      print(data)
+    }
   } yield ()
 
   @Documentation("displays the MIT license text", stackEffect = "( -- )")
-  val LICENSE = output {
+  val LICENSE = unsafeIO {
     val now = LocalDate.now
     println(
       s"""|The MIT License (MIT)
@@ -79,22 +102,27 @@ object IO {
           |IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
           |CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
        """.stripMargin)
+    pure(())
   }
 
   @Documentation("List the definition names in alphabetical order", stackEffect = "( -- )")
   val WORDS = for {
     ctx <- get[Try, Context]
-    _ <- output {
-      println(ctx.dictionary.toMap.filterNot(_._2.internal).keys.toList.sorted.mkString(" "))
+    dict = ctx.dictionary
+    words = dict.toMap.filterNot(_._2.internal).keys.toList.sorted.mkString(" ")
+    _ <- unsafeIO {
+      println(words)
     }
   } yield ()
 
-  @Documentation("Prints a hex dump of memory at the given address block", stackEffect="( len a-addr -- )")
+  @Documentation("Prints a hex dump of memory at the given address block", stackEffect = "( len a-addr -- )")
   val DUMP = for {
     len <- dataStack(pop)
     addr <- dataStack(pop)
     hexdump <- memory(inspect(_.hexDump))
-    _ <- output(hexdump.print(addr, len))
+    _ <- unsafeIO {
+      hexdump.print(addr, len)
+    }
   } yield ()
 
   @Documentation("Instruction disassembly at the given address block", stackEffect = "( len a-addr -- )")
@@ -103,6 +131,8 @@ object IO {
     addr <- dataStack(pop)
     aligned = align(addr)
     disassembler <- inspect[Try, Context, Disassembler](_.disassembler)
-    _ <- output(disassembler.print(aligned, len))
+    _ <- unsafeIO {
+      disassembler.print(aligned, len)
+    }
   } yield ()
 }
