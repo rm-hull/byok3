@@ -4,9 +4,12 @@ import byok3.data_structures.{Context, Error}
 import cats.implicits._
 import org.scalatest.{FunSuite, Matchers}
 
+import scala.io.Source
+
 class InterpreterTest extends FunSuite with Matchers {
 
-  val emptyContext = Context(0x10000)
+  val lines = Source.fromResource("forth/system.fth").getLines.toStream
+  val emptyContext = Context(0x10000).load(lines)
 
   test("should push values onto the data stack") {
     val ctx = Interpreter("9  5 3").runS(emptyContext).get
@@ -120,20 +123,41 @@ class InterpreterTest extends FunSuite with Matchers {
     ctx.ds shouldEqual List(9)
   }
 
-  test("should compile and run a user defined word over several sessions") {
+  test("should compile and run a user defined word that compiles looping primitives") {
     val ops = for {
-      _ <- Interpreter(": SQR ")
-      _ <- Interpreter("DUP * ;")
-      _ <- Interpreter("3 SQR")
+      _ <- Interpreter(": DECADE 10 0 DO I LOOP ;")
+      _ <- Interpreter("DECADE")
     } yield ()
 
     val ctx = ops.runS(emptyContext).get
-    ctx.ds shouldEqual List(9)
+    ctx.ds shouldEqual List(9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+  }
+
+  test("should compile and run a user defined word that compiles branching & string primitives") {
+    val ops = for {
+      _ <- Interpreter(": ?DOZEN  12 = IF .\" dozen \" ELSE .\" not a dozen\" THEN ;")
+      _ <- Interpreter("8 ?DOZEN")
+    } yield ()
+
+    val actual = capturingOutput{
+      ops.runS(emptyContext).get
+    }
+    actual shouldEqual "not a dozen"
+  }
+
+  test("should compile and run a user defined word over several sessions") {
+    val ops = for {
+      _ <- Interpreter(": GCD ( a b -- n )")
+      _ <- Interpreter("    begin  dup while  tuck mod  repeat drop ;")
+      _ <- Interpreter("60 201 GCD")
+    } yield ()
+
+    val ctx = ops.runS(emptyContext).get
+    ctx.ds shouldEqual List(3)
   }
 
   test("should record error when LITERAL when not in compile mode") {
     val ctx = Interpreter("10 LITERAL").runS(emptyContext).get
     ctx.status shouldEqual Left(Error(-14))
   }
-
 }
