@@ -85,17 +85,10 @@ object Context {
     } yield ()
   }
 
-  def defaultRawInput(): Int = ???
-
   def apply(memSize: Int): Context = {
     require(offset(memSize) == 0)
     bootstrap(dp = 0x100).runS(Context(CoreMemory(memSize))).get
   }
-
-  //  def dataStack2[A](block: StateT[Try, Stack[Int], A]): AppState[Unit] =
-  //    modify[Try, Context](ctx => block.runS(ctx.ds).foldLeft[Context](ctx.updateState(Error(-4))) {
-  //          (ctx, stack) => ctx.copy(ds = stack)
-  //    })
 
   def initialize(name: Word, value: Data): AppState[Unit] = for {
     addr <- comma(value)
