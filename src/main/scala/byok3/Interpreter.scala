@@ -4,6 +4,7 @@ import byok3.data_structures.Context._
 import byok3.data_structures.MachineState._
 import byok3.data_structures.Stack._
 import byok3.data_structures._
+import byok3.implicits._
 import byok3.primitives.Compiler._
 import byok3.types.{AppState, Word}
 import cats.data.StateT._
@@ -17,8 +18,18 @@ import scala.util.Try
   */
 object Interpreter extends Executor {
 
+  private val radixPrefix = Map('#' -> 10, '$' -> 16, '%' -> 2)
+
+  private def parsePrefix(value: String) = {
+    val radix = radixPrefix.get(value.charAt(0))
+    radix.toTry(Error(-13, value))
+      .flatMap(r => Try(Integer.parseInt(value.substring(1), r)))
+  }
+
   private def toNumber(value: String, radix: Int) =
-    Try(Integer.parseInt(value, radix)).getOrElse(throw Error(-13, value))
+    Try(Integer.parseInt(value, radix))
+      .orElse(parsePrefix(value))
+      .getOrElse(throw Error(-13, value))
 
   private def pushNumber(token: Word) = for {
     status <- machineState
