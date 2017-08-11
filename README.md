@@ -22,7 +22,7 @@ which can be executed with:
 
 ## Demo
 
-[![asciicast](https://asciinema.org/a/kXEtkGGKCLPNpoiiai6g7WB55)](https://asciinema.org/a/kXEtkGGKCLPNpoiiai6g7WB55)
+[![asciicast](https://asciinema.org/a/kXEtkGGKCLPNpoiiai6g7WB55.png)](https://asciinema.org/a/kXEtkGGKCLPNpoiiai6g7WB55)
 
 ## Implementation Notes 
 
