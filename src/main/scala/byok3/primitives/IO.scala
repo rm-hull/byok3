@@ -24,6 +24,17 @@ object IO {
   private def num(base: Int)(n: Int) =
     BigInt(n).toString(base)
 
+  private def isValidFilename(filename: String) =
+    !(filename.isEmpty || filename.trim.startsWith("/") || filename.contains(".."))
+
+  private def loadSource(filename: String) = for {
+    _ <- guard(isValidFilename(filename), Error(-38))
+    lines <- unsafeIO {
+      Source.fromFile(filename).getLines.toStream
+    }
+    _ <- modify[Try, Context](_.include(filename).load(lines))
+  } yield ()
+
   @Documentation("convert signed number n to string of digits, and output", stackEffect = "( n -- )")
   val `.` = for {
     base <- deref("BASE")
@@ -137,19 +148,12 @@ object IO {
     }
   } yield ()
 
-  private def isValidFilename(filename: String) = true // FIXME --> is sandboxed
-
-  @Documentation("include-file the file whose name is given by the string c-addr u", stackEffect = "( i*x c-addr u – j*x )")
+  @Documentation("include-file the file whose name is given by the string c-addr u", stackEffect = "( i*x c-addr u -- j*x )")
   val INCLUDED = for {
     len <- dataStack(pop)
     addr <- dataStack(pop)
     filename <- memory(fetch(addr, len))
-    _ <- guard(isValidFilename(filename), Error(-38))
-    lines <- unsafeIO {
-      Source.fromFile(filename).getLines.toStream
-    }
-    _ <- modify[Try, Context](_.included(filename))
-    _ <- modify[Try, Context](_.load(lines))
+    _ <- loadSource(filename)
   } yield ()
 
   @Documentation("include-file the file", "( \"ccc<file>\" -- )")
@@ -159,5 +163,23 @@ object IO {
     _ <- dataStack(push(tib + token.offset))
     _ <- dataStack(push(token.value.length))
     _ <- INCLUDED
+  } yield ()
+
+  @Documentation("include-file the file with the name given by addr u, if it is not included (or required) already. Currently this works by comparing the name of the file (with path) against the names of earlier included files", stackEffect = "( i*x c-addr u -- j*x )")
+  val REQUIRED = for {
+    len <- dataStack(pop)
+    addr <- dataStack(pop)
+    filename <- memory(fetch(addr, len))
+    included <- inspect[Try, Context, Set[String]](_.included)
+    _ <- if (included.contains(filename)) pure[Try, Context, Unit](()) else loadSource(filename)
+  } yield ()
+
+  @Documentation("include-file the file only if it is not included already", "( \"ccc<file>\" -- )")
+  val REQUIRE = for {
+    tib <- deref("TIB")
+    token <- nextToken()
+    _ <- dataStack(push(tib + token.offset))
+    _ <- dataStack(push(token.value.length))
+    _ <- REQUIRED
   } yield ()
 }

@@ -74,7 +74,7 @@ case class Context(mem: CoreMemory,
     case _ => this
   }
 
-  def included(filename: String) =
+  def include(filename: String) =
     copy(included = included + filename)
 }
 

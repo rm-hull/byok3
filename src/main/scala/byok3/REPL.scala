@@ -98,6 +98,6 @@ object REPL {
       else throw new EndOfFileException()
     }
 
-    loop(read)(ctx.included(filename))
+    loop(read)(ctx.include(filename))
   }
 }
