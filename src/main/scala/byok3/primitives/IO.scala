@@ -136,6 +136,8 @@ object IO {
     }
   } yield ()
 
+  val VLIST = WORDS
+
   @Documentation("Prints a hex dump of memory at the given address block", stackEffect = "( len a-addr -- )")
   val DUMP = for {
     len <- dataStack(pop)
