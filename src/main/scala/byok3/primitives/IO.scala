@@ -2,10 +2,9 @@ package byok3.primitives
 
 import java.time.LocalDate
 
-import biz.source_code.utils.RawConsoleInput
 import byok3.Disassembler
 import byok3.annonation.Documentation
-import byok3.data_structures.Context
+import byok3.data_structures.{Context, Error}
 import byok3.data_structures.Context._
 import byok3.data_structures.CoreMemory._
 import byok3.data_structures.Stack.{pop, push}
@@ -28,32 +27,44 @@ object IO {
   val `.` = for {
     base <- deref("BASE")
     n <- dataStack(pop)
-    _ <- unsafeIO { print(num(base)(n) + " ") }
+    _ <- unsafeIO {
+      print(num(base)(n) + " ")
+    }
   } yield ()
 
   @Documentation("display stack contents", stackEffect = "( -- )")
   val `.S` = for {
     base <- deref("BASE")
     stack <- dataStack(get[Try, Stack[Int]])
-    _ <- unsafeIO { print(stack.reverse.map(num(base)).mkString(" ") + " ") }
+    _ <- unsafeIO {
+      print(stack.reverse.map(num(base)).mkString(" ") + " ")
+    }
   } yield ()
 
   @Documentation("outputs ascii as character", stackEffect = "( ascii -- )")
   val EMIT = for {
     ascii <- dataStack(pop)
-    _ <- unsafeIO { print(ascii.toChar) }
+    _ <- unsafeIO {
+      print(ascii.toChar)
+    }
   } yield ()
 
   @Documentation("waits for key, returns ascii", "( -- ascii )")
   val KEY = for {
-    ascii <- unsafeIO { RawConsoleInput.read(true) }
+    ctx <- get[Try, Context]
+    ascii <- unsafeIO {
+      val rawInput = ctx.rawConsoleInput.getOrElse(throw Error(-21))
+      rawInput.read()
+    }
     _ <- dataStack(push(ascii))
   } yield ()
 
   @Documentation("outputs u space characters", stackEffect = "( u -- )")
   val SPACES = for {
     n <- dataStack(pop)
-    _ <- unsafeIO { print(" " * n) }
+    _ <- unsafeIO {
+      print(" " * n)
+    }
   } yield ()
 
   @Documentation("outputs the contents of addr for n bytes", stackEffect = "( addr n -- )")
@@ -61,7 +72,9 @@ object IO {
     n <- dataStack(pop)
     addr <- dataStack(pop)
     data <- memory(fetch(addr, n))
-    _ <- unsafeIO { print(data) }
+    _ <- unsafeIO {
+      print(data)
+    }
   } yield ()
 
   @Documentation("displays the MIT license text", stackEffect = "( -- )")
@@ -97,7 +110,9 @@ object IO {
     ctx <- get[Try, Context]
     dict = ctx.dictionary
     words = dict.toMap.filterNot(_._2.internal).keys.toList.sorted.mkString(" ")
-    _ <- unsafeIO { println(words) }
+    _ <- unsafeIO {
+      println(words)
+    }
   } yield ()
 
   @Documentation("Prints a hex dump of memory at the given address block", stackEffect = "( len a-addr -- )")
@@ -105,7 +120,9 @@ object IO {
     len <- dataStack(pop)
     addr <- dataStack(pop)
     hexdump <- memory(inspect(_.hexDump))
-    _ <- unsafeIO { hexdump.print(addr, len) }
+    _ <- unsafeIO {
+      hexdump.print(addr, len)
+    }
   } yield ()
 
   @Documentation("Instruction disassembly at the given address block", stackEffect = "( len a-addr -- )")
@@ -114,6 +131,8 @@ object IO {
     addr <- dataStack(pop)
     aligned = align(addr)
     disassembler <- inspect[Try, Context, Disassembler](_.disassembler)
-    _ <- unsafeIO { disassembler.print(aligned, len) }
+    _ <- unsafeIO {
+      disassembler.print(aligned, len)
+    }
   } yield ()
 }

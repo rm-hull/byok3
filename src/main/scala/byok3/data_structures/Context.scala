@@ -21,7 +21,8 @@ case class Context(mem: CoreMemory,
                    input: Tokenizer = EndOfData,
                    ds: Stack[Int] = List.empty, // data stack
                    rs: Stack[Int] = List.empty, // return stack
-                   compiling: Option[UserDefined] = None) {
+                   compiling: Option[UserDefined] = None,
+                   rawConsoleInput: Option[RawInput] = None) {
 
   def error(err: Error) =
   // reset the STATE to interpreter mode and then
@@ -83,6 +84,8 @@ object Context {
       _ <- initialize("ECHO", 0)
     } yield ()
   }
+
+  def defaultRawInput(): Int = ???
 
   def apply(memSize: Int): Context = {
     require(offset(memSize) == 0)

@@ -3,7 +3,7 @@ package byok3
 import byok3.data_structures.MachineState.{OK, Smudge}
 import byok3.data_structures.{Context, Error}
 import byok3.repl.AnsiColor._
-import byok3.repl.{Banner, UpperCaseParser, WordCompleter}
+import byok3.repl._
 import cats.effect.IO
 import cats.implicits._
 import org.jline.reader.LineReader.Option._
@@ -32,6 +32,8 @@ object REPL {
   def main(args: Array[String]): Unit = {
     println(Banner())
     val emptyContext = load("forth/system.fth", Context(0x500000))
+      .copy(rawConsoleInput = Some(TerminalRawInput(terminal)))
+
     loop(read)(emptyContext)
     println("exiting...")
   }
@@ -76,13 +78,15 @@ object REPL {
   }
 
   private def load(filename: String, ctx: Context): Context = {
-    val indicator = List("|", "/", "-", "\\")
-    val lines = Source.fromResource(filename).getLines().zip(Stream.from(1).toIterator)
+
+    val lines = Source.fromResource(filename)
+      .getLines()
+      .zip(Stream.from(1).toIterator)
 
     def read(ctx: Context): IO[String] = IO {
       if (lines.hasNext) {
         val (text, line) = lines.next()
-        Predef.print(s"${indicator(line / 10 % indicator.length)}\r")
+        Predef.print(s"${ProgressIndicator(line)}\r")
         ctx.error.foreach { err =>
           println(s"${RED}${BOLD}Error ${err.errno}:${RESET} ${err.message} occurred in ${BOLD}$filename, line: ${line - 1}${RESET}")
           throw new EndOfFileException()
