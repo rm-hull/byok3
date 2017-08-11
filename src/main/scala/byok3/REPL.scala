@@ -5,7 +5,6 @@ import byok3.data_structures.{Context, Error}
 import byok3.repl.AnsiColor._
 import byok3.repl._
 import cats.effect.IO
-import cats.implicits._
 import org.jline.reader.LineReader.Option._
 import org.jline.reader.{EndOfFileException, LineReaderBuilder, UserInterruptException}
 import org.jline.terminal.TerminalBuilder
@@ -31,10 +30,15 @@ object REPL {
 
   def main(args: Array[String]): Unit = {
     println(Banner())
-    val emptyContext = load("forth/system.fth", Context(0x500000))
+
+    val systemLibs = Seq("forth/system.fth")
+
+    val ctx = systemLibs.map(load)
+      .reduce(_ andThen _)
+      .apply(Context(0x500000))
       .copy(rawConsoleInput = Some(TerminalRawInput(terminal)))
 
-    loop(read)(emptyContext)
+    loop(read)(ctx)
     println("exiting...")
   }
 
@@ -57,15 +61,12 @@ object REPL {
     }
   }
 
-  private def eval(ctx: Context)(text: String) =
-    Interpreter(text).runS(ctx).get
-
   @tailrec
   private def loop(reader: Context => IO[String])(ctx: Context): Context = {
     val program: IO[Context] = for {
       in <- reader(ctx)
       //_ = println(in)
-      next = eval(ctx)(in)
+      next = ctx.eval(in)
     // _  <- print(next)
     } yield next
 
@@ -77,7 +78,7 @@ object REPL {
     }
   }
 
-  private def load(filename: String, ctx: Context): Context = {
+  private def load(filename: String)(ctx: Context): Context = {
 
     val lines = Source.fromResource(filename)
       .getLines()
@@ -97,6 +98,6 @@ object REPL {
       else throw new EndOfFileException()
     }
 
-    loop(read)(ctx)
+    loop(read)(ctx.included(filename))
   }
 }

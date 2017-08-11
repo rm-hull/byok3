@@ -1,6 +1,5 @@
 package byok3.data_structures
 
-import byok3.Disassembler
 import byok3.data_structures.Context._
 import byok3.data_structures.CoreMemory._
 import byok3.data_structures.Dictionary.add
@@ -8,10 +7,12 @@ import byok3.data_structures.MachineState.OK
 import byok3.data_structures.Stack.pop
 import byok3.primitives.Memory.comma
 import byok3.types.{Address, AppState, Data, Dict, Stack, Word}
+import byok3.{Disassembler, Interpreter}
 import cats.data.StateT
 import cats.data.StateT._
 import cats.implicits._
 
+import scala.annotation.tailrec
 import scala.util.{Failure, Try}
 
 
@@ -22,9 +23,10 @@ case class Context(mem: CoreMemory,
                    ds: Stack[Int] = List.empty, // data stack
                    rs: Stack[Int] = List.empty, // return stack
                    compiling: Option[UserDefined] = None,
-                   rawConsoleInput: Option[RawInput] = None) {
+                   rawConsoleInput: Option[RawInput] = None,
+                   included: Set[String] = Set.empty) {
 
-  def error(err: Error) =
+  def error(err: Error): Context =
   // reset the STATE to interpreter mode and then
   // drain the data and return stacks if there was an error
     machineState(OK).runS(this).get
@@ -62,6 +64,18 @@ case class Context(mem: CoreMemory,
     else copy(compiling = Some(UserDefined(token, addr)))
 
   lazy val disassembler = new Disassembler(this)
+
+  def eval(text: String) =
+    Interpreter(text).runS(this).get
+
+  @tailrec
+  final def load(lines: Stream[String]): Context = lines match {
+    case Stream.cons(line, rest) if error.isEmpty => eval(line).load(rest)
+    case _ => this
+  }
+
+  def included(filename: String) =
+    copy(included = included + filename)
 }
 
 object Context {

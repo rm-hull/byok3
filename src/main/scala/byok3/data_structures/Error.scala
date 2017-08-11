@@ -1,5 +1,7 @@
 package byok3.data_structures
 
+import java.io.FileNotFoundException
+
 case class Error(errno: Int, message: String) extends RuntimeException(message.trim)
 
 case object Error {
@@ -57,6 +59,7 @@ case object Error {
     case err: Error => err
     case _: NotImplementedError => Error(-21)
     case _: UnsupportedOperationException => Error(-21)
+    case _: FileNotFoundException => Error(-38)
     case _: NoSuchElementException => Error(-4)
     case _: IndexOutOfBoundsException => Error(-9, ex.getMessage)
     case ar: ArithmeticException if ar.getMessage == "/ by zero" => Error(-10)

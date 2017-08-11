@@ -4,15 +4,16 @@ import java.time.LocalDate
 
 import byok3.Disassembler
 import byok3.annonation.Documentation
-import byok3.data_structures.{Context, Error}
 import byok3.data_structures.Context._
 import byok3.data_structures.CoreMemory._
 import byok3.data_structures.Stack.{pop, push}
+import byok3.data_structures.{Context, Error}
 import byok3.types.{AppState, Stack}
 import cats.data.StateT
 import cats.data.StateT._
 import cats.implicits._
 
+import scala.io.Source
 import scala.util.Try
 
 object IO {
@@ -134,5 +135,29 @@ object IO {
     _ <- unsafeIO {
       disassembler.print(aligned, len)
     }
+  } yield ()
+
+  private def isValidFilename(filename: String) = true // FIXME --> is sandboxed
+
+  @Documentation("include-file the file whose name is given by the string c-addr u", stackEffect = "( i*x c-addr u – j*x )")
+  val INCLUDED = for {
+    len <- dataStack(pop)
+    addr <- dataStack(pop)
+    filename <- memory(fetch(addr, len))
+    _ <- guard(isValidFilename(filename), Error(-38))
+    lines <- unsafeIO {
+      Source.fromFile(filename).getLines.toStream
+    }
+    _ <- modify[Try, Context](_.included(filename))
+    _ <- modify[Try, Context](_.load(lines))
+  } yield ()
+
+  @Documentation("include-file the file", "( \"ccc<file>\" -- )")
+  val INCLUDE = for {
+    tib <- deref("TIB")
+    token <- nextToken()
+    _ <- dataStack(push(tib + token.offset))
+    _ <- dataStack(push(token.value.length))
+    _ <- INCLUDED
   } yield ()
 }
