@@ -121,6 +121,18 @@ object Memory {
     _ <- memory(poke(tin, token.offset))
   } yield ()
 
+  @Documentation("Skip leading delimiters. Parse characters ccc delimited by char. c-addr is the address of a transient region containing the parsed word as a counted string. If the parse area was empty or contained no characters other than the delimiter, the resulting string has a zero length. A program may replace characters within the string", stackEffect = "( char \"<chars>ccc<char>\" -- c-addr )")
+  val WORD = for {
+    _ <- exec("PAD")
+    addr <- dataStack(pop)
+    ascii <- dataStack(pop)
+    token <- nextToken(delim = s"\\Q${ascii.toChar}\\E")
+    len = if (token.exhausted) 0 else token.value.length
+    _ <- dataStack(push(addr))
+    _ <- memory(poke(addr, len))
+    _ <- memory(copy(addr + 1, token.value))
+  } yield ()
+
   @Documentation("c-addr is the address of, and u is the number of characters in, the input buffer", stackEffect = "( -- c-addr u )")
   val SOURCE = for {
     tib <- deref("TIB")
