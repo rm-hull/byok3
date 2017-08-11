@@ -6,19 +6,23 @@ import byok3.data_structures.Stack._
 
 object Comparison {
 
-  private implicit def truth(condition: Boolean) = if (condition) -1 else 0
-
   @Documentation("compares top two stack elements, returns true flag if equal, false otherwise", stackEffect = "( x1 x2 -- f )")
   val `=` = dataStack(arity2stackOp(_ == _))
 
   @Documentation("compares top two stack elements, returns true flag if different, false otherwise", stackEffect =  "( x1 x2 -- f )")
   val `<>` = dataStack(arity2stackOp(_ != _))
 
-  @Documentation("compares signed numbers n1 with n2, returns true if n1 is less then n2", stackEffect = "( n1 n2 -- f )")
+  @Documentation("compares signed numbers n1 with n2, returns true if n1 is less than n2", stackEffect = "( n1 n2 -- f )")
   val `<` = dataStack(arity2stackOp(_ < _))
 
-  @Documentation("compares signed numbers n1 with n2, returns true if n1 is greater then n2", stackEffect = "( n1 n2 -- f )")
+  @Documentation("compares signed numbers n1 with n2, returns true if n1 is greater than n2", stackEffect = "( n1 n2 -- f )")
   val `>` = dataStack(arity2stackOp(_ > _))
+
+  @Documentation("compares unsigned numbers u1 with u2, returns true if u1 is less than u2", stackEffect = "( u1 u2 -- f )")
+  val `U<` = dataStack(arity2stackOp((a, b) => unsigned(a) < unsigned(b)))
+
+  @Documentation("compares unsigned numbers u1 with u2, returns true if u1 is greater than u2", stackEffect = "( u1 u2 -- f )")
+  val `U>` = dataStack(arity2stackOp((a, b) => unsigned(a) > unsigned(b)))
 
   @Documentation("return a true flag if value of n is negative", stackEffect = "( n -- f )")
   val `0<` = dataStack(arity1stackOp(_ < 0))

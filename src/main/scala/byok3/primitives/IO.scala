@@ -44,6 +44,15 @@ object IO {
     }
   } yield ()
 
+  @Documentation("convert unsigned number n to string of digits, and output", stackEffect = "( u -- )")
+  val `U.` = for {
+    base <- deref("BASE")
+    n <- dataStack(pop)
+    _ <- unsafeIO {
+      print(num(base)(unsigned(n)) + " ")
+    }
+  } yield ()
+
   @Documentation("display stack contents", stackEffect = "( -- )")
   val `.S` = for {
     base <- deref("BASE")
