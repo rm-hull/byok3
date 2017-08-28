@@ -37,8 +37,8 @@ trait Executor {
   final def run(ctx: Context): Context = {
     step.run(ctx) match {
       case Failure(ex: Throwable) => ctx.error(Error(ex))
-      case Success((next, false)) => if (isInterrupted) next.error(Error(-21)) else run(next)
       case Success((next, true)) => next
+      case Success((next, false)) => if (isInterrupted) next.error(Error(-28)) else run(next)
     }
   }
 }
