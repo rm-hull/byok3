@@ -5,6 +5,7 @@ import cats.implicits._
 import org.scalatest.{FunSuite, Matchers}
 
 import scala.io.Source
+import scala.util.Success
 
 class InterpreterTest extends FunSuite with Matchers {
 
@@ -12,37 +13,37 @@ class InterpreterTest extends FunSuite with Matchers {
   val emptyContext = Context(0x10000).load(lines)
 
   test("should push values onto the data stack") {
-    val ctx = Interpreter("9  5 3").runS(emptyContext).get
-    ctx.ds shouldEqual List(3, 5, 9)
+    val ctx = Interpreter("9  5 3").runS(emptyContext)
+    ctx.map(_.ds) shouldEqual Success(List(3, 5, 9))
   }
 
   test("should execute primitives sequentially") {
-    val ctx = Interpreter(" 3 DUP * 2 -").runS(emptyContext).get
-    ctx.ds shouldEqual List(7)
+    val ctx = Interpreter(" 3 DUP * 2 -").runS(emptyContext)
+    ctx.map(_.ds) shouldEqual Success(List(7))
   }
 
   test("should perform subtraction properly") {
-    val ctx = Interpreter("5 2 -").runS(emptyContext).get
-    ctx.ds shouldEqual List(3)
+    val ctx = Interpreter("5 2 -").runS(emptyContext)
+    ctx.map(_.ds) shouldEqual Success(List(3))
   }
 
   test("should perform division properly") {
-    val ctx = Interpreter("10 2 /").runS(emptyContext).get
-    ctx.ds shouldEqual List(5)
+    val ctx = Interpreter("10 2 /").runS(emptyContext)
+    ctx.map(_.ds) shouldEqual Success(List(5))
   }
 
   test("should record an error when stack underflow occurs") {
-    val ctx = Interpreter("10 +").runS(emptyContext).get
-    assert(ctx.status == Left(Error(-4)))
-    ctx.ds shouldEqual List.empty
-    ctx.rs shouldEqual List.empty
+    val ctx = Interpreter("10 +").runS(emptyContext)
+    assert(ctx.map(_.status) == Success(Left(Error(-4))))
+    ctx.map(_.ds) shouldEqual Success(List.empty)
+    ctx.map(_.rs) shouldEqual Success(List.empty)
   }
 
   test("should record an error when accessing invalid memory") {
-    val ctx = Interpreter("-2 @").runS(emptyContext).get
-    assert(ctx.status == Left(Error(-9, "0xFFFFFFFE")))
-    ctx.ds shouldEqual List.empty
-    ctx.rs shouldEqual List.empty
+    val ctx = Interpreter("-2 @").runS(emptyContext)
+    assert(ctx.map(_.status) == Success(Left(Error(-9, "0xFFFFFFFE"))))
+    ctx.map(_.ds) shouldEqual Success(List.empty)
+    ctx.map(_.rs) shouldEqual Success(List.empty)
   }
 
   test("should create a constant") {
@@ -51,8 +52,8 @@ class InterpreterTest extends FunSuite with Matchers {
       _ <- Interpreter("20 LIMIT +")
     } yield ()
 
-    val ctx = ops.runS(emptyContext).get
-    ctx.ds shouldEqual List(240)
+    val ctx = ops.runS(emptyContext)
+    ctx.map(_.ds) shouldEqual Success(List(240))
   }
 
   test("should create a variable") {
@@ -62,53 +63,53 @@ class InterpreterTest extends FunSuite with Matchers {
       _ <- Interpreter("DATE @ 3 +")
     } yield ()
 
-    val ctx = ops.runS(emptyContext).get
-    ctx.ds shouldEqual List(15)
+    val ctx = ops.runS(emptyContext)
+    ctx.map(_.ds) shouldEqual Success(List(15))
   }
 
   test("should parse the input stream") {
     val ops = Interpreter("33 PARSE BEYOND SPACE! 42")
-    val ctx = ops.runS(emptyContext).get
-    ctx.ds shouldEqual List(42, 12, 9)
+    val ctx = ops.runS(emptyContext)
+    ctx.map(_.ds) shouldEqual Success(List(42, 12, 9))
 
     Stream.from(9).zip("BEYOND SPACE").foreach {
-      case (addr, ch) => ctx.mem.char_peek(addr) shouldEqual ch
+      case (addr, ch) => ctx.map(_.mem.char_peek(addr)) shouldEqual Success(ch)
     }
   }
 
   test("should record an error on unfound word") {
-    val ctx = Interpreter("10 4 + SAUSAGES 19 4 -").runS(emptyContext).get
-    ctx.status shouldEqual Left(Error(-13, "SAUSAGES"))
-    ctx.ds shouldEqual List.empty
-    ctx.rs shouldEqual List.empty
+    val ctx = Interpreter("10 4 + SAUSAGES 19 4 -").runS(emptyContext)
+    ctx.map(_.status) shouldEqual Success(Left(Error(-13, "SAUSAGES")))
+    ctx.map(_.ds) shouldEqual Success(List.empty)
+    ctx.map(_.rs) shouldEqual Success(List.empty)
   }
 
   test("should record an error when user-defined throw occurs") {
-    val ctx = Interpreter("10 4 + THROW 19 4 -").runS(emptyContext).get
-    ctx.status shouldEqual Left(Error(14))
-    ctx.ds shouldEqual List.empty
-    ctx.rs shouldEqual List.empty
+    val ctx = Interpreter("10 4 + THROW 19 4 -").runS(emptyContext)
+    ctx.map(_.status) shouldEqual Success(Left(Error(14)))
+    ctx.map(_.ds) shouldEqual Success(List.empty)
+    ctx.map(_.rs) shouldEqual Success(List.empty)
   }
 
   test("should print the top stack item") {
     val result = capturingOutput {
-      val ctx = Interpreter("1 2 3 5 7 + . . .").runS(emptyContext).get
-      ctx.ds shouldEqual List(1)
+      val ctx = Interpreter("1 2 3 5 7 + . . .").runS(emptyContext)
+      ctx.map(_.ds) shouldEqual Success(List(1))
     }
     result shouldEqual "12 3 2 "
   }
 
   test("should print the stack") {
     val result = capturingOutput {
-      val ctx = Interpreter("1 2 3 5 7 + .S").runS(emptyContext).get
-      ctx.ds shouldEqual List(12, 3, 2, 1)
+      val ctx = Interpreter("1 2 3 5 7 + .S").runS(emptyContext)
+      ctx.map(_.ds) shouldEqual Success(List(12, 3, 2, 1))
     }
     result shouldEqual "1 2 3 12 "
   }
 
   test("should parse and print the message") {
     val result = capturingOutput {
-      Interpreter("33 PARSE HELLO, WORLD! TYPE 10 EMIT 33 PARSE THAT IS ALL! TYPE").runS(emptyContext).get
+      Interpreter("33 PARSE HELLO, WORLD! TYPE 10 EMIT 33 PARSE THAT IS ALL! TYPE").runS(emptyContext)
     }
     result shouldEqual "HELLO, WORLD\nTHAT IS ALL"
   }
@@ -119,8 +120,8 @@ class InterpreterTest extends FunSuite with Matchers {
       _ <- Interpreter("3 SQR")
     } yield ()
 
-    val ctx = ops.runS(emptyContext).get
-    ctx.ds shouldEqual List(9)
+    val ctx = ops.runS(emptyContext)
+    ctx.map(_.ds) shouldEqual Success(List(9))
   }
 
   test("should compile and run a user defined word that compiles looping primitives") {
@@ -129,8 +130,8 @@ class InterpreterTest extends FunSuite with Matchers {
       _ <- Interpreter("DECADE")
     } yield ()
 
-    val ctx = ops.runS(emptyContext).get
-    ctx.ds shouldEqual List(9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+    val ctx = ops.runS(emptyContext)
+    ctx.map(_.ds) shouldEqual Success(List(9, 8, 7, 6, 5, 4, 3, 2, 1, 0))
   }
 
   test("should compile and run a user defined word that compiles branching & string primitives") {
@@ -140,7 +141,7 @@ class InterpreterTest extends FunSuite with Matchers {
     } yield ()
 
     val actual = capturingOutput{
-      ops.runS(emptyContext).get
+      ops.runS(emptyContext)
     }
     actual shouldEqual "not a dozen"
   }
@@ -152,12 +153,12 @@ class InterpreterTest extends FunSuite with Matchers {
       _ <- Interpreter("60 201 GCD")
     } yield ()
 
-    val ctx = ops.runS(emptyContext).get
-    ctx.ds shouldEqual List(3)
+    val ctx = ops.runS(emptyContext)
+    ctx.map(_.ds) shouldEqual Success(List(3))
   }
 
   test("should record error when LITERAL when not in compile mode") {
-    val ctx = Interpreter("10 LITERAL").runS(emptyContext).get
-    ctx.status shouldEqual Left(Error(-14))
+    val ctx = Interpreter("10 LITERAL").runS(emptyContext)
+    ctx.map(_.status) shouldEqual Success(Left(Error(-14)))
   }
 }

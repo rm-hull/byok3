@@ -9,7 +9,7 @@ import cats.data.StateT
 import cats.implicits._
 import org.scalatest.{FunSuite, Matchers}
 
-import scala.util.Try
+import scala.util.{Success, Try}
 
 abstract class PrimitivesTestBase extends FunSuite with Matchers {
 
@@ -25,7 +25,7 @@ abstract class PrimitivesTestBase extends FunSuite with Matchers {
       _ <- op
     } yield ()
 
-    val result = effects.runS(emptyContext).get
-    assert(result.ds == expected)
+    val result = effects.runS(emptyContext)
+    result.map(_.ds) shouldEqual Success(expected)
   }
 }

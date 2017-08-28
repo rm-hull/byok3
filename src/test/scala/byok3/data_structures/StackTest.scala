@@ -5,19 +5,20 @@ import byok3.helpers._
 import cats.implicits._
 import org.scalatest.{FunSuite, Matchers}
 
+import scala.util.Success
+
 
 class StackTest extends FunSuite with Matchers {
 
-
   test("should push to an empty stack") {
     val ops = sequence(push(10), push(3), push(6))
-    ops.runS(List.empty).get shouldEqual List(6, 3, 10)
+    ops.runS(List.empty) shouldEqual Success(List(6, 3, 10))
   }
 
   test("should push to an existing stack") {
     val stack = List(6, 3, 10)
     val ops = sequence(push(19), push(12))
-    ops.runS(stack).get shouldEqual List(12, 19, 6, 3, 10)
+    ops.runS(stack) shouldEqual Success(List(12, 19, 6, 3, 10))
   }
 
   test("should peek the top element on the stack") {
@@ -27,7 +28,7 @@ class StackTest extends FunSuite with Matchers {
       _ <- push(9)
       a <- peek
     } yield a
-    ops.runA(List.empty).get shouldEqual 9
+    ops.runA(List.empty) shouldEqual Success(9)
   }
 
   test("should fail when peeking an empty stack") {
@@ -46,7 +47,7 @@ class StackTest extends FunSuite with Matchers {
       c <- pop
     } yield (a, b, c)
 
-    ops.run(List.empty).get shouldEqual(List.empty, (9, 7, 4))
+    ops.run(List.empty) shouldEqual Success(List.empty, (9, 7, 4))
   }
 
   test("should fail when popping an empty stack") {
