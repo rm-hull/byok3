@@ -10,12 +10,14 @@ import byok3.primitives.Compiler._
 import byok3.primitives.Memory._
 import cats.implicits._
 
+import scala.util.Failure
+
 class CompilerTest extends PrimitivesTestBase {
 
   test("literal should fail when not in compile mode") {
     val ops = sequence(machineState(OK), LITERAL)
-    val ex = ops.runS(emptyContext).failed.get
-    ex shouldEqual Error(-14)
+    val ctx = ops.runS(emptyContext)
+    ctx shouldEqual Failure(Error(-14))
   }
 
   test("literal should write (LIT) n when in compile mode") {
