@@ -41,7 +41,7 @@ class WordCompleter extends Completer {
   private def candidate(key: String, exeTok: ExecutionToken) =
     exeTok match {
       case p: Primitive => new Candidate(p.name, p.name, "built-in", immediate(p, p.doc.fold[String](null)(_.toString)), null, key, true)
-      case v: Variable => new Candidate(v.name, v.name, "variable", s"value: ${ctx.get.mem.peek(v.addr)}", null, key, true)
+      case v: Variable => new Candidate(v.name, v.name, "variable", s"value: ${ctx.map(_.mem.peek(v.addr)).getOrElse("unknown")}", null, key, true)
       case c: Constant => new Candidate(c.name, c.name, "constant", s"constant: ${c.value}", null, key, true)
       case u: UserDefined => new Candidate(u.name, u.name, "user-defined", immediate(u, null), null, key, true)
     }
