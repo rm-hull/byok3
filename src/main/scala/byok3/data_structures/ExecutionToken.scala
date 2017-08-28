@@ -3,13 +3,14 @@ package byok3.data_structures
 import byok3.Executor
 import byok3.annonation.Documentation
 import byok3.data_structures.Context._
-import byok3.data_structures.CoreMemory.{peek, inc}
+import byok3.data_structures.CoreMemory.{inc, peek}
 import byok3.data_structures.Dictionary.{addressOf, instruction}
 import byok3.data_structures.Stack.push
 import byok3.primitives.Compiler
 import byok3.types._
 import cats.data.StateT._
 import cats.implicits._
+
 
 sealed trait ExecutionToken {
   val name: Word
@@ -23,8 +24,6 @@ sealed trait ExecutionToken {
     xt <- dictionary(addressOf(name))
     _ <- Compiler.compile(xt)
   } yield ()
-
-  def run = effect
 }
 
 case class Primitive(name: Word,

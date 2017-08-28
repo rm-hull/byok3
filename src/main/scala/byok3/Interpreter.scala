@@ -40,7 +40,7 @@ object Interpreter extends Executor {
 
   private def runOrCompile(xt: ExecutionToken) = for {
     status <- machineState
-    _ <- if (xt.immediate || status != Smudge) xt.run else xt.compile
+    _ <- if (xt.immediate || status != Smudge) xt.effect else xt.compile
   } yield ()
 
   private def assemble: AppState[Unit] =
