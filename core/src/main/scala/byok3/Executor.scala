@@ -22,13 +22,14 @@
 package byok3
 
 import byok3.data_structures.{Context, Error}
+import byok3.Interruptible._
 import byok3.types.AppState
 import cats.implicits._
 
 import scala.annotation.tailrec
 import scala.util.{Failure, Success}
 
-trait Executor extends Interruptible {
+trait Executor {
 
   def step: AppState[Boolean]
 

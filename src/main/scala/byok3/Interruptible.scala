@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 import sun.misc.{Signal, SignalHandler}
 
-trait Interruptible {
+object Interruptible {
 
   private val interrupted = new AtomicBoolean(false)
 
