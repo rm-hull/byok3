@@ -22,6 +22,7 @@
 package byok3.data_structures
 
 import byok3.HexDump
+import byok3.data_structures.CoreMemory._
 import byok3.types.{Address, AddressSpace, Data}
 import cats.data.StateT
 import cats.data.StateT._
@@ -31,8 +32,6 @@ import scala.annotation.tailrec
 import scala.util.Try
 
 case class CoreMemory(size: Int, private val addressSpace: AddressSpace) {
-
-  import CoreMemory._
 
   private val empty: Data = 0
 
