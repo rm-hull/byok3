@@ -86,9 +86,7 @@ object REPL {
   private def loop(reader: Context => IO[String])(ctx: Context): Context = {
     val program: IO[Context] = for {
       in <- reader(ctx)
-      //_ = println(in)
       next = ctx.eval(in)
-    // _  <- print(next)
     } yield next
 
     Try(program.unsafeRunSync) match {
@@ -112,7 +110,6 @@ object REPL {
         ctx.error.foreach { err =>
           println(s"${RED}${BOLD}Error ${err.errno}:${RESET} ${err.message} occurred in ${BOLD}$filename, line: ${line - 1}${RESET}")
           throw new EndOfFileException()
-          //sys.exit(-1)
         }
         text
       }
