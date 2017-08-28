@@ -1,5 +1,9 @@
 name := "byok3"
 version := "0.1.0"
+startYear := Some(2017)
+organizationName := "Richard Hull"
+licenses += ("MIT", new URL("https://opensource.org/licenses/MIT"))
+
 scalaVersion := "2.12.3"
 scalacOptions := Seq("-unchecked", "-deprecation", "-feature", "-language:implicitConversions")
 mainClass in (Compile, run) := Some("byok3.REPL")
