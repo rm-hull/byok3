@@ -7,6 +7,7 @@ import byok3.data_structures.CoreMemory.{inc, peek}
 import byok3.data_structures.Dictionary.{addressOf, instruction}
 import byok3.data_structures.Stack.push
 import byok3.primitives.Compiler
+import byok3.primitives.FlowControl.__NEST
 import byok3.types._
 import cats.data.StateT._
 import cats.implicits._
@@ -52,7 +53,8 @@ case class UserDefined(name: Word, addr: Address, override val immediate: Boolea
     xt <- memory(peek(addr))
     _ <- W(addr)
     _ <- XT(xt)
-    _ <- modify(run)
+    rsEmpty <- returnStack(inspect(_.isEmpty))
+    _ <- if (rsEmpty) modify(run) else __NEST
   } yield ()
 
   override def step = for {
