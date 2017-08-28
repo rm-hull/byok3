@@ -2,7 +2,7 @@ package byok3.data_structures
 
 import org.scalatest.{FunSuite, Matchers}
 
-import scala.util.Try
+import scala.util.{Failure, Try}
 
 class CoreMemoryTest extends FunSuite with Matchers {
 
@@ -14,23 +14,23 @@ class CoreMemoryTest extends FunSuite with Matchers {
   }
 
   test("should throw error -9 on poking invalid memory") {
-    Try(mem.poke(0x2002, 0x12345678)).failed.get shouldEqual Error(-9, "0x00002002")
+    Try(mem.poke(0x2002, 0x12345678)) shouldEqual Failure(Error(-9, "0x00002002"))
   }
 
   test("should throw error -9 on peeking invalid memory") {
-    Try(mem.peek(-4)).failed.get shouldEqual Error(-9, "0xFFFFFFFC")
+    Try(mem.peek(-4)) shouldEqual Failure(Error(-9, "0xFFFFFFFC"))
   }
 
   test("should throw error -23 on poking unaligned address") {
-    Try(mem.poke(0x0123, 0x12345678)).failed.get shouldEqual Error(-23, "0x00000123")
+    Try(mem.poke(0x0123, 0x12345678)) shouldEqual Failure(Error(-23, "0x00000123"))
   }
 
   test("should throw error -23 on peeking unaligned address") {
-    Try(mem.peek(0x0987)).failed.get shouldEqual Error(-23, "0x00000987")
+    Try(mem.peek(0x0987)) shouldEqual Failure(Error(-23, "0x00000987"))
   }
 
   test("should throw error -9 on char-peeking invalid memory") {
-    Try(mem.char_peek(0x5123)).failed.get shouldEqual Error(-9, "0x00005123")
+    Try(mem.char_peek(0x5123)) shouldEqual Failure(Error(-9, "0x00005123"))
   }
 
   test("should char-peek") {
