@@ -28,7 +28,48 @@ which can be executed with:
 
 ## Implementation Notes 
 
-> TODO
+The forth virtual machine is based on a stateful [Context](https://github.com/rm-hull/byok3/blob/master/src/main/scala/byok3/data_structures/Context.scala) which is composed of the following parts
+
+* Core memory address space
+* A data stack
+* A return stack
+* A dictionaty of words
+* A number of flags (compiling state, error) 
+
+Ordinarily, a forth machine would most likely represent all these in terms of 
+the core memory, but this implementation does not. That may change in the future.
+
+The context is wrapped inside [cats](https://github.com/typelevel/cats)' State
+monad,  specifically the type signature being: `StateT[Try, Context, A]`, and 
+aliased as `AppState[A]`.
+
+The `Try` part allows us to force the state to become invalidate either by using 
+`inspectF`, `modifyF`, etc. or by letting the implicit `Applicatve[Try]` 
+automatically take care of thrown exceptions.
+
+This means that all the internal words can be expressed succinctly with for-comprehensions,
+and further composed if necessary. For example:
+
+```scala
+@Documentation("Adds x to the single cell number at a-addr", stackEffect = "( x a-addr -- )")
+val +! = for {
+  addr <- dataStack(pop)
+  x <- dataStack(pop)
+  data <- memory(peek(addr))
+  _ <- memory(poke(addr, data + x))
+} yield ()
+```
+
+The interpreter and compiler both use an [executor](https://github.com/rm-hull/byok3/blob/master/src/main/scala/byok3/Executor.scala)
+to recursively step through the words under consideration.
+
+## TODO
+
+* Move `DOES>` and `(DOES>)` to internal words (current implementation does not work).
+* Implement `LOAD` and `LIST` block commands.
+* Investigate if word input can be colorized with [JLine3](https://github.com/jline/jline3).
+* Block editor
+* Web API
 
 ## References
 
