@@ -38,6 +38,11 @@ class Dictionary[K, A](private val byKey: Map[K, Int], private val byPosn: Vecto
   def add(key: K, a: A): Dictionary[K, A] =
     new Dictionary(byKey.updated(key, byPosn.length), byPosn :+ a)
 
+  def replace(key: K, a: A): Dictionary[K, A] =
+    byKey.get(key).map(idx => new Dictionary(byKey, byPosn.updated(idx, a))).getOrElse {
+      throw new NoSuchElementException(key.toString)
+    }
+
   def get(key: K): Option[A] =
     indexOf(key).flatMap(get)
 
@@ -111,6 +116,9 @@ object Dictionary {
 
   def add(exeTok: ExecutionToken): StateT[Try, Dict, Unit] =
     modify[Try, Dict](_.add(exeTok.name, exeTok))
+
+  def replace(exeTok: ExecutionToken): StateT[Try, Dict, Unit] =
+    modify[Try, Dict](_.replace(exeTok.name, exeTok))
 
   def addressOf(token: Word): StateT[Try, Dict, Int] =
     inspectF[Try, Dict, Int](_.indexOf(token).toTry(Error(-13, token)))

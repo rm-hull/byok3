@@ -24,7 +24,7 @@ package byok3.primitives
 import byok3.annonation.{Documentation, Immediate}
 import byok3.data_structures.Context._
 import byok3.data_structures.CoreMemory._
-import byok3.data_structures.Dictionary.{add, addressOf, instruction, last}
+import byok3.data_structures.Dictionary._
 import byok3.data_structures.MachineState.{OK, Smudge}
 import byok3.data_structures.Stack.{pop, push}
 import byok3.data_structures._
@@ -79,7 +79,7 @@ object Compiler {
   @Documentation("Make the most recent definition an immediate word", stackEffect = "( -- )")
   val IMMEDIATE = for {
     lastWord <- dictionary(last)
-    _ <- dictionary(add(lastWord.markAsImmediate))
+    _ <- dictionary(replace(lastWord.markAsImmediate))
   } yield ()
 
   @Documentation("", stackEffect = "( -- xt )")
