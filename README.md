@@ -70,6 +70,8 @@ to recursively step through the words under consideration.
 * Investigate if word input can be colorized with [JLine3](https://github.com/jline/jline3).
 * Block editor
 * Web API
+* Implement full 2012 spec
+* Implement forth test suite
 
 ## References
 
