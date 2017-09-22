@@ -11,7 +11,12 @@ mainClass in (Compile, run) := Some("byok3.console.REPL")
 libraryDependencies ++= Seq(
   "org.typelevel" %% "cats" % "0.9.0",
   "org.typelevel" %% "cats-effect" % "0.3",
-  "org.jline" % "jline" % "3.4.0"
+  "org.jline" % "jline" % "3.4.0",
+  "com.typesafe.akka" %% "akka-http" % "10.0.10",
+  "com.typesafe.akka" %% "akka-stream" % "2.5.4",
+  "com.typesafe.akka" %% "akka-actor"  % "2.5.4",
+  "com.typesafe.akka" %% "akka-slf4j"  % "2.5.4",
+  "ch.qos.logback" % "logback-classic" % "1.2.3"
 )
 
 // test dependencies
