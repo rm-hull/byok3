@@ -19,7 +19,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package byok3.repl
+package byok3.console
 
 import byok3.data_structures.RawInput
 import org.jline.terminal.Terminal

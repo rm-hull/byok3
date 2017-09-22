@@ -19,11 +19,11 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package byok3.repl
+package byok3.console
 
 import java.time.LocalDate
 
-import byok3.repl.AnsiColor._
+import byok3.console.AnsiColor._
 
 object Banner {
 

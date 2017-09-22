@@ -6,7 +6,7 @@ licenses += ("MIT", new URL("https://opensource.org/licenses/MIT"))
 
 scalaVersion := "2.12.3"
 scalacOptions := Seq("-unchecked", "-deprecation", "-feature", "-language:implicitConversions")
-mainClass in (Compile, run) := Some("byok3.REPL")
+mainClass in (Compile, run) := Some("byok3.console.REPL")
 
 libraryDependencies ++= Seq(
   "org.typelevel" %% "cats" % "0.9.0",

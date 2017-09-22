@@ -19,12 +19,11 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package byok3
+package byok3.console
 
+import byok3.console.AnsiColor._
 import byok3.data_structures.MachineState.{OK, Smudge}
 import byok3.data_structures.{Context, Error}
-import byok3.repl.AnsiColor._
-import byok3.repl._
 import cats.effect.IO
 import org.jline.reader.LineReader.Option._
 import org.jline.reader.{EndOfFileException, LineReaderBuilder, UserInterruptException}

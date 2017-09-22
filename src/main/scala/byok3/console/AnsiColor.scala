@@ -19,15 +19,12 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package byok3.repl
+package byok3.console
 
-import org.jline.reader.ParsedLine
-import org.jline.reader.Parser.ParseContext
-import org.jline.reader.impl.DefaultParser
-
-
-class UpperCaseParser extends DefaultParser {
-
-  override def parse(line: String, cursor: Int, context: ParseContext): ParsedLine =
-    super.parse(line.toUpperCase, cursor, context)
+trait ExtendedAnsiColors {
+  val LIGHT_GREY = "\u001b[38;5;252m"
+  val MID_GREY = "\u001b[38;5;247m"
+  val DARK_GREY = "\u001b[38;5;242m"
 }
+
+object AnsiColor extends scala.io.AnsiColor with ExtendedAnsiColors

@@ -19,12 +19,15 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package byok3.repl
+package byok3.console
 
-object ProgressIndicator {
-  private val indicators = List("|", "/", "-", "\\")
+import org.jline.reader.ParsedLine
+import org.jline.reader.Parser.ParseContext
+import org.jline.reader.impl.DefaultParser
 
-  def apply(line: Int) = {
-    indicators(line / 10 % indicators.length)
-  }
+
+class UpperCaseParser extends DefaultParser {
+
+  override def parse(line: String, cursor: Int, context: ParseContext): ParsedLine =
+    super.parse(line.toUpperCase, cursor, context)
 }
