@@ -19,33 +19,34 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package byok3.web
+package byok3.web.actors
 
 import java.util.UUID
 
 import akka.actor._
 import akka.pattern.{ask, pipe}
 import akka.util.Timeout
-import byok3.web.Supervisor._
+import byok3.web.actors.Supervisor._
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 
 object Supervisor {
-  def props(implicit timeout: Timeout) = Props(new Supervisor)
+  def props(implicit timeout: Timeout, ec: ExecutionContext) = Props(new Supervisor)
   def name = "supervisor"
 
-  def forward(machine: ActorRef, session: String, input: String)(implicit timeout: Timeout) =
-    machine.ask(input).mapTo[String].map(s => Text(Some(session), s))
 
   sealed trait Event
   case class Text(session: Option[String], text: String) extends Event
   case object UnknownSession extends Event
 }
 
-class Supervisor(implicit timeout: Timeout) extends Actor with ActorLogging {
+class Supervisor(implicit timeout: Timeout, ec: ExecutionContext) extends Actor with ActorLogging {
 
   private def createStackMachine(name: String) =
     context.actorOf(StackMachine.props(name), name)
+
+  private def forward(machine: ActorRef, session: String, input: String)(implicit timeout: Timeout) =
+    machine.ask(input).mapTo[String].map(s => Text(Some(session), s))
 
   override def preStart() = {
     log.info(s"Starting supervisor: $self")
@@ -67,26 +68,6 @@ class Supervisor(implicit timeout: Timeout) extends Actor with ActorLogging {
         val response = forward(machine, session, input)
         pipe(response) to sender()
       }
-    }
-  }
-}
-
-object StackMachine {
-  def props(name: String) = Props(new StackMachine(name))
-}
-
-class StackMachine(name: String) extends Actor with ActorLogging {
-
-  override def preStart() = {
-    log.info(s"Starting: $name")
-    // TODO: create VM here
-  }
-
-  override def receive = {
-    case s: String => {
-      log.info(s"$name: $s (sender = ${sender()})")
-      sender() ! s"Hello $s"
-      // TODO: call out to VM
     }
   }
 }

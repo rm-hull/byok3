@@ -97,6 +97,8 @@ case class Context(mem: CoreMemory,
 
   def include(filename: String) =
     copy(included = included + filename)
+
+  def stackDepthIndicator = "." * math.min(16, ds.length)
 }
 
 object Context {

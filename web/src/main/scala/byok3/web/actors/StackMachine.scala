@@ -19,64 +19,78 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package byok3.console
+package byok3.web.actors
 
+import java.io.ByteArrayOutputStream
+
+import akka.actor._
 import byok3.AnsiColor._
 import byok3.Banner
+import byok3.data_structures.Context
 import byok3.data_structures.MachineState.{OK, Smudge}
-import byok3.data_structures.{Context, Error}
 import cats.effect.IO
-import org.jline.reader.LineReader.Option._
-import org.jline.reader.{EndOfFileException, LineReaderBuilder, UserInterruptException}
-import org.jline.terminal.TerminalBuilder
 
 import scala.annotation.tailrec
 import scala.io.Source
 import scala.util.{Failure, Success, Try}
 
-object REPL {
 
-  private val wordCompleter = new WordCompleter
-  private val upperCaseParser = new UpperCaseParser
-  private val terminal = TerminalBuilder.terminal()
-  private val lineReader = LineReaderBuilder.builder
-    .terminal(terminal)
-    .parser(upperCaseParser)
-    .completer(wordCompleter)
-    .build
+object StackMachine {
+  def props(name: String) = Props(new StackMachine(name))
+}
 
-  lineReader.setOpt(DISABLE_EVENT_EXPANSION)
-  lineReader.setOpt(CASE_INSENSITIVE)
-  lineReader.setOpt(GROUP)
+case class EndOfFileException() extends Exception
 
-  def main(args: Array[String]): Unit = {
-    println(Banner())
+class StackMachine(name: String) extends Actor with ActorLogging {
 
-    val systemLibs = Seq("forth/system.fth")
+  var ctx: Context = null
+  var output: String = ""
 
-    val ctx = systemLibs.map(load)
-      .reduce(_ andThen _)
-      .apply(Context(0x500000))
-      .copy(rawConsoleInput = Some(TerminalRawInput(terminal)))
+  override def preStart() = {
+    log.info(s"Starting: $name")
 
-    loop(read)(ctx)
-    println("exiting...")
+    output += capturingOutput {
+      println(Banner())
+
+      val systemLibs = Seq("forth/system.fth")
+
+      ctx = systemLibs.map(load)
+        .reduce(_ andThen _)
+        .apply(Context(0x50000))
+        .copy(rawConsoleInput = None)
+    }
   }
 
-  private def read(ctx: Context) = {
-    val prompt = ctx.status match {
-      case Right(Smudge) => s"${LIGHT_GREY}|  "
-      case Right(OK) => s"  ${WHITE}${BOLD}ok${LIGHT_GREY}${ctx.stackDepthIndicator}\n"
-      case Left(err) => s"${RED}${BOLD}Error ${err.errno}:${RESET} ${err.message}\n"
-    }
+  override def receive = {
+    case input: String => {
+      log.info(s"$name: $input (sender = ${sender()})")
 
-    IO {
-      wordCompleter.setContext(ctx)
-      val input = lineReader.readLine(prompt)
-      Console.withOut(terminal.output) {
-        Predef.print(MID_GREY)
+      output += capturingOutput {
+        ctx = ctx.eval(input)
+
+        val prompt = ctx.status match {
+          case Right(Smudge) => s"${LIGHT_GREY}|  "
+          case Right(OK) => s"  ${WHITE}${BOLD}ok${LIGHT_GREY}${ctx.stackDepthIndicator}\n"
+          case Left(err) => s"${RED}${BOLD}Error ${err.errno}:${RESET} ${err.message}\n"
+        }
+
+        Predef.print(s"$MID_GREY$prompt")
       }
-      input
+
+      sender() ! output
+      output = ""
+    }
+  }
+
+  private def capturingOutput(program: => Any): String = {
+    val baos = new ByteArrayOutputStream
+    try {
+      Console.withOut(baos) {
+        program
+      }
+      baos.toString
+    } finally {
+      baos.close
     }
   }
 
@@ -89,7 +103,6 @@ object REPL {
 
     Try(program.unsafeRunSync) match {
       case Success(next) => loop(reader)(next)
-      case Failure(ex: UserInterruptException) => loop(reader)(ctx.reset.error(Error(-28)))
       case Failure(ex: EndOfFileException) => ctx
       case Failure(ex) => throw ex
     }
@@ -104,7 +117,6 @@ object REPL {
     def read(ctx: Context): IO[String] = IO {
       if (lines.hasNext) {
         val (text, line) = lines.next()
-        Predef.print(s"${ProgressIndicator(line)}\r")
         ctx.error.foreach { err =>
           println(s"${RED}${BOLD}Error ${err.errno}:${RESET} ${err.message} occurred in ${BOLD}$filename, line: ${line - 1}${RESET}")
           throw new EndOfFileException()

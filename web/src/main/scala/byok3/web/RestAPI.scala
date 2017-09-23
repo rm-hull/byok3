@@ -28,12 +28,13 @@ import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import akka.http.scaladsl.server.Directives._
 import akka.pattern.ask
 import akka.util.Timeout
-import byok3.web.Supervisor.{Event, Text, UnknownSession}
+import byok3.web.actors.Supervisor
+import byok3.web.actors.Supervisor.{Event, Text, UnknownSession}
 
 import scala.concurrent.ExecutionContext
 
 
-class RestApi(system: ActorSystem, timeout: Timeout) extends RestRoutes {
+class RestAPI(system: ActorSystem, timeout: Timeout) extends RestRoutes {
   implicit val requestTimeout = timeout
 
   implicit def executionContext = system.dispatcher

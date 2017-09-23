@@ -24,8 +24,10 @@ package byok3.web
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
-import com.typesafe.config.ConfigFactory
+import akka.util.Timeout
+import com.typesafe.config.{Config, ConfigFactory}
 
+import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.io.StdIn
 
 object Server extends RequestTimeout {
@@ -40,7 +42,7 @@ object Server extends RequestTimeout {
     implicit val materializer = ActorMaterializer()
     implicit val executionContext = system.dispatcher
 
-    val api = new RestApi(system, requestTimeout(config)).routes
+    val api = new RestAPI(system, requestTimeout(config)).routes
     val bindingFuture = Http().bindAndHandle(api, host, port)
 
     println(s"Server online at http://$host:$port/\nPress RETURN to stop...")
@@ -48,5 +50,13 @@ object Server extends RequestTimeout {
     bindingFuture
       .flatMap(_.unbind()) // trigger unbinding from the port
       .onComplete(_ => system.terminate()) // and shutdown when done
+  }
+}
+
+trait RequestTimeout {
+  def requestTimeout(config: Config): Timeout = {
+    val t = config.getString("http.request-timeout")
+    val d = Duration(t)
+    FiniteDuration(d.length, d.unit)
   }
 }
