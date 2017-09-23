@@ -17,4 +17,6 @@ before_cache:
 script:
   sbt clean coverage test
 after_success:
-  sbt coverageReport coveralls
+  - sbt coverageReport
+  - sbt coverageAggregate
+  - sbt coveralls
