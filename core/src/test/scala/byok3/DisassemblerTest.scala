@@ -1,7 +1,7 @@
 package byok3
 
 import byok3.data_structures.Context
-import byok3.console.AnsiColor._
+import AnsiColor._
 import cats.implicits._
 import org.scalatest.FunSuite
 

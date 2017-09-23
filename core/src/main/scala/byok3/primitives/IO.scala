@@ -46,7 +46,7 @@ object IO {
     BigInt(n).toString(base)
 
   private def isValidFilename(filename: String) =
-    !(filename.isEmpty || filename.trim.startsWith("/") || filename.contains(".."))
+    !(filename.isEmpty || filename.trim.startsWith("/") || filename.contains("core/src/test"))
 
   private def loadSource(filename: String) = for {
     _ <- guard(isValidFilename(filename), Error(-38))

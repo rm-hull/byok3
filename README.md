@@ -15,12 +15,12 @@ Download [SBT](http://www.scala-sbt.org/), then clone the repository and build t
 
     $ git clone https://github.com/rm-hull/byok3.git
     $ cd byok3
-    $ sbt assembly
+    $ sbt core/assembly
     
-This produces a self-contained jar file `target/scala-2.12/byok3-assembly-0.1.0.jar` 
+This produces a self-contained jar file `target/scala-2.12/byok3-repl.jar` 
 which can be executed with:
 
-    $ java -jar target/scala-2.12/byok3-assembly-0.1.0.jar
+    $ java -jar target/scala-2.12/byok3-repl.jar
 
 ## Demo
 

@@ -19,12 +19,16 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package byok3.console
+package byok3.web
 
-trait ExtendedAnsiColors {
-  val LIGHT_GREY = "\u001b[38;5;252m"
-  val MID_GREY = "\u001b[38;5;247m"
-  val DARK_GREY = "\u001b[38;5;242m"
+import akka.util.Timeout
+import com.typesafe.config.Config
+
+trait RequestTimeout {
+  import scala.concurrent.duration._
+  def requestTimeout(config: Config): Timeout = {
+    val t = config.getString("http.request-timeout")
+    val d = Duration(t)
+    FiniteDuration(d.length, d.unit)
+  }
 }
-
-object AnsiColor extends scala.io.AnsiColor with ExtendedAnsiColors

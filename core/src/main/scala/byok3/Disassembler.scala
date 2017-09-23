@@ -23,7 +23,7 @@ package byok3
 
 import byok3.data_structures.CoreMemory._
 import byok3.data_structures.{Context, UserDefined}
-import byok3.console.AnsiColor._
+import AnsiColor._
 import byok3.types.Address
 
 import scala.Predef.{print => pr}

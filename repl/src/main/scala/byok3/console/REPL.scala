@@ -21,7 +21,8 @@
 
 package byok3.console
 
-import byok3.console.AnsiColor._
+import byok3.AnsiColor._
+import byok3.Banner
 import byok3.data_structures.MachineState.{OK, Smudge}
 import byok3.data_structures.{Context, Error}
 import cats.effect.IO
