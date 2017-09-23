@@ -17,9 +17,9 @@ RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 COPY . /usr/src/app
 RUN \
-  sbt assembly && \
-  mv target/scala-$SCALA_VERSION/byok3-assembly-0.1.0.jar byok3-assembly.jar && \
+  sbt repl/assembly && \
+  mv target/scala-$SCALA_VERSION/byok3-web.jar byok3-web.jar && \
   rm -rf target project/target ~/.ivy2
 
-EXPOSE 3000
-ENTRYPOINT ["java", "-jar", "byok3-assembly.jar"]
+EXPOSE 5000
+ENTRYPOINT ["java", "-jar", "byok3-web.jar"]
