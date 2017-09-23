@@ -17,7 +17,7 @@ RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 COPY . /usr/src/app
 RUN \
-  sbt repl/assembly && \
+  sbt web/assembly && \
   mv web/target/scala-$SCALA_VERSION/byok3-web.jar byok3-web.jar && \
   rm -rf target project/target ~/.ivy2
 
