@@ -1,0 +1,26 @@
+@font-face {
+  font-family: vt220;
+  src: url("../fonts/Glass_TTY_VT220.woff") format("woff");
+}
+
+body, input {
+  background: black;
+  color: green;
+  font-family: vt220;
+  font-size: 1.2rem;
+}
+
+a, a:visited {
+  color: green;
+  text-decoration: none;
+}
+
+input, input:focus {
+  border: 0;
+  outline: none;
+  width: 95%;
+}
+
+#scrollback div.output {
+  white-space: pre-wrap;
+}

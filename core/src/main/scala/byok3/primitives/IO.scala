@@ -120,7 +120,7 @@ object IO {
   } yield ()
 
   @Documentation("displays the MIT license text", stackEffect = "( -- )")
-  val LICENSE = unsafeIO {
+  val LICENSE: AppState[Unit] = unsafeIO {
     val now = LocalDate.now
     println(
       s"""|The MIT License (MIT)

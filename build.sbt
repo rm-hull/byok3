@@ -1,3 +1,6 @@
+import org.scalajs.core.tools.linker.ModuleInitializer
+import sbt.Keys.scalacOptions
+
 val BaseVersion = "0.2.0"
 
 lazy val commonSettings = Seq(
@@ -5,7 +8,7 @@ lazy val commonSettings = Seq(
   startYear := Some(2017),
   organizationName := "Richard Hull",
   licenses += ("MIT", new URL("https://opensource.org/licenses/MIT")),
-  homepage := Some(url("https://(your project url)")),
+  homepage := Some(url("https://github.com/rm-hull/byok3")),
   scmInfo := Some(
     ScmInfo(
       url("https://github.com/rm-hull/byok3"),
@@ -41,6 +44,7 @@ lazy val core = (project in file("core"))
 
 lazy val repl = (project in file("repl"))
   .dependsOn(core)
+  .enablePlugins(JavaAppPackaging)
   .settings(
     commonSettings,
     name := "byok3-repl",
@@ -53,6 +57,7 @@ lazy val repl = (project in file("repl"))
 
 lazy val web = (project in file("web"))
   .dependsOn(core)
+  .enablePlugins(SbtWeb, SbtTwirl, JavaAppPackaging)
   .settings(
     commonSettings,
     name := "byok3-web",
@@ -63,12 +68,27 @@ lazy val web = (project in file("web"))
       "com.typesafe.akka" %% "akka-stream" % "2.4.19",
       "com.typesafe.akka" %% "akka-actor"  % "2.4.19",
       "com.typesafe.akka" %% "akka-slf4j"  % "2.4.19",
-      "ch.qos.logback" % "logback-classic" % "1.2.3"
-    )
+      "ch.qos.logback" % "logback-classic" % "1.2.3",
+      "com.vmunier" %% "scalajs-scripts" % "1.1.1"
+    ),
+    scalaJSProjects := Seq(client),
+    pipelineStages in Assets := Seq(scalaJSPipeline),
+    WebKeys.packagePrefix in Assets := "public/",
+    managedClasspath in Runtime += (packageBin in Assets).value,
+    compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value
   )
 
-
-enablePlugins(JavaAppPackaging)
+lazy val client = (project in file("client"))
+  .enablePlugins(ScalaJSPlugin, ScalaJSWeb)
+  .settings(
+    commonSettings,
+    scalaJSUseMainModuleInitializer := true,
+    //scalaJSMainModuleInitializer := Some(ModuleInitializer.mainMethod("byok3.js.ScalaJSExample", "main")),
+    mainClass := Some("byok3.js.ScalaJSExample"),
+    libraryDependencies ++= Seq(
+      "org.scala-js" %%% "scalajs-dom" % "0.9.1"
+    )
+  )
 
 //enablePlugins(GitVersioning)
 //

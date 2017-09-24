@@ -23,6 +23,7 @@ package byok3.web
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
+import akka.http.scaladsl.server.RouteConcatenation.concat
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.typesafe.config.{Config, ConfigFactory}
@@ -42,7 +43,7 @@ object Server extends RequestTimeout {
     implicit val materializer = ActorMaterializer()
     implicit val executionContext = system.dispatcher
 
-    val api = new RestAPI(system, requestTimeout(config)).routes
+    val api = concat(WebService.routes, new RestAPI(system, requestTimeout(config)).routes)
     val bindingFuture = Http().bindAndHandle(api, host, port)
 
     println(s"Server online at http://$host:$port/\nPress RETURN to stop...")
