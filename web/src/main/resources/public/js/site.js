@@ -44,4 +44,4 @@ input.onkeypress = function(event) {
   }
 };
 
-sendCommand("")
+sendCommand("", addLine);

@@ -43,14 +43,11 @@ object Server extends RequestTimeout {
     implicit val materializer = ActorMaterializer()
     implicit val executionContext = system.dispatcher
 
-    val api = concat(WebService.routes, new RestAPI(system, requestTimeout(config)).routes)
-    val bindingFuture = Http().bindAndHandle(api, host, port)
+    val api = concat(Assets.routes, new RestAPI(system, requestTimeout(config)).routes)
+    Http().bindAndHandle(api, host, port)
 
-    println(s"Server online at http://$host:$port/\nPress RETURN to stop...")
-    StdIn.readLine() // let it run until user presses return
-    bindingFuture
-      .flatMap(_.unbind()) // trigger unbinding from the port
-      .onComplete(_ => system.terminate()) // and shutdown when done
+    println(s"Server online at http://$host:$port/")
+    println(s"Press CTRL-C to stop...")
   }
 }
 

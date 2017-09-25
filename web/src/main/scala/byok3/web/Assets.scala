@@ -19,14 +19,15 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package byok3
+package byok3.web
 
-import akka.http.scaladsl.marshalling.{Marshaller, _}
+import akka.http.scaladsl.marshalling.{Marshaller, ToEntityMarshaller}
 import akka.http.scaladsl.model.MediaType
-import akka.http.scaladsl.model.MediaTypes._
+import akka.http.scaladsl.model.MediaTypes.{`text/html`, `text/plain`, `text/xml`}
+import akka.http.scaladsl.server.Directives
 import play.twirl.api.{Html, Txt, Xml}
 
-package object web {
+object Assets extends Directives {
 
   /** Twirl marshallers for Xml, Html and Txt mediatypes */
   implicit val twirlHtmlMarshaller = twirlMarshaller[Html](`text/html`)
@@ -35,5 +36,22 @@ package object web {
 
   def twirlMarshaller[A](contentType: MediaType): ToEntityMarshaller[A] = {
     Marshaller.StringMarshaller.wrap(contentType)(_.toString)
+  }
+
+  val routes = {
+    pathSingleSlash {
+      get {
+        complete {
+          byok3.web.html.index.render()
+        }
+      }
+    } ~
+      pathPrefix("assets" / Remaining) { file =>
+        // optionally compresses the response with Gzip or Deflate
+        // if the client accepts compressed responses
+        encodeResponse {
+          getFromResource("public/" + file)
+        }
+      }
   }
 }

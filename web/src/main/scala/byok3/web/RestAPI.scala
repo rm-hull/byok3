@@ -28,7 +28,7 @@ import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import akka.http.scaladsl.server.Directives._
 import akka.pattern.ask
 import akka.util.Timeout
-import byok3.web.Formatter._
+import byok3.AnsiColor
 import byok3.web.actors.Supervisor
 import byok3.web.actors.Supervisor.{Event, Text, UnknownSession}
 
@@ -65,7 +65,7 @@ trait RestRoutes extends SupervisorAPI {
             onSuccess(evaluate(cookie.map(_.value), input)) {
               case Text(Some(session), output) =>
                 setCookie(HttpCookiePair("session", session).toCookie()) {
-                  complete(HttpEntity(ContentTypes.`text/plain(UTF-8)`, stripAnsi(output)))
+                  complete(HttpEntity(ContentTypes.`text/plain(UTF-8)`, AnsiColor.strip(output)))
                 }
 
               case Text(None, _) | UnknownSession =>
