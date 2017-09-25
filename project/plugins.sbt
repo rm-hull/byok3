@@ -11,4 +11,3 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.2.2")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-twirl" % "1.3.4")
 addSbtPlugin("com.vmunier" % "sbt-web-scalajs" % "1.0.6")
-addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.19")

@@ -68,27 +68,12 @@ lazy val web = (project in file("web"))
       "com.typesafe.akka" %% "akka-stream" % "2.4.19",
       "com.typesafe.akka" %% "akka-actor"  % "2.4.19",
       "com.typesafe.akka" %% "akka-slf4j"  % "2.4.19",
-      "ch.qos.logback" % "logback-classic" % "1.2.3",
-      "com.vmunier" %% "scalajs-scripts" % "1.1.1"
+      "ch.qos.logback" % "logback-classic" % "1.2.3"
     ),
-    scalaJSProjects := Seq(client),
-    pipelineStages in Assets := Seq(scalaJSPipeline),
     WebKeys.packagePrefix in Assets := "public/",
-    managedClasspath in Runtime += (packageBin in Assets).value,
-    compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value
+    managedClasspath in Runtime += (packageBin in Assets).value
   )
 
-lazy val client = (project in file("client"))
-  .enablePlugins(ScalaJSPlugin, ScalaJSWeb)
-  .settings(
-    commonSettings,
-    scalaJSUseMainModuleInitializer := true,
-    //scalaJSMainModuleInitializer := Some(ModuleInitializer.mainMethod("byok3.js.ScalaJSExample", "main")),
-    mainClass := Some("byok3.js.ScalaJSExample"),
-    libraryDependencies ++= Seq(
-      "org.scala-js" %%% "scalajs-dom" % "0.9.1"
-    )
-  )
 
 //enablePlugins(GitVersioning)
 //
