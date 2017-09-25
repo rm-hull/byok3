@@ -66,6 +66,7 @@ class StackMachine(name: String) extends Actor with ActorLogging {
       log.info(s"$name: $input (sender = ${sender()})")
 
       output += capturingOutput {
+        Predef.print(MID_GREY)
         ctx = ctx.eval(input)
 
         val prompt = ctx.status match {
@@ -74,7 +75,7 @@ class StackMachine(name: String) extends Actor with ActorLogging {
           case Left(err) => s"${RED}${BOLD}Error ${err.errno}:${RESET} ${err.message}\n"
         }
 
-        Predef.print(s"$MID_GREY$prompt")
+        Predef.print(prompt)
       }
 
       sender() ! output

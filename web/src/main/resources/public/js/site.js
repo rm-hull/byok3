@@ -24,11 +24,16 @@ function busy(enable) {
 
 function sendCommand(text, cb) {
   var xhr = new XMLHttpRequest();
+
   xhr.open('POST', '/byok3', true);
   xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
   xhr.onload = function() {
-    cb(this.responseText);
+    cb(null, xhr.responseText);
   };
+  xhr.onerror = function(e) {
+    cb("Unknown error occured: server response not received.", null);
+  };
+
   xhr.send(text);
 }
 
@@ -42,8 +47,8 @@ input.onkeypress = function(event) {
   if (event.which === 13) {
     addLine(input.value);
     busy(true);
-    sendCommand(input.value, function(result) {
-      addLine(result);
+    sendCommand(input.value, function(err, result) {
+      addLine(result || err);
       input.scrollIntoView({behaviour: 'instant', block: 'end'});
       busy(false);
     });
@@ -52,7 +57,7 @@ input.onkeypress = function(event) {
   }
 };
 
-sendCommand('', function(result) {
-  addLine(result);
+sendCommand('', function(err, result) {
+  addLine(result || err);
   busy(false);
 });

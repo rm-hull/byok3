@@ -23,9 +23,9 @@ package byok3.web
 
 import akka.http.scaladsl.marshalling.{Marshaller, ToEntityMarshaller}
 import akka.http.scaladsl.model.MediaType
-import akka.http.scaladsl.model.MediaTypes.{`text/html`, `text/plain`, `text/xml`}
+import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.server.Directives
-import play.twirl.api.{Html, Txt, Xml}
+import play.twirl.api._
 
 object Assets extends Directives {
 

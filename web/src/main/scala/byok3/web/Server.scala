@@ -29,7 +29,6 @@ import akka.util.Timeout
 import com.typesafe.config.{Config, ConfigFactory}
 
 import scala.concurrent.duration.{Duration, FiniteDuration}
-import scala.io.StdIn
 
 object Server extends RequestTimeout {
 
