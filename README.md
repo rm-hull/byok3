@@ -7,7 +7,8 @@
 [![Maintenance](https://img.shields.io/maintenance/yes/2017.svg?maxAge=2592000)]()
 
 BYOK (_BYE-OK_) is a [Scala](https://www.scala-lang.org/) program that implements a 
-[Forth](http://lars.nocrew.org/forth2012/index.html) virtual machine.
+[Forth](http://lars.nocrew.org/forth2012/index.html) virtual machine. It can be run 
+either as a command-line REPL, or through a browser.
 
 ## Building & running
 
@@ -17,12 +18,63 @@ Download [SBT](http://www.scala-sbt.org/), then clone the repository and build t
     $ cd byok3
     $ sbt repl/assembly
     
-This produces a self-contained jar file `target/scala-2.12/byok3-repl.jar` 
+This produces the REPL as a self-contained jar file `target/scala-2.12/byok3-repl.jar` 
 which can be executed with:
 
     $ java -jar repl/target/scala-2.12/byok3-repl.jar
 
+To build the web service, execute:
+
+    $ sbt web/assembly
+    $ java -jar web/target/scala-2.12/byok3-web.jar
+
 ## Demo
+
+A live web service is hosted on a [zeit now](https://zeit.co/now) node: https://byok3-zgqhyypdxg.now.sh. 
+Try the following commands:
+
+```forth
+: sqrt-closer  ( square guess -- square guess adjustment ) 2dup / over - 2 / ;
+   ok
+: sqrt ( square -- root ) 1 begin sqrt-closer dup while + repeat drop nip ;
+   ok
+```
+
+These compiled words implement the Newton-Raphson method to finding successively better
+approximations of the root of a number, for example:
+
+```forth
+36 sqrt .
+6   ok
+
+53345 sqrt .
+231   ok
+
+231 dup * .
+53361   ok
+```
+
+We can see the compiled code with:
+
+```forth
+' sqrt >body 52 disassemble
+000010D4:  2B 00 00 00  |+...|  : SQRT
+000010D8:  4A 00 00 00  |J...|  (LIT)
+000010DC:  01 00 00 00  |....|  1
+000010E0:  08 01 00 00  |....|  SQRT-CLOSER
+000010E4:  65 00 00 00  |e...|  DUP
+000010E8:  32 00 00 00  |2...|  0BRANCH
+000010EC:  10 00 00 00  |....|  16 (==> 0x000010FC)
+000010F0:  00 00 00 00  |....|  +
+000010F4:  31 00 00 00  |1...|  BRANCH
+000010F8:  E8 FF FF FF  |....|  -24 (==> 0x000010E0)
+000010FC:  5B 00 00 00  |[...|  DROP
+00001100:  5F 00 00 00  |_...|  NIP
+00001104:  2C 00 00 00  |,...|  EXIT
+  ok
+```
+
+Alternatively, watch a screencast:
 
 [![asciicast](https://asciinema.org/a/kXEtkGGKCLPNpoiiai6g7WB55.png)](https://asciinema.org/a/kXEtkGGKCLPNpoiiai6g7WB55)
 
@@ -69,9 +121,11 @@ to recursively step through the words under consideration.
 * Implement `LOAD` and `LIST` block commands.
 * Investigate if word input can be colorized with [JLine3](https://github.com/jline/jline3).
 * Block editor
-* Web API
+* ~~Web API~~
 * Implement full 2012 spec
 * Implement forth test suite
+* Performance improvements - reframe stack in terms of core memory
+* Purely functional IO
 
 ## References
 
