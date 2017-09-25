@@ -1,7 +1,7 @@
-import org.scalajs.core.tools.linker.ModuleInitializer
 import sbt.Keys.scalacOptions
 
 val BaseVersion = "0.2.0"
+scalaVersion := "2.12.3"
 
 lazy val commonSettings = Seq(
   version := BaseVersion,
@@ -51,7 +51,7 @@ lazy val repl = (project in file("repl"))
     assemblyJarName in assembly := "byok3-repl.jar",
     mainClass in (Compile, run) := Some("byok3.console.REPL"),
     libraryDependencies ++= Seq(
-      "org.jline" % "jline" % "3.4.0"
+      "org.jline" % "jline" % "3.5.1"
     )
   )
 
@@ -65,9 +65,9 @@ lazy val web = (project in file("web"))
     mainClass in (Compile, run) := Some("byok3.web.Server"),
     libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-http" % "10.0.10",
-      "com.typesafe.akka" %% "akka-stream" % "2.4.19",
-      "com.typesafe.akka" %% "akka-actor"  % "2.4.19",
-      "com.typesafe.akka" %% "akka-slf4j"  % "2.4.19",
+      "com.typesafe.akka" %% "akka-stream" % "2.4.20",
+      "com.typesafe.akka" %% "akka-actor"  % "2.4.20",
+      "com.typesafe.akka" %% "akka-slf4j"  % "2.4.20",
       "ch.qos.logback" % "logback-classic" % "1.2.3"
     ),
     WebKeys.packagePrefix in Assets := "public/",

@@ -9,5 +9,5 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.2.2")
 //addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "1.1")
 //addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.0.0")
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-twirl" % "1.3.4")
+addSbtPlugin("com.typesafe.sbt" % "sbt-twirl" % "1.3.7")
 addSbtPlugin("com.vmunier" % "sbt-web-scalajs" % "1.0.6")
