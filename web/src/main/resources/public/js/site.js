@@ -4,9 +4,9 @@ var scrollback = document.getElementById("scrollback");
 var input = document.getElementById("expression");
 
 function addLine(text) {
-  var elem = document.createElement("div");
-  elem.className = "output";
-  elem.innerHTML = text.replace(/</g,"&lt;").replace(/>/g,"&gt;") || " ";
+  var elem = document.createElement('div');
+  elem.className = 'output';
+  elem.innerHTML = (text || ' ').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   scrollback.appendChild(elem);
 }
 
@@ -15,6 +15,11 @@ function clearScrollback() {
   for (var i = 0, n = children.length; i < n; i++) {
     scrollback.removeChild(children[0]);
   }
+}
+
+function busy(enable) {
+  var elem = document.getElementById('busy')
+  elem.className = enable ? 'blink' : 'hide';
 }
 
 function sendCommand(text, cb) {
@@ -36,12 +41,18 @@ input.focus();
 input.onkeypress = function(event) {
   if (event.which === 13) {
     addLine(input.value);
+    busy(true);
     sendCommand(input.value, function(result) {
       addLine(result);
-      input.scrollIntoView({behaviour: "instant", block: "end"});
+      input.scrollIntoView({behaviour: 'instant', block: 'end'});
+      busy(false);
     });
-    input.value = "";
+    input.value = '';
+    input.scrollIntoView({behaviour: 'instant', block: 'end'});
   }
 };
 
-sendCommand("", addLine);
+sendCommand('', function(result) {
+  addLine(result);
+  busy(false);
+});
