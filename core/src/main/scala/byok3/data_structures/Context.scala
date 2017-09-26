@@ -21,10 +21,11 @@
 
 package byok3.data_structures
 
+import byok3.AnsiColor._
 import byok3.data_structures.Context._
 import byok3.data_structures.CoreMemory._
 import byok3.data_structures.Dictionary.add
-import byok3.data_structures.MachineState.OK
+import byok3.data_structures.MachineState.{OK, Smudge}
 import byok3.data_structures.Stack.pop
 import byok3.primitives.Memory.comma
 import byok3.types.{Address, AppState, Data, Dict, Stack, Word}
@@ -52,6 +53,12 @@ case class Context(mem: CoreMemory,
   // drain the data and return stacks if there was an error
     machineState(OK).runS(this).get
       .copy(error = Some(err), ds = List.empty, rs = List.empty)
+
+  def prompt = status match {
+    case Right(Smudge) => s"${LIGHT_GREY}|  "
+    case Right(OK) => s"  ${WHITE}${BOLD}ok${LIGHT_GREY}${stackDepthIndicator}\n"
+    case Left(err) => s"${RED}${BOLD}Error ${err.errno}:${RESET} ${err.message}\n"
+  }
 
   def find(token: Word) =
     dictionary.get(token.toUpperCase)

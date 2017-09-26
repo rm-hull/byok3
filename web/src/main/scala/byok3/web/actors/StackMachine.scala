@@ -27,59 +27,47 @@ import akka.actor._
 import byok3.AnsiColor._
 import byok3.Banner
 import byok3.data_structures.Context
-import byok3.data_structures.MachineState.{OK, Smudge}
-import cats.effect.IO
 
-import scala.annotation.tailrec
 import scala.io.Source
-import scala.util.{Failure, Success, Try}
-
-
-object StackMachine {
-  def props(name: String) = Props(new StackMachine(name))
-}
 
 case class EndOfFileException() extends Exception
 
-class StackMachine(name: String) extends Actor with ActorLogging {
+object StackMachine {
+  def props(name: String) = Props(new StackMachine(name, root))
 
-  var ctx: Context = null
-  var output: String = ""
+  val systemLibs = Seq("forth/system.fth")
 
-  override def preStart() = {
-    log.info(s"Starting: $name")
+  val root = systemLibs.map(load)
+    .reduce(_ andThen _)
+    .apply(Context(0x50000))
+    .copy(rawConsoleInput = None)
 
-    output += capturingOutput {
-      println(Banner())
+  private def load(filename: String)(ctx: Context) =
+    ctx.load(Source.fromResource(filename).getLines().toStream)
+}
 
-      val systemLibs = Seq("forth/system.fth")
 
-      ctx = systemLibs.map(load)
-        .reduce(_ andThen _)
-        .apply(Context(0x50000))
-        .copy(rawConsoleInput = None)
-    }
-  }
+class StackMachine(name: String, var ctx: Context) extends Actor with ActorLogging {
+
+  private var printBanner = true
+
+  override def preStart() =
+    log.info(s"Starting stack machine: $self")
 
   override def receive = {
     case input: String => {
+
       log.info(s"$name: $input (sender = ${sender()})")
 
-      output += capturingOutput {
-        Predef.print(MID_GREY)
+      sender() ! capturingOutput {
+        if (printBanner)
+          Predef.println(Banner())
+          printBanner = false
+
+        print(MID_GREY)
         ctx = ctx.eval(input)
-
-        val prompt = ctx.status match {
-          case Right(Smudge) => s"${LIGHT_GREY}|  "
-          case Right(OK) => s"  ${WHITE}${BOLD}ok${LIGHT_GREY}${ctx.stackDepthIndicator}\n"
-          case Left(err) => s"${RED}${BOLD}Error ${err.errno}:${RESET} ${err.message}\n"
-        }
-
-        Predef.print(prompt)
+        print(ctx.prompt)
       }
-
-      sender() ! output
-      output = ""
     }
   }
 
@@ -93,40 +81,5 @@ class StackMachine(name: String) extends Actor with ActorLogging {
     } finally {
       baos.close
     }
-  }
-
-  @tailrec
-  private def loop(reader: Context => IO[String])(ctx: Context): Context = {
-    val program: IO[Context] = for {
-      in <- reader(ctx)
-      next = ctx.eval(in)
-    } yield next
-
-    Try(program.unsafeRunSync) match {
-      case Success(next) => loop(reader)(next)
-      case Failure(ex: EndOfFileException) => ctx
-      case Failure(ex) => throw ex
-    }
-  }
-
-  private def load(filename: String)(ctx: Context): Context = {
-
-    val lines = Source.fromResource(filename)
-      .getLines()
-      .zip(Stream.from(1).toIterator)
-
-    def read(ctx: Context): IO[String] = IO {
-      if (lines.hasNext) {
-        val (text, line) = lines.next()
-        ctx.error.foreach { err =>
-          println(s"${RED}${BOLD}Error ${err.errno}:${RESET} ${err.message} occurred in ${BOLD}$filename, line: ${line - 1}${RESET}")
-          throw new EndOfFileException()
-        }
-        text
-      }
-      else throw new EndOfFileException()
-    }
-
-    loop(read)(ctx.include(filename))
   }
 }

@@ -23,7 +23,6 @@ package byok3.console
 
 import byok3.AnsiColor._
 import byok3.Banner
-import byok3.data_structures.MachineState.{OK, Smudge}
 import byok3.data_structures.{Context, Error}
 import cats.effect.IO
 import org.jline.reader.LineReader.Option._
@@ -64,15 +63,9 @@ object REPL {
   }
 
   private def read(ctx: Context) = {
-    val prompt = ctx.status match {
-      case Right(Smudge) => s"${LIGHT_GREY}|  "
-      case Right(OK) => s"  ${WHITE}${BOLD}ok${LIGHT_GREY}${ctx.stackDepthIndicator}\n"
-      case Left(err) => s"${RED}${BOLD}Error ${err.errno}:${RESET} ${err.message}\n"
-    }
-
     IO {
       wordCompleter.setContext(ctx)
-      val input = lineReader.readLine(prompt)
+      val input = lineReader.readLine(ctx.prompt)
       Console.withOut(terminal.output) {
         Predef.print(MID_GREY)
       }

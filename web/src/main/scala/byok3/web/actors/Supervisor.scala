@@ -27,17 +27,19 @@ import akka.actor._
 import akka.pattern.{ask, pipe}
 import akka.util.Timeout
 import byok3.web.actors.Supervisor._
+import byok3.web.actors.StackMachine._
 
 import scala.concurrent.ExecutionContext
+
+
+sealed trait Event
+case class Text(session: Option[String], text: String) extends Event
+case object UnknownSession extends Event
+
 
 object Supervisor {
   def props(implicit timeout: Timeout, ec: ExecutionContext) = Props(new Supervisor)
   def name = "supervisor"
-
-
-  sealed trait Event
-  case class Text(session: Option[String], text: String) extends Event
-  case object UnknownSession extends Event
 }
 
 class Supervisor(implicit timeout: Timeout, ec: ExecutionContext) extends Actor with ActorLogging {
@@ -48,12 +50,11 @@ class Supervisor(implicit timeout: Timeout, ec: ExecutionContext) extends Actor 
   private def forward(machine: ActorRef, session: String, input: String)(implicit timeout: Timeout) =
     machine.ask(input).mapTo[String].map(s => Text(Some(session), s))
 
-  override def preStart() = {
+  override def preStart() =
     log.info(s"Starting supervisor: $self")
-  }
+
 
   def receive = {
-
     // Create a new stack machine
     case Text(None, input) => {
       val session = UUID.randomUUID.toString
