@@ -22,15 +22,16 @@
 package byok3.web
 
 import akka.actor.{ActorRef, ActorSystem}
+import akka.http.scaladsl.model.ContentTypes._
+import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.model.StatusCodes._
-import akka.http.scaladsl.model.headers.HttpCookiePair
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
+import akka.http.scaladsl.model._
+import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.server.Directives._
 import akka.pattern.ask
 import akka.util.Timeout
 import byok3.AnsiColor
-import byok3.web.actors.Supervisor
-import byok3.web.actors.Supervisor.{Event, Text, UnknownSession}
+import byok3.web.actors.{Event, Supervisor, Text, UnknownSession}
 
 import scala.concurrent.ExecutionContext
 
@@ -57,6 +58,11 @@ trait SupervisorAPI {
 
 trait RestRoutes extends SupervisorAPI {
 
+  def extractAccept: PartialFunction[HttpHeader, MediaType] = {
+    case Accept(`text/html`) => `text/html`
+    case Accept(_) => `text/plain`
+  }
+
   val routes =
     path("byok3") {
       post {
@@ -65,7 +71,10 @@ trait RestRoutes extends SupervisorAPI {
             onSuccess(evaluate(cookie.map(_.value), input)) {
               case Text(Some(session), output) =>
                 setCookie(HttpCookiePair("session", session).toCookie()) {
-                  complete(HttpEntity(ContentTypes.`text/plain(UTF-8)`, AnsiColor.strip(output)))
+                  headerValueByName("Accept") {
+                    case "text/html" => complete(HttpEntity(`text/html(UTF-8)`, AnsiColor.strip(output)))
+                    case _ => complete(HttpEntity(`text/plain(UTF-8)`, output))
+                  }
                 }
 
               case Text(None, _) | UnknownSession =>

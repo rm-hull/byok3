@@ -26,6 +26,7 @@ function sendCommand(text, cb) {
   var xhr = new XMLHttpRequest();
 
   xhr.open('POST', '/byok3', true);
+  xhr.setRequestHeader('Accept', 'text/html');
   xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
   xhr.onload = function() {
     cb(null, xhr.responseText);
