@@ -32,6 +32,9 @@ import akka.pattern.ask
 import akka.util.Timeout
 import byok3.AnsiColor
 import byok3.web.actors.{Event, Supervisor, Text, UnknownSession}
+import com.lonelyplanet.prometheus.PrometheusResponseTimeRecorder
+import com.lonelyplanet.prometheus.api.MetricsEndpoint
+import com.lonelyplanet.prometheus.directives.ResponseTimeRecordingDirectives
 
 import scala.concurrent.ExecutionContext
 
@@ -46,7 +49,9 @@ class RestAPI(system: ActorSystem, timeout: Timeout) extends RestRoutes {
 
 trait SupervisorAPI {
   def createSupervisor(): ActorRef
+
   implicit def executionContext: ExecutionContext
+
   implicit def requestTimeout: Timeout
 
   lazy val supervisor = createSupervisor()
@@ -58,34 +63,42 @@ trait SupervisorAPI {
 
 trait RestRoutes extends SupervisorAPI {
 
-  def extractAccept: PartialFunction[HttpHeader, MediaType] = {
+  private val responseTimeDirectives = ResponseTimeRecordingDirectives(PrometheusResponseTimeRecorder.Default)
+
+  import responseTimeDirectives._
+
+  private val metricsEndpoint = new MetricsEndpoint(PrometheusResponseTimeRecorder.DefaultRegistry)
+
+  private def extractAccept: PartialFunction[HttpHeader, MediaType] = {
     case Accept(`text/html`) => `text/html`
     case Accept(_) => `text/plain`
   }
 
   val routes =
     path("byok3") {
-      post {
-        entity(as[String]) { input =>
-          optionalCookie("session") { cookie =>
-            onSuccess(evaluate(cookie.map(_.value), input)) {
-              case Text(Some(session), output) =>
-                setCookie(HttpCookiePair("session", session).toCookie()) {
-                  headerValueByName("Accept") {
-                    case "text/html" => complete(HttpEntity(`text/html(UTF-8)`, AnsiColor.strip(output)))
-                    case _ => complete(HttpEntity(`text/plain(UTF-8)`, output))
+      recordResponseTime("byok3") {
+        post {
+          entity(as[String]) { input =>
+            optionalCookie("session") { cookie =>
+              onSuccess(evaluate(cookie.map(_.value), input)) {
+                case Text(Some(session), output) =>
+                  setCookie(HttpCookiePair("session", session).toCookie()) {
+                    headerValueByName("Accept") {
+                      case "text/html" => complete(HttpEntity(`text/html(UTF-8)`, AnsiColor.strip(output)))
+                      case _ => complete(HttpEntity(`text/plain(UTF-8)`, output))
+                    }
                   }
-                }
 
-              case Text(None, _) | UnknownSession =>
-                deleteCookie("session") {
-                  complete(NotFound)
-                }
+                case Text(None, _) | UnknownSession =>
+                  deleteCookie("session") {
+                    complete(NotFound)
+                  }
+              }
             }
           }
         }
       }
-    }
+    } ~ metricsEndpoint.routes
 }
 
 
