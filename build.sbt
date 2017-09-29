@@ -68,7 +68,8 @@ lazy val web = (project in file("web"))
       "com.typesafe.akka" %% "akka-stream" % "2.5.6",
       "com.typesafe.akka" %% "akka-actor"  % "2.5.6",
       "com.typesafe.akka" %% "akka-slf4j"  % "2.5.6",
-      "ch.qos.logback" % "logback-classic" % "1.2.3"
+      "ch.qos.logback" % "logback-classic" % "1.2.3",
+      "nl.grons" %% "metrics-scala" % "3.5.9_a2.4"
     ),
     WebKeys.packagePrefix in Assets := "public/",
     managedClasspath in Runtime += (packageBin in Assets).value
