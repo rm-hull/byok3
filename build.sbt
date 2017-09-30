@@ -65,17 +65,10 @@ lazy val web = (project in file("web"))
     mainClass in (Compile, run) := Some("byok3.web.Server"),
     libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-http" % "10.0.10",
-      "com.typesafe.akka" %% "akka-stream" % "2.5.4",
-      "com.typesafe.akka" %% "akka-actor"  % "2.5.4",
-      "com.typesafe.akka" %% "akka-slf4j"  % "2.5.4",
+      "com.typesafe.akka" %% "akka-stream" % "2.5.6",
+      "com.typesafe.akka" %% "akka-actor"  % "2.5.6",
+      "com.typesafe.akka" %% "akka-slf4j"  % "2.5.6",
       "ch.qos.logback" % "logback-classic" % "1.2.3"
-    ),
-    dependencyOverrides ++= Set(
-      "com.typesafe.akka" %% "akka-stream" % "2.5.4",
-      "com.typesafe.akka" %% "akka-actor"  % "2.5.4",
-      "com.typesafe.akka" %% "akka-slf4j"  % "2.5.4",
-      "com.typesafe" %% "config" % "1.3.1",
-      "org.slf4j" %% "slf4j-api" % "1.7.25"
     ),
     WebKeys.packagePrefix in Assets := "public/",
     managedClasspath in Runtime += (packageBin in Assets).value
