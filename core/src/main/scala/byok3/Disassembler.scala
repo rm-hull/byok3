@@ -32,7 +32,7 @@ class Disassembler(ctx: Context) {
 
   val nest = ctx.dictionary.indexOf("__NEST").get
   val defns = ctx.dictionary.toMap.values.map {
-    case UserDefined(name, address, _) => Some((address, name))
+    case UserDefined(name, address, _, _) => Some((address, name))
     case _ => None
   }.flatten.toMap
 

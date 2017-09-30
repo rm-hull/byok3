@@ -71,7 +71,9 @@ object Compiler {
     exit <- dictionary(addressOf("EXIT"))
     _ <- comma(exit)
     userDefinedWord <- inspectF[Try, Context, UserDefined](_.compiling.toTry(Error(-14))) // used only during compilation
-    _ <- dictionary(add(userDefinedWord))
+    dp <- DP()
+    wordSize = dp - userDefinedWord.addr
+    _ <- dictionary(add(userDefinedWord.copy(size = Some(wordSize))))
     _ <- modify[Try, Context](_.copy(compiling = None))
     _ <- machineState(OK)
   } yield ()
@@ -97,6 +99,14 @@ object Compiler {
       case _ => throw Error(-31)
     }
     _ <- dataStack(push(pfa))
+  } yield ()
+
+  @Documentation("the size of the body corresponding to xt", stackEffect = "( xt -- sz )")
+  val `>SIZE` = for {
+    xt <- dataStack(pop)
+    instr <- dictionary(instruction(xt))
+    size = instr.size.getOrElse { throw Error(-21) }  // unsupported operation
+    _ <- dataStack(push(size))
   } yield ()
 
   @Documentation("the address and length of the name of the execution token", stackEffect = "( xt -- len a-addr)")

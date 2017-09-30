@@ -39,6 +39,7 @@ sealed trait ExecutionToken {
   val effect: AppState[Unit]
   val immediate: Boolean = false
   val internal: Boolean = false
+  val size: Option[Int] = None
 
   def markAsImmediate: ExecutionToken = ???
 
@@ -65,7 +66,10 @@ case class Variable(name: Word, addr: Address) extends ExecutionToken {
 /**
   * Inner interpreter
   */
-case class UserDefined(name: Word, addr: Address, override val immediate: Boolean = false)
+case class UserDefined(name: Word,
+                       addr: Address,
+                       override val immediate: Boolean = false,
+                       override val size: Option[Int] = None)
   extends ExecutionToken with Executor {
 
   override def markAsImmediate = copy(immediate = true)

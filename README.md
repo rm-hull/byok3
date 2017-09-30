@@ -56,7 +56,20 @@ approximations of the root of a number, for example:
 We can see the compiled code with:
 
 ```forth
-' sqrt >body 52 disassemble
+: show ' dup >body swap >size disassemble ;
+   ok
+show sqrt-closer
+000010BC:  2C 00 00 00  |,...|  : SQRT-CLOSER
+000010C0:  67 00 00 00  |g...|  2DUP
+000010C4:  03 00 00 00  |....|  /
+000010C8:  5E 00 00 00  |^...|  OVER
+000010CC:  01 00 00 00  |....|  -
+000010D0:  4B 00 00 00  |K...|  (LIT)
+000010D4:  02 00 00 00  |....|  2
+000010D8:  03 00 00 00  |....|  /
+000010DC:  2D 00 00 00  |-...|  EXIT
+   ok
+show sqrt
 000010D4:  2B 00 00 00  |+...|  : SQRT
 000010D8:  4A 00 00 00  |J...|  (LIT)
 000010DC:  01 00 00 00  |....|  1

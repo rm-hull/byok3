@@ -18,17 +18,17 @@ class DisassemblerTest extends FunSuite {
 
   test("should print disassembly") {
     val expected =
-      s"""${MID_GREY}00000124:  2B 00 00 00  |+...|  ${CYAN}${BOLD}: <unknown>${RESET}${MID_GREY}
-         |${MID_GREY}00000128:  65 00 00 00  |e...|  DUP
+      s"""${MID_GREY}00000124:  2C 00 00 00  |,...|  ${CYAN}${BOLD}: <unknown>${RESET}${MID_GREY}
+         |${MID_GREY}00000128:  66 00 00 00  |f...|  DUP
          |${MID_GREY}0000012C:  02 00 00 00  |....|  *
-         |${MID_GREY}00000130:  2C 00 00 00  |,...|  EXIT
-         |${MID_GREY}00000134:  2B 00 00 00  |+...|  ${CYAN}${BOLD}: SQR${RESET}${MID_GREY}
-         |${MID_GREY}00000138:  4A 00 00 00  |J...|  (LIT)
+         |${MID_GREY}00000130:  2D 00 00 00  |-...|  EXIT
+         |${MID_GREY}00000134:  2C 00 00 00  |,...|  ${CYAN}${BOLD}: SQR${RESET}${MID_GREY}
+         |${MID_GREY}00000138:  4B 00 00 00  |K...|  (LIT)
          |${MID_GREY}0000013C:  09 00 00 00  |....|  9
-         |${MID_GREY}00000140:  4A 00 00 00  |J...|  (LIT)
+         |${MID_GREY}00000140:  4B 00 00 00  |K...|  (LIT)
          |${MID_GREY}00000144:  09 00 00 00  |....|  9
          |${MID_GREY}00000148:  02 00 00 00  |....|  *
-         |${MID_GREY}0000014C:  2C 00 00 00  |,...|  EXIT
+         |${MID_GREY}0000014C:  2D 00 00 00  |-...|  EXIT
          |""".stripMargin
 
     val actual = capturingOutput(disassembler.print(0x0124, 0x2C))
