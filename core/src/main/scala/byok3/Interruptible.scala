@@ -2,7 +2,7 @@ package byok3
 
 import java.util.concurrent.atomic.AtomicBoolean
 
-import sun.misc.{Signal, SignalHandler}
+import sun.misc.Signal
 
 object Interruptible {
 
