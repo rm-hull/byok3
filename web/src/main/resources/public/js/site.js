@@ -43,6 +43,7 @@ function ESC(ansicode) {
 hterm.defaultStorage = new lib.Storage.Local();
 var t = new hterm.Terminal();
 t.onTerminalReady = function() {
+  var maxLineLength = 256;
   var io = t.io.push();
   var input = '';
   var pos = 0;
@@ -59,6 +60,8 @@ t.onTerminalReady = function() {
   };
 
   io.onVTKeystroke = io.sendString = function(str) {
+
+    // TODO - prevent input when busy
     var chr = str.charCodeAt(0);
     if (chr === 13) {
 
@@ -91,7 +94,7 @@ t.onTerminalReady = function() {
     } else if (str === ESC('D') && pos > 0) { // backwards
       pos -= 1;
 
-    } else if (chr >= 32 && chr <= 127) {
+    } else if (chr >= 32 && chr <= 127 && pos < maxLineLength) {
       if (insertMode) {
         input = input.insertCharAt(pos, str);
         pos += 1;
