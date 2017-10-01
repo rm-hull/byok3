@@ -15,7 +15,6 @@ String.prototype.insertCharAt = function(pos, char) {
   return target.substring(0, pos) + char + target.substring(pos);
 };
 
-
 function busy(enable) {
   var elem = document.getElementById('busy')
   elem.className = enable ? 'blink' : 'hide';
@@ -37,14 +36,19 @@ function sendCommand(text, cb) {
   xhr.send(text);
 }
 
+function ESC(ansicode) {
+  return '\u001B[' + ansicode;
+}
+
 hterm.defaultStorage = new lib.Storage.Local();
 var t = new hterm.Terminal();
 t.onTerminalReady = function() {
   var io = t.io.push();
   var input = '';
   var pos = 0;
+  var currHist = 0;
   var history = [];
-  var ESC = '\u001B[';
+  var insertMode = true;
 
   io.onReadline = function(str) {
     busy(true);
@@ -57,26 +61,48 @@ t.onTerminalReady = function() {
   io.onVTKeystroke = io.sendString = function(str) {
     var chr = str.charCodeAt(0);
     if (chr === 13) {
-      history.push(input);
+
+      if (history.indexOf(input) < 0) {
+        history.push(input);
+        currHist = history.length;
+      }
       io.onReadline(input);
       io.println('');
       input = '';
       pos = 0;
+
     } else if (chr === 127) {
       input = input.deleteCharAt(pos)
       pos -= 1;
-      io.print('\b');
-    } else if (str === ESC + '[C' && pos < input.length) { // forward
-      io.print(ESC + '[1C');
+
+    } else if (str == ESC('A') && currHist > 0) {
+      currHist -= 1;
+      input = history[currHist];
+      pos = 0;
+
+    } else if (str == ESC('B') && currHist < history.length - 1) {
+      currHist += 1;
+      input = history[currHist];
+      pos = 0;
+
+    } else if (str === ESC('C') && pos < input.length) { // forward
       pos += 1;
-    } else if (str === ESC + '[D' && pos > 0) { // backwards
-      io.print(ESC + '[1D');
+
+    } else if (str === ESC('D') && pos > 0) { // backwards
       pos -= 1;
+
     } else if (chr >= 32 && chr <= 127) {
-      console.log(chr);
-      t.io.print(str);
-      input = input.insertCharAt(pos, str);
-      pos += 1;
+      if (insertMode) {
+        input = input.insertCharAt(pos, str);
+        pos += 1;
+      } else {
+        // TODO - replace mode
+      }
+    }
+
+    io.print('\r' + ESC('K') + input + '\r');
+    if (pos > 0) {
+      io.print(ESC(pos + 'C'));
     }
   };
 
