@@ -5,9 +5,9 @@
 
 body, input {
   background: black;
-  color: green;
+/*  color: green;
   font-family: vt220;
-  font-size: 1.2rem;
+  font-size: 1.2rem;*/
 }
 
 a, a:visited {
@@ -49,4 +49,5 @@ input, input:focus {
   top: 10px;
   padding: 0px 4px;
   border-radius: 3px;
+  z-index: 10;
 }
