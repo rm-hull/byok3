@@ -2,7 +2,7 @@ FROM frolvlad/alpine-oraclejdk8:latest
 MAINTAINER Richard Hull <rm_hull@yahoo.co.uk>
 
 ARG SCALA_VERSION=2.12
-ARG SBT_DOWNLOAD_URL=https://cocl.us/sbt01316tgz
+ARG SBT_DOWNLOAD_URL=https://github.com/sbt/sbt/releases/download/v1.0.2/sbt-1.0.2.tgz
 
 RUN apk add --no-cache bash
 
