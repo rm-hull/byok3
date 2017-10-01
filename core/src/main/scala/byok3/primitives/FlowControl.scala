@@ -26,7 +26,7 @@ import byok3.data_structures.Context._
 import byok3.data_structures.CoreMemory._
 import byok3.data_structures.Dictionary._
 import byok3.data_structures.Stack.{pop, push, peek => speek}
-import byok3.data_structures.{Error, IP, W}
+import byok3.data_structures.{Error, IP, MachineState, W}
 import byok3.primitives.StackManipulation.RDROP
 import byok3.types.AppState
 import byok3.helpers._
@@ -114,7 +114,6 @@ object FlowControl {
          else returnStack(sequence(push(limit), push(index)))
   } yield ()
 
-
   @Documentation("n | u is a copy of the current (innermost) loop index. An ambiguous condition exists if the loop control parameters are unavailable", stackEffect = "( -- n | u ) ( R: loop-sys -- loop-sys )")
   val I = for {
     n <- returnStack(speek)
@@ -147,4 +146,6 @@ object FlowControl {
     _ <- if (index + step != limit) BRANCH
          else sequence(`ip++`, RDROP, RDROP)
   } yield ()
+
+  val `BYE` = machineState(MachineState.BYE)
 }

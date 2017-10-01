@@ -23,6 +23,7 @@ package byok3.console
 
 import byok3.AnsiColor._
 import byok3.Banner
+import byok3.data_structures.MachineState.BYE
 import byok3.data_structures.{Context, Error}
 import cats.effect.IO
 import org.jline.reader.LineReader.Option._
@@ -81,7 +82,7 @@ object REPL {
     } yield next
 
     Try(program.unsafeRunSync) match {
-      case Success(next) => loop(reader)(next)
+      case Success(next) => if (next.status == Right(BYE)) next else loop(reader)(next)
       case Failure(ex: UserInterruptException) => loop(reader)(ctx.reset.error(Error(-28)))
       case Failure(ex: EndOfFileException) => ctx
       case Failure(ex) => throw ex

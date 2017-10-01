@@ -27,11 +27,11 @@ object MachineState {
     val value: Int = this.i
   }
 
+  case object BYE extends Value(-1)
   case object OK extends Value(0)
-
   case object Smudge extends Value(1)
 
-  def states: Seq[Value] = Seq(OK, Smudge)
+  def states: Seq[Value] = Seq(BYE, OK, Smudge)
 
   def apply(value: Int): Value =
     states.find(v => v.value == value).getOrElse(throw new IllegalArgumentException)

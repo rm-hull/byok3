@@ -27,6 +27,7 @@ import akka.actor._
 import byok3.AnsiColor._
 import byok3.Banner
 import byok3.data_structures.Context
+import byok3.data_structures.MachineState.BYE
 
 import scala.io.Source
 
@@ -67,6 +68,9 @@ class StackMachine(name: String, var ctx: Context) extends Actor with ActorLoggi
         print(MID_GREY)
         ctx = ctx.eval(input)
         print(ctx.prompt)
+
+        if (ctx.status == Right(BYE))
+          context.stop(self)
       }
     }
   }

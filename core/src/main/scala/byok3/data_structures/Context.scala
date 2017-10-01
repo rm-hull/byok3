@@ -25,7 +25,7 @@ import byok3.AnsiColor._
 import byok3.data_structures.Context._
 import byok3.data_structures.CoreMemory._
 import byok3.data_structures.Dictionary.add
-import byok3.data_structures.MachineState.{OK, Smudge}
+import byok3.data_structures.MachineState.{BYE, OK, Smudge}
 import byok3.data_structures.Stack.pop
 import byok3.primitives.Memory.comma
 import byok3.types.{Address, AppState, Data, Dict, Stack, Word}
@@ -56,6 +56,7 @@ case class Context(mem: CoreMemory,
 
   def prompt = status match {
     case Right(Smudge) => s"${LIGHT_GREY}|  "
+    case Right(BYE) => s"${LIGHT_GREY}> SYSTEM STOPPED\n"
     case Right(OK) => s"  ${WHITE}${BOLD}ok${LIGHT_GREY}${stackDepthIndicator}\n"
     case Left(err) => s"${RED}${BOLD}Error ${err.errno}:${RESET} ${err.message}\n"
   }
