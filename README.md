@@ -7,7 +7,9 @@
 
 BYOK (_BYE-OK_) is a [Scala](https://www.scala-lang.org/) program that implements a 
 [Forth](http://lars.nocrew.org/forth2012/index.html) virtual machine. It can be run 
-either as a command-line REPL, or through a browser.
+either as a command-line REPL, or through a browser. It will almost certainly never
+be useful for any purpose besides that which it has already fulfilled: forcing me to
+think quite carefully about how forth works.
 
 ## Building & running
 
@@ -142,6 +144,8 @@ to recursively step through the words under consideration.
 ## References
 
 * http://lars.nocrew.org/forth2012/index.html
+* https://rwmj.wordpress.com/2010/08/07/jonesforth-git-repository/
+* http://galileo.phys.virginia.edu/classes/551.jvn.fall01/primer.htm
 
 ## License
 
