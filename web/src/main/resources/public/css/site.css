@@ -3,6 +3,12 @@ body {
   margin: 0;
 }
 
+#terminal {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
 .blink {
   animation: blinker 1s infinite alternate;
 }
