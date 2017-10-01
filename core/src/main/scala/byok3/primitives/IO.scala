@@ -214,4 +214,10 @@ object IO {
     _ <- dataStack(push(token.value.length))
     _ <- REQUIRED
   } yield ()
+
+  @Documentation("displays some help text", stackEffect = "( -- )")
+  val HELP: AppState[Unit] = unsafeIO {
+    Source.fromResource("help.txt").getLines.foreach(println)
+    pure(())
+  }
 }

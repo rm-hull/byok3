@@ -1,0 +1,228 @@
+
+
+    1. Preliminaries
+
+    Forth is an unusual computer language that has probably been applied
+    to more varied projects than any other. It is the obvious choice when
+    the project is exceptionally demanding in terms of completion sched-
+    ule, speed of execution, compactness of code, or any combination of
+    the above.
+
+    It has also been called “...one of the best-kept secrets in the com-
+    puting world.” This is no exaggeration: large corporations have pur-
+    chased professional Forth development systems from vendors such as
+    Laboratory Microsystems, Inc., Forth, Inc. or MicroProcessor Engineer-
+    ing, Ltd. and sworn them to secrecy.
+
+    Some speculate (unkindly) that corporate giants prefer to hide their
+    shame at using Forth; but I believe they are actually concealing a
+    secret weapon from their rivals. Whenever Forth has competed directly
+    with a more conventional language like C it has won hands down, pro-
+    ducing smaller, faster, more reliable code in far less time. I have
+    searched for examples with the opposite outcome but have been unable
+    to find a single instance.
+
+
+
+    2. The structure of Forth
+
+    You can use UPPER or lower-case to type commands and data. BYOK3
+    is case-insensitive.
+
+    At the command line, now type
+
+       BYE  <cr>
+
+    The system immediately closes.
+
+
+    What just happened? Forth is an interactive programming language con-
+    sisting entirely of subroutines, called words in Forth jargon.
+
+    Interactive means you type things in at the keyboard and the machine
+    responds. We will see some details of how it does this below.
+
+    A word is executed (interactively) by naming it. We have just seen
+    this happen: BYE is a Forth subroutine meaning “exit to the operating
+    system”. So when we typed BYE <cr> BYE was executed, and the system re-
+    turned control to Windows.
+
+
+    Re-start Forth. Now we will try something a little more complicated.
+    Enter
+
+       2 17  +  .  <cr>
+       19  ok
+
+    What happened? Forth is interpretive. A small program called the “outer
+    interpreter” continually loops, waiting for input from the keyboard or
+    from a mass storage device. The input is a sequence of text strings
+    (words or numbers) separated from each other by the standard Forth
+    delimiter: one or more ASCII blank (32decimal = 20hex) characters.
+
+    The text strings can be interpreted in only three ways: words (sub-
+    routine names), numbers, or “not defined”.
+
+    The outer interpreter tries first to look for an incoming word in the
+    dictionary (a list of already-defined subroutine names). If it finds
+    that word, the interpreter executes the corresponding code.
+
+    If no dictionary entry exists, the interpreter tries to read the input
+    as a number. If the string satisfies the rules defining a number, it
+    is converted to a number in the machine's internal representation,
+    and stored in a special memory location, called “the top of the stack”
+    (TOS).
+
+    In the above example, Forth interpreted 2 and 17 as numbers, and
+    pushed them both onto the stack.
+
+    "+" is a pre-defined word as is ".", so they were looked up and exe-
+    cuted.
+
+    "+" added 2 to 17 and left 19 on the stack.
+
+    The word "." (called "dot") removed 19 from the stack and displayed
+    it on the standard output device (in this case, CRT).
+
+    We might also have said
+
+       HEX    0A  14  * . <cr>
+       C8 ok
+
+    (Do you understand this? Hint: DECIMAL means “switch to decimal arith-
+    metic”, whereas HEX stands for “switch to hexadecimal arithmetic”.)
+
+    If the incoming text can neither be located in the dictionary nor in-
+    terpreted as a number, Forth issues an error message. Try it: type X <cr>
+    and see
+
+       X
+       Error -13: word not found: X
+
+    or type THING <cr> and see
+
+       THING
+       Error -13: word not found: THING
+
+    Finally, here is the obligatory "Hello, World!" program. Forth lets you
+    output text using the word ." as follows (we will explain in §3 below
+    what : and ; mean):
+
+       : hi     ." Hello, World!"  ;  ok
+
+    Now type in hi and see what happens:
+
+       hi <cr>
+       Hello, World! ok
+
+    This can be elaborated with words that tab, emit carriage returns,
+    display in colors, etc. but that would take us too far afield.
+
+    (The word ." means “Display the string, following the obligatory blank space
+    and terminated by the close-quote " on the standard output device.”)
+
+    Forth belongs to the class of Threaded Interpretive Languages. This
+    means it can interpret commands (subroutines or programs) typed in
+    at the console, as well as create (compile) new subroutines and pro-
+    grams.
+
+    To compile and test a program in a traditional language such
+    as Fortran, C or Pascal, one prepares an input (source) file, submits it
+    to a black box that someone else created (the compiler) and then
+    runs the resulting executable file (which is generally in machine
+    language). This process can be so tedious that most program
+    development in traditional languages must be supported by
+    an elaborate set of programs called the “environment”,
+    consisting of integrated editors, debuggers, version control
+    catalogues and the like.
+
+    Forth has little in common with the traditional compilation method.
+    Although the Forth interpreter/compiler looks complicated, it is
+    simplicity itself compared with a traditional black-box compiler.
+
+    A continuous loop waits for input—from the keyboard, a disk file or
+    whatever— and acts on it according to its nature. Input consists
+    of a sequence of words and numbers. If a name is recognized it is
+    executed; if it is not in the dictionary (where else would you keep
+    a list of words?) Forth tries to convert it to a number and push it
+    on the stack. If this is impossible, Forth aborts execution, issues an
+    error message and waits for more input.
+
+    As we shall see below, what makes Forth a compiler as well as an
+    interpreter is the set of words (Forth subroutines) that, when they are
+    typed in and executed, create new Forth subroutines.
+
+
+
+    3. Extending the dictionary
+
+    The compiler is one of Forth's most endearing features. Unlike
+    most other high-level languages, the Forth compiler is part of the
+    language. (LISP and its dialects also make components of the com-
+    pilation mechanism available to the programmer.) That is, its com-
+    ponents are Forth words available to the programmer, that can be
+    used to solve his problems.
+
+    In this section we discuss how the compiler extends the
+    dictionary. As noted above, normally a Forth system awaits
+    input, and interprets (and executes it). We say the system is
+    normally in interpret mode.
+
+    Forth uses special words to create new dictionary entries, i.e.,
+    new words. The most important are ":" (“start a new definition”)
+    and ";" (“terminate the definition”).
+
+    Let's try this out: enter
+
+       : *+    *  +  ;  <cr>
+       ok
+
+    What happened? The word ":" was executed because it was already
+    in the dictionary. The action of ":" is
+
+     > Create a new dictionary entry named *+ and switch from
+       interpret to compile mode.
+
+     > In compile mode, the interpreter looks up words and
+       —rather than executing them— installs pointers to
+       their code. (If the text is a number, instead of
+       pushing it on the stack, Forth builds the number
+       into the dictionary space allotted for the new word,
+       following special code that puts the stored number
+       on the stack whenever that word is executed.)
+
+     > The action of "*+" is thus to execute sequentially
+       the previously-defined words "*" and "+".
+
+     > The word ";" is special: when it was defined a bit
+       was turned on in its dictionary entry to mark it as
+       IMMEDIATE. Thus, rather than writing down the address
+       of ";", the compiler executes ";" immediately.
+       (That is, an IMMEDIATE word is always executed, even
+       if the system is in compile mode.)
+
+       What ";" does is twofold: first, it installs the code
+       that returns control to the next outer level of the
+       interpreter; and second, it switches back from compile
+       mode to interpret mode.
+
+    Now try out *+ :
+
+       DECIMAL   5 6 7 *+ .  <cr>
+       47  ok
+
+    This example illustrated two principles of Forth: adding a new word to
+    the dictionary, and trying it out as soon as it was defined.
+
+    Any word you have added to the dictionary can be decompiled using
+    the Forth word SEE. Say
+
+          SEE *+  <cr>
+
+    and get
+
+          SEE *+
+          : *+    * + ;  ok
+
+    This can be useful when trying to understand how something works.
+
