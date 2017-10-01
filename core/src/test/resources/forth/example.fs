@@ -16,3 +16,11 @@
 : QUADRATIC  ( a b c d -- n )  >r swap rot r@ * + r> * + ;
 : ?DOZEN  12 = IF ." dozen " ELSE ." not a dozen" THEN ;
 : GREETINGS   ." Hello earthling " cr ;
+
+
+\ This code prints a box made of asterisks of the specified height and width
+
+: star 42 emit ;
+: top 0 do star loop cr ; : bottom top ;
+: middle star 2 - 0 do space loop star cr ;
+: box ( width height -- ) cr over top 2 - 0 do dup middle loop bottom ;
