@@ -20,6 +20,11 @@ function busy(enable) {
   elem.className = enable ? 'blink' : 'hide';
 }
 
+function isBusy() {
+  var elem = document.getElementById('busy')
+  return elem.className === 'blink';
+}
+
 function sendCommand(text, cb) {
   var xhr = new XMLHttpRequest();
 
@@ -60,8 +65,8 @@ t.onTerminalReady = function() {
   };
 
   io.onVTKeystroke = io.sendString = function(str) {
+    if (isBusy()) return;
 
-    // TODO - prevent input when busy
     var chr = str.charCodeAt(0);
     if (chr === 13) {
 
