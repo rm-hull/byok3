@@ -35,16 +35,20 @@ class WordCompleter extends Completer {
     this.ctx = Some(ctx)
   }
 
-  private def immediate(exeTok: ExecutionToken, doc: String) =
-    if (exeTok.immediate) s"[IMMEDIATE] ${Option(doc).getOrElse("")}".trim else doc
+  private def blank(text: String) = Option(text).getOrElse("").trim
 
-  private def candidate(key: String, exeTok: ExecutionToken) =
+  private def immediate(exeTok: ExecutionToken, doc: String) =
+    if (exeTok.immediate) s"[IMMEDIATE] ${blank(doc)}".trim else doc
+
+  private def candidate(key: String, exeTok: ExecutionToken) = {
+    val doc = immediate(exeTok, exeTok.doc.fold[String](null)(_.toString))
     exeTok match {
-      case p: Primitive => new Candidate(p.name, p.name, "built-in", immediate(p, p.doc.fold[String](null)(_.toString)), null, key, true)
-      case v: Variable => new Candidate(v.name, v.name, "variable", s"value: ${ctx.map(_.mem.peek(v.addr)).getOrElse("unknown")}", null, key, true)
-      case c: Constant => new Candidate(c.name, c.name, "constant", s"constant: ${c.value}", null, key, true)
+      case p: Primitive => new Candidate(p.name, p.name, "built-in", doc, null, key, true)
+      case v: Variable => new Candidate(v.name, v.name, "variable", s"value: ${ctx.map(_.mem.peek(v.addr)).getOrElse("unknown")} ${blank(doc)}".trim, null, key, true)
+      case c: Constant => new Candidate(c.name, c.name, "constant", s"constant: ${c.value} ${blank(doc)}".trim, null, key, true)
       case u: UserDefined => new Candidate(u.name, u.name, "user-defined", immediate(u, null), null, key, true)
     }
+  }
 
   override def complete(reader: LineReader, line: ParsedLine, candidates: util.List[Candidate]): Unit = {
     ctx.foreach { c =>

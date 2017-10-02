@@ -40,6 +40,7 @@ sealed trait ExecutionToken {
   val immediate: Boolean = false
   val internal: Boolean = false
   val size: Option[Int] = None
+  val doc: Option[Documentation] = None
 
   def markAsImmediate: ExecutionToken = ???
 
@@ -53,13 +54,17 @@ case class Primitive(name: Word,
                      effect: AppState[Unit],
                      override val immediate: Boolean,
                      override val internal: Boolean,
-                     doc: Option[Documentation]) extends ExecutionToken
+                     override val doc: Option[Documentation]) extends ExecutionToken
 
-case class Constant(name: Word, value: Data) extends ExecutionToken {
+case class Constant(name: Word,
+                    value: Data,
+                    override val doc: Option[Documentation] = None) extends ExecutionToken {
   override val effect = dataStack(push(value))
 }
 
-case class Variable(name: Word, addr: Address) extends ExecutionToken {
+case class Variable(name: Word,
+                    addr: Address,
+                    override val doc: Option[Documentation] = None) extends ExecutionToken {
   override val effect = dataStack(push(addr))
 }
 

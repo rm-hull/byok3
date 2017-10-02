@@ -22,6 +22,7 @@
 package byok3.data_structures
 
 import byok3.AnsiColor._
+import byok3.annonation.Documentation
 import byok3.data_structures.Context._
 import byok3.data_structures.CoreMemory._
 import byok3.data_structures.Dictionary.add
@@ -126,7 +127,7 @@ object Context {
       _ <- initialize("BASE", 10)
       // aux registers
       _ <- initialize("TIB", 0)
-      _ <- initialize(">IN", 0) // FIXME: add @Documentation("a-addr is the address of a cell containing the offset in characters from the start of the input buffer to the start of the parse area", stackEffect = "( -- a-addr )")
+      _ <- initialize(">IN", 0, Some(Documentation("a-addr is the address of a cell containing the offset in characters from the start of the input buffer to the start of the parse area", stackEffect = "( -- a-addr )")))
       _ <- initialize("ECHO", 0)
     } yield ()
   }
@@ -136,9 +137,9 @@ object Context {
     bootstrap(dp = 0x100).runS(Context(CoreMemory(memSize))).get
   }
 
-  def initialize(name: Word, value: Data): AppState[Unit] = for {
+  def initialize(name: Word, value: Data, doc: Option[Documentation] = None): AppState[Unit] = for {
     addr <- comma(value)
-    _ <- dictionary(add(Constant(name, addr)))
+    _ <- dictionary(add(Constant(name, addr, doc)))
   } yield ()
 
   def requires[S](predicate: S => Boolean, onFail: Error): StateT[Try, S, Unit] =
