@@ -36,7 +36,7 @@ import cats.data.StateT._
 import cats.implicits._
 
 import scala.annotation.tailrec
-import scala.util.{Failure, Try}
+import scala.util.{Failure, Success, Try}
 
 
 case class Context(mem: CoreMemory,
@@ -96,7 +96,10 @@ case class Context(mem: CoreMemory,
   lazy val disassembler = new Disassembler(this)
 
   def eval(text: String) =
-    Interpreter(text).runS(this).get
+    Interpreter(text).runS(this) match {
+      case Failure(ex: Throwable) => error(Error(ex))
+      case Success(ctx) => ctx
+    }
 
   @tailrec
   final def load(lines: Stream[String]): Context = lines match {
@@ -143,10 +146,10 @@ object Context {
   } yield ()
 
   def requires[S](predicate: S => Boolean, onFail: Error): StateT[Try, S, Unit] =
-    inspectF[Try, S, Unit](s => Try(if (!predicate(s)) throw onFail))
+    inspectF(s => if (predicate(s)) Success(()) else Failure(onFail))
 
   def guard[S](predicate: => Boolean, onFail: Error): StateT[Try, S, Unit] =
-    inspectF[Try, S, Unit](_ => Try(if (!predicate) throw onFail))
+    inspectF(_ => if (predicate) Success(()) else Failure(onFail))
 
   def dataStack[A](block: StateT[Try, Stack[Int], A]): AppState[A] =
     block.transformS(_.ds, (ctx, stack) => ctx.copy(ds = stack))
