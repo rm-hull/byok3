@@ -84,7 +84,7 @@ object FlowControl {
   val EXECUTE = for {
     xt <- dataStack(pop)
     instr <- dictionary(instruction(xt))
-    _ <- exec(instr.name)
+    _ <- instr.effect
   } yield ()
 
   @Documentation("", stackEffect = "( -- )")

@@ -85,7 +85,7 @@ case class UserDefined(name: Word,
   override def step = for {
     xt <- XT()
     instr <- dictionary(instruction(xt))
-    _ <- exec(instr.name)
+    _ <- instr.effect
     ip <- IP()
     next <- memory(peek(ip))
     _ <- IP(inc(ip))

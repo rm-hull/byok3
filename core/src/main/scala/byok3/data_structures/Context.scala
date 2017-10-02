@@ -70,7 +70,7 @@ case class Context(mem: CoreMemory,
   def reset =
     copy(error = None)
 
-  def exec(token: Word) =
+  private def exec(token: Word) =
     find(token).fold[Try[Context]](Failure(Error(-13, token))) {
       xt => xt.effect.runS(this)
     }
