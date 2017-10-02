@@ -25,6 +25,7 @@ import byok3.annonation.Documentation
 import byok3.data_structures.Context._
 import byok3.data_structures.Error
 import byok3.data_structures.Stack._
+import byok3.implicits._
 import byok3.types.Stack
 import cats.data.StateT._
 import cats.implicits._
@@ -181,6 +182,17 @@ object StackManipulation {
       u <- pop
       stack <- get[Try, Stack[Int]]
       xu = Try(stack(u)).getOrElse(throw Error(-11)) // result out of range
+      _ <- push(xu)
+    } yield ()
+  }
+
+  @Documentation("Remove u. Rotate u+1 items on the top of the stack. An ambiguous condition exists if there are less than u+2 items on the stack before ROLL is executed", stackEffect = "( xu xu-1 ... x0 u -- xu-1 ... x0 xu )")
+  val ROLL = dataStack {
+    for {
+      u <- pop
+      stack <- get[Try, Stack[Int]]
+      xu = Try(stack(u)).getOrElse(throw Error(-11)) // result out of range
+      _ <- set(stack.remove(u))
       _ <- push(xu)
     } yield ()
   }

@@ -30,4 +30,10 @@ package object implicits {
       opt.map(Success(_)).getOrElse(Failure(ex))
   }
 
+  implicit class ListOps[A](l: List[A]) {
+    def remove[A](i: Int) = {
+      val (head, _ :: tail) = l.splitAt(i)
+      head ::: tail
+    }
+  }
 }
