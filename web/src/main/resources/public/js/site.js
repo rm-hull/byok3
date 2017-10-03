@@ -10,9 +10,9 @@ String.prototype.deleteCharAt = function(pos) {
   return (pos > 0) ? target.substring(0, pos - 1) + target.substring(pos) : target;
 };
 
-String.prototype.insertCharAt = function(pos, char) {
+String.prototype.insertAt = function(pos, str) {
   var target = this;
-  return target.substring(0, pos) + char + target.substring(pos);
+  return target.substring(0, pos) + str + target.substring(pos);
 };
 
 function busy(enable) {
@@ -99,10 +99,10 @@ t.onTerminalReady = function() {
     } else if (str === ESC('D') && pos > 0) { // backwards
       pos -= 1;
 
-    } else if (chr >= 32 && chr <= 127 && pos < maxLineLength) {
+    } else if (chr >= 32 && chr <= 127 && (pos + str.length) < maxLineLength) {
       if (insertMode) {
-        input = input.insertCharAt(pos, str);
-        pos += 1;
+        input = input.insertAt(pos, str);
+        pos += str.length;
       } else {
         // TODO - replace mode
       }
