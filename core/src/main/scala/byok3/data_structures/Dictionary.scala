@@ -24,7 +24,7 @@ package byok3.data_structures
 import byok3.annonation.{Documentation, Immediate, Internal}
 import byok3.implicits._
 import byok3.primitives.{Arithmetics, BitLogic, Comparison, Compiler, FlowControl, IO, Memory, StackManipulation}
-import byok3.types.{AppState, Dict, Word}
+import byok3.types.{AppState, Dict, Stack, Word}
 import cats.data.StateT
 import cats.data.StateT._
 import cats.implicits._
@@ -33,14 +33,21 @@ import scala.reflect.ClassTag
 import scala.reflect.runtime.universe._
 import scala.util.Try
 
-class Dictionary[K, A](private val byKey: Map[K, Int], private val byPosn: Vector[A]) {
+class Dictionary[K, A](private val byKey: Map[K, Stack[Int]], private val byPosn: Vector[A]) {
 
   def add(key: K, a: A): Dictionary[K, A] =
-    new Dictionary(byKey.updated(key, byPosn.length), byPosn :+ a)
+    new Dictionary(byKey.updated(key, byPosn.length :: byKey.get(key).getOrElse(Nil)), byPosn :+ a)
 
   def replace(key: K, a: A): Dictionary[K, A] =
-    byKey.get(key).map(idx => new Dictionary(byKey, byPosn.updated(idx, a))).getOrElse {
-      throw new NoSuchElementException(key.toString)
+    byKey.get(key) match {
+      case Some(idx :: _) => new Dictionary(byKey, byPosn.updated(idx, a))
+      case _ => throw new NoSuchElementException(key.toString)
+    }
+
+  def forget(key: K): Dictionary[K, A]  =
+    byKey.get(key) match {
+      case Some(_ :: rest) => new Dictionary(byKey.updated(key, rest), byPosn)
+      case _ => throw new NoSuchElementException(key.toString)
     }
 
   def get(key: K): Option[A] =
@@ -50,17 +57,20 @@ class Dictionary[K, A](private val byKey: Map[K, Int], private val byPosn: Vecto
     Try(byPosn(index)).toOption
 
   def indexOf(key: K): Option[Int] =
-    byKey.get(key)
+    byKey.get(key).flatMap(_.headOption)
 
-  def keys = byKey.keys
+  def keys: Iterable[K] = byKey.keys
 
-  def length = byPosn.length
+  def length: Int = byPosn.length
 
-  def toMap = byKey.mapValues(idx => get(idx).get)
+  def toMap: Map[K, A] =
+    byKey.filter(_._2.nonEmpty).mapValues {
+      case idx :: _ => get(idx).get
+      case Nil => throw new AssertionError("Should never be nil")
+    }
 }
 
 object Dictionary {
-
 
   private def annotation[T](term: TermSymbol)(implicit ev: TypeTag[T]) = {
     val mirror = runtimeMirror(getClass.getClassLoader)
@@ -112,13 +122,16 @@ object Dictionary {
     }
   }
 
-  def empty[K, A]: Dictionary[K, A] = new Dictionary(Map.empty[K, Int], Vector.empty[A])
+  def empty[K, A]: Dictionary[K, A] = new Dictionary(Map.empty[K, List[Int]], Vector.empty[A])
 
   def add(exeTok: ExecutionToken): StateT[Try, Dict, Unit] =
     modify[Try, Dict](_.add(exeTok.name, exeTok))
 
   def replace(exeTok: ExecutionToken): StateT[Try, Dict, Unit] =
     modify[Try, Dict](_.replace(exeTok.name, exeTok))
+
+  def forget(token: Word): StateT[Try, Dict, Unit] =
+      modify[Try, Dict](_.forget(token))
 
   def addressOf(token: Word): StateT[Try, Dict, Int] =
     inspectF[Try, Dict, Int](_.indexOf(token).toTry(Error(-13, token)))

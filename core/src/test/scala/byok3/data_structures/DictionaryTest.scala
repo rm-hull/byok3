@@ -40,4 +40,21 @@ class DictionaryTest extends FunSuite with Matchers {
   test("should convert to a map") {
     dict.toMap shouldEqual Range(0, 10).map(i => i.toString -> i).toMap
   }
+
+  test("should forget an existing value") {
+    val newDict = dict.forget("3")
+    newDict.get("3") shouldEqual None
+  }
+
+  test("should remember an old value") {
+    val newDict = dict.add("3", 95)
+    newDict.get("3") shouldEqual Some(95)
+    newDict.forget("3").get("3") shouldEqual Some(3)
+  }
+
+  test("should throw error on forgetting a non-existent value") {
+    intercept[NoSuchElementException] {
+      dict.forget("67")
+    }
+  }
 }

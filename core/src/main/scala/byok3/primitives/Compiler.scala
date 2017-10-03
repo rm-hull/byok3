@@ -134,4 +134,12 @@ object Compiler {
     _ <- compile(exit)
     _ <- dictionary(add(UserDefined(name, addr)))
   } yield ()
+
+  @Documentation("Restores the previous definition (if any) for a word. Use with caution", stackEffect = "( \"<spaces>name\" -- )")
+  val FORGET = for {
+    token <- nextToken()
+    name = token.value.toUpperCase
+    _ <- guard(name.nonEmpty, Error(-16))
+    _ <- dictionary(forget(name))
+  } yield ()
 }
