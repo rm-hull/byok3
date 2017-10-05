@@ -79,24 +79,33 @@ t.onTerminalReady = function() {
       input = '';
       pos = 0;
 
-    } else if (chr === 127) {
+    } else if (chr === 1) { // Ctrl-A
+      pos = 0;
+
+    } else if (chr === 5) { // Ctrl-E
+      pos = input.length;
+
+    } else if (chr === 127) { // Backspace
       input = input.deleteCharAt(pos)
       pos -= 1;
 
-    } else if (str == ESC('A') && currHist > 0) {
+    } else if (str === ESC("3~")) { // Delete
+      input = input.deleteCharAt(pos + 1)
+
+    } else if (str === ESC('A') && currHist > 0) { // Cursor up
       currHist -= 1;
       input = history[currHist];
       pos = 0;
 
-    } else if (str == ESC('B') && currHist < history.length - 1) {
+    } else if (str === ESC('B') && currHist < history.length - 1) { // Cursor down
       currHist += 1;
       input = history[currHist];
       pos = 0;
 
-    } else if (str === ESC('C') && pos < input.length) { // forward
+    } else if (str === ESC('C') && pos < input.length) { // Cursor right
       pos += 1;
 
-    } else if (str === ESC('D') && pos > 0) { // backwards
+    } else if (str === ESC('D') && pos > 0) { // Cursor left
       pos -= 1;
 
     } else if (chr >= 32 && chr <= 127 && (pos + str.length) < maxLineLength) {
@@ -108,10 +117,7 @@ t.onTerminalReady = function() {
       }
     }
 
-    io.print('\r' + ESC('K') + input + '\r');
-    if (pos > 0) {
-      io.print(ESC(pos + 'C'));
-    }
+    io.print(ESC('0G') + ESC('2K') + input + ESC((pos + 1) + 'G'));
   };
 
   sendCommand('', function(err, result) {
