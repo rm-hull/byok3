@@ -53,7 +53,10 @@ object IO {
   private def loadSource(filename: String) = for {
     _ <- guard(isValidFilename(filename), Error(-38))
     lines <- unsafeIO {
-      Source.fromFile(filename).getLines.toStream
+      Try(Source.fromFile(filename)).orElse(
+        Try(Source.fromResource(filename)))
+        .map(_.getLines.toStream)
+        .getOrElse(throw Error(-38))
     }
     _ <- modify[Try, Context](_.include(filename).load(lines))
   } yield ()
