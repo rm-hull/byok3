@@ -49,7 +49,7 @@ case class Context(mem: CoreMemory,
                    rawConsoleInput: Option[RawInput] = None,
                    included: Set[String] = Set.empty) {
 
-  def error(err: Error): Context =
+  def error(err: Error) =
   // reset the STATE to interpreter mode and then
   // drain the data and return stacks if there was an error
     machineState(OK).runS(this).get
