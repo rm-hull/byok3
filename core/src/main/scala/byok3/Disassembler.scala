@@ -26,7 +26,6 @@ import byok3.data_structures.CoreMemory._
 import byok3.data_structures.{Context, UserDefined}
 import byok3.types.Address
 
-import scala.Predef.{print => pr}
 
 class Disassembler(ctx: Context) {
 
@@ -52,21 +51,22 @@ class Disassembler(ctx: Context) {
     }
 
     def printRow(addr: Address) = {
-      pr(f"${MID_GREY}$addr%08X:  ")
-      pr(bytes(addr) { n => f"${ctx.mem.char_peek(n)}%02X " })
-      pr(" |")
-      pr(bytes(addr) { n => printable(ctx.mem.char_peek(n)) })
-      pr("|  ")
+      Predef.print(f"${MID_GREY}$addr%08X:  ")
+      Predef.print(bytes(addr) { n => f"${ctx.mem.char_peek(n)}%02X " })
+      Predef.print(" |")
+      Predef.print(bytes(addr) { n => printable(ctx.mem.char_peek(n)) })
+      Predef.print("|  ")
 
       val data = ctx.mem.peek(addr)
-      prevInstr(addr) match {
-        case Some("(LIT)") => pr(data)
-        case Some("BRANCH") | Some("0BRANCH") | Some("(LOOP)") | Some("(LEAVE)") => pr(f"$data ${YELLOW}(==> 0x${addr + data}%08X)${RESET}${MID_GREY}")
-        case _ => pr(
-          if (data == nest) s"${CYAN}${BOLD}: ${defns.get(addr).getOrElse("<unknown>")}${RESET}${MID_GREY}"
-          else ctx.dictionary.get(data).fold(data.toString)(_.name))
+      val line = prevInstr(addr) match {
+        case Some("(LIT)") => data
+        case Some("BRANCH") | Some("0BRANCH") |
+             Some("(LOOP)") | Some("(+LOOP)") |
+             Some("(LEAVE)") => f"$data ${YELLOW}(==> 0x${addr + data}%08X)${RESET}${MID_GREY}"
+        case _ if (data == nest) => s"${CYAN}${BOLD}: ${defns.get(addr).getOrElse("<unknown>")}${RESET}${MID_GREY}"
+        case _ => ctx.dictionary.get(data).fold(data.toString)(_.name)
       }
-      pr("\n")
+      Predef.println(line)
     }
 
     Range(offset, offset + len, CELL_SIZE).foreach(printRow)
