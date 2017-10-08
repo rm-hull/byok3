@@ -102,7 +102,7 @@
 ;
 
 ( Clean up - hide non-standard multiplication def. )
-( hide * )
+forget *
 
 ( Default picture )
 : mandel
