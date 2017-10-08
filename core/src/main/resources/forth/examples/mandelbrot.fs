@@ -60,7 +60,7 @@
 
         iterate
         2dup cmagsq
-        4 0 >scaled > if
+        [ 4 0 >scaled ] literal > if
             false ( not in set )
             leave
         then
@@ -87,7 +87,7 @@
         3 pick 6 pick do
 
             i j inSet? if
-                42 emit
+                ascii * emit
             else
                 space
             then
