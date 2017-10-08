@@ -28,7 +28,7 @@ import byok3.annonation.Documentation
 import byok3.data_structures.Context._
 import byok3.data_structures.CoreMemory._
 import byok3.data_structures.Stack.{pop, push}
-import byok3.data_structures.{Context, Error}
+import byok3.data_structures._
 import byok3.types.{AppState, Stack}
 import cats.data.StateT
 import cats.data.StateT._
@@ -38,6 +38,8 @@ import scala.io.Source
 import scala.util.Try
 
 object IO {
+
+  private def noOp: AppState[Unit] = pure(())
 
   private def unsafeIO[A](block: => A): AppState[A] =
     StateT(s => Try((s, block)))
@@ -144,7 +146,7 @@ object IO {
           |IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
           |CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
        """.stripMargin)
-    pure(())
+    noOp
   }
 
   @Documentation("List the definition names in alphabetical order", stackEffect = "( -- )")
@@ -203,7 +205,7 @@ object IO {
     addr <- dataStack(pop)
     filename <- memory(fetch(addr, len))
     included <- inspect[Try, Context, Set[String]](_.included)
-    _ <- if (included.contains(filename)) pure[Try, Context, Unit](()) else loadSource(filename)
+    _ <- if (included.contains(filename)) noOp else loadSource(filename)
   } yield ()
 
   @Documentation("include-file the file only if it is not included already", "( \"ccc<file>\" -- )")
@@ -218,6 +220,29 @@ object IO {
   @Documentation("displays some help text", stackEffect = "( -- )")
   val HELP: AppState[Unit] = unsafeIO {
     Source.fromResource("help.txt").getLines.foreach(println)
-    pure(())
+    noOp
   }
+
+  def diagnostics(label: String): AppState[Unit] = for {
+    state <- deref("STATE")
+    dp <- DP()
+    ip <- IP()
+    w <- W()
+    xt <- XT()
+    ds <- inspect[Try, Context, Stack[Int]](_.ds)
+    rs <- inspect[Try, Context, Stack[Int]](_.rs)
+
+    _ <- unsafeIO {
+      val indent = "  " * rs.length
+      val instr = s"$indent$label"
+      print(f"$instr%-48s  state:${state}  dp:${dp}%08X  ip:${ip}%08X  w:${w}%08X  xt:${xt}%08X")
+      print(s"  ds: ${ds.reverse.map(n => f"${n}").mkString(" ")}")
+      println(s"  rs: ${rs.reverse.map(n => f"${n}%08X").mkString(" ")}")
+    }
+  } yield ()
+
+  def trace(label: String) = for {
+    echo <- deref("ECHO")
+    _ <- if (echo == 1) diagnostics(label) else noOp
+  } yield ()
 }

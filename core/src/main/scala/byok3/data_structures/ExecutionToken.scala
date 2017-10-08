@@ -29,6 +29,7 @@ import byok3.data_structures.Dictionary.{addressOf, instruction}
 import byok3.data_structures.Stack.push
 import byok3.primitives.Compiler
 import byok3.primitives.FlowControl.__NEST
+import byok3.primitives.IO.trace
 import byok3.types._
 import cats.data.StateT._
 import cats.implicits._
@@ -90,6 +91,7 @@ case class UserDefined(name: Word,
   override def step = for {
     xt <- XT()
     instr <- dictionary(instruction(xt))
+    _ <- trace(instr.name)
     _ <- instr.effect
     ip <- IP()
     next <- memory(peek(ip))
