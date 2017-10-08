@@ -22,7 +22,7 @@
 package byok3.console
 
 import byok3.AnsiColor._
-import byok3.Banner
+import byok3.{Banner, Interruptible}
 import byok3.data_structures.MachineState.BYE
 import byok3.data_structures.{Context, Error}
 import cats.effect.IO
@@ -67,6 +67,7 @@ object REPL {
     IO {
       wordCompleter.setContext(ctx)
       val input = lineReader.readLine(ctx.prompt)
+      Interruptible.trigger(println)
       Console.withOut(terminal.output) {
         Predef.print(MID_GREY)
       }
