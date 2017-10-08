@@ -85,7 +85,7 @@ t.onTerminalReady = function() {
     } else if (chr === 5) { // Ctrl-E
       pos = input.length;
 
-    } else if (chr === 127) { // Backspace
+    } else if (chr === 127 && pos > 0) { // Backspace
       input = input.deleteCharAt(pos)
       pos -= 1;
 
@@ -108,7 +108,7 @@ t.onTerminalReady = function() {
     } else if (str === ESC('D') && pos > 0) { // Cursor left
       pos -= 1;
 
-    } else if (chr >= 32 && chr <= 127 && (pos + str.length) < maxLineLength) {
+    } else if (chr >= 32 && chr < 127 && (pos + str.length) < maxLineLength) {
       if (insertMode) {
         input = input.insertAt(pos, str);
         pos += str.length;
