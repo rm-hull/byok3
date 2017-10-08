@@ -110,4 +110,4 @@
         mandeldraw
 ;
 
-CR .( Enter 'mandel' to draw the Mandelbrot Set.)
+CR .( Enter 'mandel' to draw the Mandelbrot Set.) CR
