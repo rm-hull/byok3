@@ -21,9 +21,9 @@
 
 package byok3
 
+import byok3.AnsiColor._
 import byok3.data_structures.CoreMemory._
 import byok3.data_structures.{Context, UserDefined}
-import AnsiColor._
 import byok3.types.Address
 
 import scala.Predef.{print => pr}
@@ -61,7 +61,7 @@ class Disassembler(ctx: Context) {
       val data = ctx.mem.peek(addr)
       prevInstr(addr) match {
         case Some("(LIT)") => pr(data)
-        case Some("BRANCH") | Some("0BRANCH") | Some("(LOOP)") => pr(f"$data ${YELLOW}(==> 0x${addr + data}%08X)${RESET}${MID_GREY}")
+        case Some("BRANCH") | Some("0BRANCH") | Some("(LOOP)") | Some("(LEAVE)") => pr(f"$data ${YELLOW}(==> 0x${addr + data}%08X)${RESET}${MID_GREY}")
         case _ => pr(
           if (data == nest) s"${CYAN}${BOLD}: ${defns.get(addr).getOrElse("<unknown>")}${RESET}${MID_GREY}"
           else ctx.dictionary.get(data).fold(data.toString)(_.name))

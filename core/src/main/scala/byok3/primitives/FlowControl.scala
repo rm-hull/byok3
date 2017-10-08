@@ -27,9 +27,9 @@ import byok3.data_structures.CoreMemory._
 import byok3.data_structures.Dictionary._
 import byok3.data_structures.Stack.{pop, push, peek => speek}
 import byok3.data_structures.{Error, IP, MachineState, W}
+import byok3.helpers._
 import byok3.primitives.StackManipulation.RDROP
 import byok3.types.AppState
-import byok3.helpers._
 import cats.data.StateT._
 import cats.implicits._
 
@@ -127,10 +127,9 @@ object FlowControl {
   } yield ()
 
   val `(LEAVE)` = for {
-    _ <- returnStack(pop)
-    limit <- returnStack(speek)
-    index = limit - 1
-    _ <- returnStack(push(index))
+    _ <- RDROP
+    _ <- RDROP
+    _ <- BRANCH
   } yield ()
 
   val `(LOOP)` = for {
