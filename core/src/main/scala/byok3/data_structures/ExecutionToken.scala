@@ -45,6 +45,8 @@ sealed trait ExecutionToken {
 
   def markAsImmediate: ExecutionToken = ???
 
+  def setAddress(addr: Address): ExecutionToken = ???
+
   def compile = for {
     xt <- dictionary(addressOf(name))
     _ <- Compiler.compile(xt)
@@ -79,6 +81,7 @@ case class UserDefined(name: Word,
   extends ExecutionToken with Executor {
 
   override def markAsImmediate = copy(immediate = true)
+  override def setAddress(addr: Address) = copy(addr = addr)
 
   override val effect = for {
     xt <- memory(peek(addr))

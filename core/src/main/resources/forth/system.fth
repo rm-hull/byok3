@@ -136,12 +136,6 @@
 ; immediate
 
 
-: (DOES>)  ( xt -- , modify previous definition to execute code at xt )
-        latest >body \ get address of code for new word
-        cell + \ offset to second cell in create word
-        !      \ store execution token of DOES> code in new word
-;
-
 : DOES>   ( -- , define execution code for CREATE word )
         0 [compile] literal \ dummy literal to hold xt
         here cell-          \ address of zero in literal
