@@ -37,10 +37,7 @@ object Arithmetics {
   val * = dataStack(arity2stackOp(_ * _))
 
   @Documentation("divides x1 by x2, leaves result x3", stackEffect = "( x1 x2 -- x3 )")
-  val / = dataStack(arity2stackOp((a, b) => {
-//    println(s"$a / $b")
-    a / b
-  }))
+  val / = dataStack(arity2stackOp(_ / _))
 
   @Documentation("increments x1 by 1", stackEffect = "( x1 -- x2 )")
   val `1+` = dataStack(arity1stackOp(_ + 1))
@@ -79,11 +76,8 @@ object Arithmetics {
   val `/MOD` = dataStack(arity2stackOp2[Int](_ % _)(_ / _))
 
   @Documentation("multiplies then divides (n1 x n2) / n3", stackEffect = "( n1 n2 n3 -- n4 )")
-  val `*/` = dataStack(arity3stackOp[Int] { (a, b, c) =>
-//    println(s"$a * $b / $c")
-    if (c == 0) 0 else a * b / c
-  })
+  val `*/` = dataStack(arity3stackOp[Int](_ * _ / _))
 
-  @Documentation("multiplies then divides (n1 x n2) / n3, returning the remainder n n4 and quotient in n5", stackEffect = "( n1 n2 n3 -- n4 n5)")
+  @Documentation("multiplies then divides (n1 x n2) / n3, returning the remainder in n4 and quotient in n5", stackEffect = "( n1 n2 n3 -- n4 n5)")
   val `*/MOD` = dataStack(arity3stackOp2[Int](_ * _ / _)(_ * _ / _))
 }
