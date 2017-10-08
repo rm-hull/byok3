@@ -27,10 +27,13 @@ import akka.http.scaladsl.server.RouteConcatenation.concat
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.typesafe.config.{Config, ConfigFactory}
+import org.slf4j.LoggerFactory
 
 import scala.concurrent.duration.{Duration, FiniteDuration}
 
 object Server extends RequestTimeout {
+
+  val log = LoggerFactory.getLogger(getClass)
 
   def main(args: Array[String]) {
 
@@ -45,8 +48,8 @@ object Server extends RequestTimeout {
     val api = concat(Assets.routes, new RestAPI(system, requestTimeout(config)).routes)
     Http().bindAndHandle(api, host, port)
 
-    println(s"Server online at http://$host:$port/")
-    println(s"Press CTRL-C to stop...")
+    log.info(s"Server online at http://$host:$port/")
+    log.info(s"Press CTRL-C to stop...")
   }
 }
 
