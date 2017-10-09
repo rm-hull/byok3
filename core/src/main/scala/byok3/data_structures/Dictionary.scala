@@ -131,7 +131,7 @@ object Dictionary {
     modify[Try, Dict](_.replace(exeTok.name, exeTok))
 
   def forget(token: Word): StateT[Try, Dict, Unit] =
-      modify[Try, Dict](_.forget(token))
+    modify[Try, Dict](_.forget(token))
 
   def exists(token: Word): StateT[Try, Dict, Boolean] =
     inspect(_.get(token).isDefined)

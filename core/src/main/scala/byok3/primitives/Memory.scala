@@ -106,7 +106,6 @@ object Memory {
     _ <- memory(modify(_.move(a2, a1, u * CELL_SIZE)))
   } yield ()
 
-
   @Documentation("", stackEffect = "( a1 a2 u --  )")
   val CMOVE = for {
     u <- dataStack(pop)
