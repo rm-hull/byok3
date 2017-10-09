@@ -80,6 +80,21 @@ object FlowControl {
     _ <- dataStack(push(xt))
   } yield ()
 
+  @Documentation("Find the definition named in the counted string at c-addr. If the definition is not found, return c-addr and zero. If the definition is found, return its execution token xt. If the definition is immediate, also return one (1), otherwise also return minus-one (-1)", stackEffect = "( c-addr -- c-addr 0 | xt 1 | xt -1 )")
+  val FIND = for {
+    caddr <- dataStack(pop)
+    name <- memory(cfetch(caddr))
+    ucName = name.toUpperCase
+    exists <- dictionary(exists(ucName))
+    _ <- if (exists) {
+      for {
+        xt <- dictionary(addressOf(ucName))
+        token <- dictionary(instruction(ucName))
+        _ <- dataStack(sequence(push(xt), push(if (token.immediate) 1 else -1)))
+      } yield ()
+    } else dataStack(sequence(push(caddr), push(0)))
+  } yield ()
+
   @Documentation("Remove xt from the stack and perform the semantics identified by it. Other stack effects are due to the word EXECUTEd", stackEffect = "( i*x xt -- j*x )")
   val EXECUTE = for {
     xt <- dataStack(pop)

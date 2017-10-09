@@ -133,6 +133,9 @@ object Dictionary {
   def forget(token: Word): StateT[Try, Dict, Unit] =
       modify[Try, Dict](_.forget(token))
 
+  def exists(token: Word): StateT[Try, Dict, Boolean] =
+    inspect(_.get(token).isDefined)
+
   def addressOf(token: Word): StateT[Try, Dict, Int] =
     inspectF[Try, Dict, Int](_.indexOf(token).toTry(Error(-13, token)))
 

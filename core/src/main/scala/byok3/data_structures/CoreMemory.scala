@@ -135,6 +135,10 @@ case class CoreMemory(size: Int, private val addressSpace: AddressSpace) {
     fetch0(addr, len, "")
   }
 
+  def cfetch(caddr: Address): String =
+    fetch(caddr + 1, char_peek(caddr))
+
+
   @tailrec
   final def char_fill(dest: Address, len: Int, char: Int): CoreMemory = {
     boundsCheck(dest)
@@ -174,4 +178,7 @@ case object CoreMemory {
 
   def fetch(addr: Address, len: Int): StateT[Try, CoreMemory, String] =
     inspect(_.fetch(addr, len))
+
+  def cfetch(caddr: Address): StateT[Try, CoreMemory, String] =
+    inspect(_.cfetch(caddr))
 }
