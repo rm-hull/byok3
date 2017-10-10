@@ -143,6 +143,7 @@ object Compiler {
     _ <- dictionary(forget(name))
   } yield ()
 
+  @Documentation("Modify previous definition to execute code at xt", stackEffect = "( xt -- )")
   val `(DOES>)` = for {
     xt <- dataStack(pop)
     lastWord <- dictionary(last)
