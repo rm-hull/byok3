@@ -195,4 +195,7 @@ case object CoreMemory {
 
   def cfetch(caddr: Address): StateT[Try, CoreMemory, String] =
     inspect(_.cfetch(caddr))
+
+  def cstore(addr: Address, data: String): StateT[Try, CoreMemory, Unit] =
+    modify(_.char_poke(addr, data.length).memcpy(addr + 1, data))
 }

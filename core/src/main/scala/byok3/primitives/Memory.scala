@@ -141,9 +141,8 @@ object Memory {
     ascii <- dataStack(pop)
     tib <- deref("TIB")
     token <- nextToken(delim = s"\\Q${ascii.toChar}\\E")
-    len = if (token.exhausted) 0 else token.value.length
     _ <- dataStack(push(tib + token.offset))
-    _ <- dataStack(push(len))
+    _ <- dataStack(push(token.value.length))
     _ <- exec(">IN")
     tin <- dataStack(pop)
     _ <- memory(poke(tin, token.offset))
@@ -155,10 +154,8 @@ object Memory {
     addr <- dataStack(pop)
     ascii <- dataStack(pop)
     token <- nextToken(delim = s"\\Q${ascii.toChar}\\E")
-    len = if (token.exhausted) 0 else token.value.length
     _ <- dataStack(push(addr))
-    _ <- memory(poke(addr, len))
-    _ <- memory(copy(addr + 1, token.value))
+    _ <- memory(cstore(addr, token.value))
   } yield ()
 
   @Documentation("c-addr is the address of, and u is the number of characters in, the input buffer", stackEffect = "( -- c-addr u )")
