@@ -481,3 +481,27 @@ variable pictured_output_len \ hidden?
     WHILE swap digit hold
     REPEAT
     digit hold ;
+
+
+: (WARNING")  ( flag $message -- )
+    swap
+    IF count type
+    ELSE drop
+    THEN
+;
+
+: WARNING" ( flag <message> -- , print warning if true. )
+	[compile] "  ( compile message )
+	state @
+	IF  compile (warning")
+	ELSE (warning")
+	THEN
+; IMMEDIATE
+
+: ABORT" ( flag <message> -- , print warning if true. )
+	[compile] "  ( compile message )
+	state @
+	IF  compile (abort")
+	ELSE (abort")
+	THEN
+; IMMEDIATE

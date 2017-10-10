@@ -63,13 +63,20 @@ object FlowControl {
   } yield ()
 
   @Documentation("TODO", stackEffect = "( i*x -- )")
-  val THROW: AppState[Unit] =
+  val THROW =
     dataStack(pop).flatMapF[Unit](err => Failure(Error(err)))
 
   val `?ERROR` = for {
     err <- dataStack(pop)
     cond <- dataStack(pop)
   } yield if (cond == 0) () else throw Error(err)
+
+  @Documentation("Remove x1 from the stack. If any bit of x1 is not zero, display ccc and perform an implementation-defined abort sequence that includes the function of ABORT", stackEffect = "( \"ccc<quote>\" x -- )")
+  val `(ABORT")` = for {
+    caddr <- dataStack(pop)
+    text <- memory(cfetch(caddr))
+    cond <- dataStack(pop)
+  } yield if (cond == 0) () else throw Error(-2, text)
 
   @Documentation("Skip leading space delimiters. Parse name delimited by a space. Find name and return xt, the execution token for name", stackEffect = "( \"<spaces>name\" -- xt )")
   val `'` = for {
