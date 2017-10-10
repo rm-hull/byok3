@@ -163,10 +163,10 @@
         dup cell+ @ swap @ ;
 
 : 2* ( n -- n*2 )
-        1 lshift
+        2 *
 ;
 : 2/ ( n -- n/2 )
-        1 rshift
+        2 /
 ;
 
 
