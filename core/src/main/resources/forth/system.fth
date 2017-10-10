@@ -358,16 +358,16 @@ ustack 0stackp
 : (S")  ( -- c-addr cnt ) r> count 2dup + aligned >r ;
 : (.")  ( -- , type following string ) r> count 2dup + aligned >r type ;
 : ",    ( addr len -- , place string into dict ) tuck 'word place 1+ allot align ;
-: ,"    ( -- ) 34 parse ", ;
+: ,"    ( -- ) [char] " parse ", ;
 
 : .(  ( <string> --, type string delimited by parens )
-    41 parse type
+    [char] ) parse type
 ; immediate
 
 : ."  ( <string> -- , type string )
     state @ 1 =
     IF compile (.")  ,"
-    ELSE 34 parse type
+    ELSE [char] " parse type
     THEN
 ; immediate
 
