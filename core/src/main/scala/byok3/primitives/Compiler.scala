@@ -68,6 +68,8 @@ object Compiler {
   @Immediate
   @Documentation("End the current definition, allow it to be found in the dictionary and enter interpretation state, consuming colon-sys", stackEffect = "( C: colon-sys -- )")
   val `;` = for {
+    status <- machineState
+    _ <- guard(status == Smudge, Error(-14)) // used only during compilation
     exit <- dictionary(addressOf("EXIT"))
     _ <- comma(exit)
     userDefinedWord <- inspectF[Try, Context, UserDefined](_.compiling.toTry(Error(-14))) // used only during compilation
