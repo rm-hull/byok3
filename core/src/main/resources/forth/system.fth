@@ -393,15 +393,15 @@ ustack 0stackp
         [compile] C"
 ; immediate
 
-\ : ""  ( <string> -- addr )
-\        state @
-\        IF
-\                compile (C")
-\                bl parse-word  ",
-\        ELSE
-\                bl parse-word pad place pad
-\        THEN
-\ ; immediate
+: ""  ( <string> -- addr )
+       state @
+       IF
+               compile (C")
+               bl parse-word  ",
+       ELSE
+               bl parse-word pad place pad
+       THEN
+; immediate
 
 : SLITERAL ( addr cnt -- , compile string )
 	compile (S")
@@ -419,18 +419,16 @@ ustack 0stackp
 ;
 
 \ ANSI word to replace [COMPILE] and COMPILE ----------------
-\ : POSTPONE  ( <name> -- )
-\	bl word find
-\	dup 0=
-\	IF
-\		." Postpone could not find " count type cr abort
-\	ELSE
-\		0>
-\		IF compile,  \ immediate
-\		ELSE (compile)  \ normal
-\		THEN
-\	THEN
-\ ; immediate
+: POSTPONE  ( <name> -- )
+	bl word find
+	dup
+    0= -13 ?ERROR
+    0>
+    IF compile,  \ immediate
+    ELSE (compile)  \ normal
+    THEN
+
+; immediate
 
 \ -----------------------------------------------------------------
 \ Auto Initialization
@@ -443,6 +441,12 @@ ustack 0stackp
 \	." End AUTO.TERM ------" cr
 ;
 
+: INCLUDE? ( <word> <file> -- , load file if word not defined )
+        bl word find
+        IF drop bl word drop  ( eat word from source )
+        ELSE drop include
+        THEN
+; immediate
 
 : CLEARSTACK ( i*x -- )
     BEGIN depth
