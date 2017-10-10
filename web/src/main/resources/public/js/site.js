@@ -55,11 +55,13 @@ t.onTerminalReady = function() {
   var currHist = 0;
   var history = [];
   var insertMode = true;
+  var offset = 0;
 
   io.onReadline = function(str) {
     busy(true);
     sendCommand(input, function(err, result) {
-      t.io.print((result || err).replaceAll('\n', '\r\n'));
+      t.io.print(ESC('0G') + (result || err).replaceAll('\n', '\r\n'));
+      offset = result.lastIndexOf('|  ') < 0 ? 0 : 3;
       busy(false);
     });
   };
@@ -122,7 +124,7 @@ t.onTerminalReady = function() {
       }
     }
 
-    io.print(ESC('0G') + ESC('2K') + input + ESC((pos + 1) + 'G'));
+    io.print(ESC((offset + 1) + 'G') + ESC('K') + input + ESC((offset + pos + 1) + 'G'));
   };
 
   sendCommand('', function(err, result) {
