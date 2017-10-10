@@ -70,10 +70,15 @@ t.onTerminalReady = function() {
     var chr = str.charCodeAt(0);
     if (chr === 13) {
 
-      if (history.indexOf(input) < 0) {
-        history.push(input);
-        currHist = history.length;
+      var histIdx = history.indexOf(input.trim());
+      if (histIdx >= 0) {
+        history.splice(histIdx, 1);
       }
+      if (input.trim() !== "") {
+        history.push(input.trim());
+      }
+      currHist = history.length;
+
       io.onReadline(input);
       io.println('');
       input = '';
@@ -95,12 +100,12 @@ t.onTerminalReady = function() {
     } else if (str === ESC('A') && currHist > 0) { // Cursor up
       currHist -= 1;
       input = history[currHist];
-      pos = 0;
+      pos = input.length;
 
-    } else if (str === ESC('B') && currHist < history.length - 1) { // Cursor down
+    } else if (str === ESC('B') && currHist < history.length) { // Cursor down
       currHist += 1;
-      input = history[currHist];
-      pos = 0;
+      input = currHist < history.length ? history[currHist] : "";
+      pos = input.length;
 
     } else if (str === ESC('C') && pos < input.length) { // Cursor right
       pos += 1;
