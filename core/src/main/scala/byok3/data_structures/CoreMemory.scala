@@ -35,33 +35,45 @@ case class CoreMemory(size: Int, private val addressSpace: AddressSpace) {
 
   private val empty: Data = 0
 
+  @inline
   private def boundsCheck(addr: Address): Unit = {
     if (addr < 0 || addr >= size)
       throw Error(-9, f"0x$addr%08X") // invalid memory address
   }
 
+  @inline
   private def alignmentCheck(addr: Address): Unit = {
     if (offset(addr) != 0)
       throw Error(-23, f"0x$addr%08X") // address alignment exception
   }
 
+  @inline
   private def floor(addr: Address) = addr - offset(addr)
 
   def poke(addr: Address, data: Data): CoreMemory = {
     boundsCheck(addr)
     alignmentCheck(addr)
-    copy(addressSpace = addressSpace.updated(addr, data))
+    poke_internal(addr, data)
   }
+
+  @inline
+  def poke_internal(addr: Address, data: Data) =
+    copy(addressSpace = if (data == empty) addressSpace - addr else addressSpace.updated(addr, data))
+
 
   def peek(addr: Address): Data = {
     boundsCheck(addr)
     alignmentCheck(addr)
-    addressSpace.getOrElse(addr, empty)
+    peek_internal(addr)
   }
+
+  @inline
+  private def peek_internal(addr: Address) =
+    addressSpace.getOrElse(addr, empty)
 
   def char_peek(addr: Address): Data = {
     boundsCheck(addr)
-    val word = addressSpace.getOrElse(floor(addr), empty)
+    val word = peek_internal(floor(addr))
     (word >> (offset(addr) << 3)) & 0xFF
   }
 
@@ -71,7 +83,7 @@ case class CoreMemory(size: Int, private val addressSpace: AddressSpace) {
     val shifted = offset(addr) << 3
     val mask = 0xFF << shifted
     val newValue = (data & 0xFF) << shifted
-    poke(alignedAddr, (peek(alignedAddr) & ~mask) | (newValue & mask))
+    poke_internal(alignedAddr, (peek_internal(alignedAddr) & ~mask) | (newValue & mask))
   }
 
   @tailrec
@@ -153,8 +165,10 @@ case object CoreMemory {
 
   val CELL_SIZE = 4
 
+  @inline
   def align(addr: Address) = (addr + (CELL_SIZE - 1)) & ~(CELL_SIZE - 1)
 
+  @inline
   def offset(addr: Address) = addr % CELL_SIZE
 
   def inc(addr: Address) = addr + CELL_SIZE
