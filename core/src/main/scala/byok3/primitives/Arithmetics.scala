@@ -36,6 +36,17 @@ object Arithmetics {
   @Documentation("multiplies x1 with x2, leaves result x3", stackEffect = "( x1 x2 -- x3 )")
   val * = dataStack(arity2stackOp(_ * _))
 
+  @Documentation("multiplies x1 with x2, leaves 64-bit result split in x3 and x4", stackEffect = "( x1 x2 -- x3 x4)")
+  val `M*` = dataStack(arity2stackOp2[Int] {
+    (x, y) =>
+      val result: Long = x * y
+      (result & 0xFFFFFFFF).toInt
+    } {
+    (x, y) =>
+      val result: Long = x * y
+      (result >> 32).toInt
+    })
+
   @Documentation("divides x1 by x2, leaves result x3", stackEffect = "( x1 x2 -- x3 )")
   val / = dataStack(arity2stackOp(_ / _))
 
