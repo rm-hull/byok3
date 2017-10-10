@@ -82,8 +82,7 @@
 
 : SEE ( <name> -- )
     ' dup
-    16 + @ \ offset in execution token for alloc size
-    cells swap >body swap
+    >body swap >size
     disassemble ;
 
 \ Compiler support -------------------------------------------------
