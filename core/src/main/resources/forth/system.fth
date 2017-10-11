@@ -501,3 +501,14 @@ variable pictured_output_len \ hidden?
 	ELSE (abort")
 	THEN
 ; IMMEDIATE
+
+: DEFER ( "name" -- )
+   CREATE ['] ABORT ,
+   DOES> ( ... -- ... ) @ EXECUTE ;
+
+: DEFER! ( xt2 xt1 -- )
+   >BODY 4 CELL* + ! ;
+
+: DEFER@ ( xt1 -- xt2 )
+   >BODY 4 CELL* + @ ;
+
