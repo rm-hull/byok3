@@ -110,18 +110,17 @@ create data1 23 , 45 , 67 , 89 , 111 , 222 , 333 , 444 ,
 ;
 
 \ BENCH3 - DEFER ----------------------------------
-\ defer calc.answer
+defer calc.answer
 : answer ( n -- m )
 	dup +
 	$a5a5 xor
 	1000 max
 ;
-\ ' answer is calc.answer
+' answer is calc.answer
 : bench3
 	1500000 0
 	DO
-		\ i calc.answer drop
-		i answer drop
+		i calc.answer drop
 	LOOP
 ;
 
