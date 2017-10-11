@@ -97,8 +97,6 @@
 
 : COMPILE  ( <name> --, save xt and compile later ) ' (compile) ; immediate
 
-: :NONAME  ( -- xt , begin compilation of headerless secondary ) align here ] ;
-
 \ Error codes defined in ANSI Exception word set -------------------
 : ERR_ABORT       -1 ;
 : ERR_ABORTQ      -2 ;
@@ -135,11 +133,10 @@
     ?comp ' [compile] literal
 ; immediate
 
-
 : (DOES>)  ( xt -- , modify previous definition to execute code at xt )
-        latest >body \ get address of code for new word
-        cell + \ offset to second cell in create word
-        !      \ store execution token of DOES> code in new word
+        latest >body   \ get address of code for new word
+        3 cell* +      \ offset to EXIT cell in create word
+        !              \ store execution token of DOES> code in new word
 ;
 
 : DOES>   ( -- , define execution code for CREATE word )
@@ -150,11 +147,10 @@
         [compile] ;         \ terminate part of code before does>
 		r>
         :noname       ( addrz xt )
+        compile rdrop       \ drop a stack frame (call becomes goto)
         swap !              \ save execution token in literal
 ; immediate
 
-0 1- constant -1
-0 2- constant -2
 
 : 2! ( x1 x2 addr -- , store x2 followed by x1 )
         swap over ! cell+ ! ;
