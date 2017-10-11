@@ -515,3 +515,10 @@ variable pictured_output_len \ hidden?
 : DEFER@ ( xt1 -- xt2 )
    >BODY 4 CELL* + @ ;
 
+\ : IS ( xt "<spaces>name" -- , Skip leading spaces and parse name delimited by a space. Set name to execute xt. )
+\    STATE @ IF
+\      POSTPONE ['] POSTPONE DEFER!
+\    ELSE
+\      ' DEFER!
+\    THEN ; IMMEDIATE
+
