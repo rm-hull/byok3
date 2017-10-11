@@ -143,7 +143,7 @@ object Dictionary {
     inspectF[Try, Dict, ExecutionToken](_.get(index).toTry(Error(-13)))
 
   def instruction(token: Word): StateT[Try, Dict, ExecutionToken] =
-    inspectF[Try, Dict, ExecutionToken](_.get(token).toTry(Error(-13)))
+    inspectF[Try, Dict, ExecutionToken](_.get(token).toTry(Error(-13, token)))
 
   def last(): StateT[Try, Dict, ExecutionToken] =
     inspectF[Try, Dict, ExecutionToken](dict => dict.get(dict.length - 1).toTry(Error(-13)))
