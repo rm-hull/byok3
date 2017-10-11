@@ -135,6 +135,11 @@
     ?comp ' [compile] literal
 ; immediate
 
+: (DOES>)  ( xt -- , modify previous definition to execute code at xt )
+        latest >body \ get address of code for new word
+        3 cell* + \ offset to second cell in create word
+        !      \ store execution token of DOES> code in new word
+;
 
 : DOES>   ( -- , define execution code for CREATE word )
         0 [compile] literal \ dummy literal to hold xt
@@ -144,11 +149,10 @@
         [compile] ;         \ terminate part of code before does>
 		r>
         :noname       ( addrz xt )
+        compile rdrop       \ drop a stack frame (call becomes goto)
         swap !              \ save execution token in literal
 ; immediate
 
-0 1- constant -1
-0 2- constant -2
 
 : 2! ( x1 x2 addr -- , store x2 followed by x1 )
         swap over ! cell+ ! ;

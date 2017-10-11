@@ -45,8 +45,6 @@ sealed trait ExecutionToken {
 
   def markAsImmediate: ExecutionToken = ???
 
-  def setAddress(addr: Address): ExecutionToken = ???
-
   def compile = for {
     xt <- dictionary(addressOf(name))
     _ <- Compiler.compile(xt)
@@ -103,11 +101,9 @@ case class UserDefined(name: Word,
    extends InnerInterpreter {
 
   override def markAsImmediate = copy(immediate = true)
-  override def setAddress(addr: Address) = copy(addr = addr)
 }
 
 case class Anonymous(addr: Address) extends InnerInterpreter {
-  val name = s"__anon_$addr"
-
-  override def setAddress(addr: Address) = copy(addr = addr)
+  val name = f"__anon_$addr%08X"
+  override val internal = true
 }

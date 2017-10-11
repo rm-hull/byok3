@@ -60,9 +60,9 @@ t.onTerminalReady = function() {
   io.onReadline = function(str) {
     busy(true);
     sendCommand(input, function(err, result) {
-      t.io.print(ESC('0G') + (result || err).replaceAll('\n', '\r\n'));
-      offset = result.lastIndexOf('|  ') < 0 ? 1 : 4;
       busy(false);
+      t.io.print(ESC('0G') + (result || err).replaceAll('\n', '\r\n'));
+      offset = (result === null || !result.endsWith('|  ' + ESC("0m"))) ? 1 : 4;
     });
   };
 
