@@ -109,7 +109,9 @@ object Compiler {
 
   @Documentation("", stackEffect = "( -- xt )")
   val LATEST = for {
-    xt <- dictionary(inspect(_.length - 1))
+    state <- machineState
+    offset = if (state == Smudge) 0 else 1
+    xt <- dictionary(inspect(_.length - offset))
     _ <- dataStack(push(xt))
   } yield ()
 
