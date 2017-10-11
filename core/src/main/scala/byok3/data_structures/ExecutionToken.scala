@@ -51,29 +51,11 @@ sealed trait ExecutionToken {
   } yield ()
 }
 
-case class Primitive(name: Word,
-                     effect: AppState[Unit],
-                     override val immediate: Boolean,
-                     override val internal: Boolean,
-                     override val doc: Option[Documentation]) extends ExecutionToken
-
-case class Constant(name: Word,
-                    value: Data,
-                    override val doc: Option[Documentation] = None) extends ExecutionToken {
-  override val effect = dataStack(push(value))
-}
-
-case class Variable(name: Word,
-                    addr: Address,
-                    override val doc: Option[Documentation] = None) extends ExecutionToken {
-  override val effect = dataStack(push(addr))
-}
-
-trait InnerInterpreter extends ExecutionToken with Executor {
+sealed trait InnerInterpreter extends Executor {
 
   val addr: Address
 
-  override val effect = for {
+  val effect = for {
     xt <- memory(peek(addr))
     _ <- W(addr)
     _ <- XT(xt)
@@ -94,16 +76,33 @@ trait InnerInterpreter extends ExecutionToken with Executor {
   } yield rsEmpty
 }
 
+
+case class Primitive(name: Word,
+                     effect: AppState[Unit],
+                     override val immediate: Boolean,
+                     override val internal: Boolean,
+                     override val doc: Option[Documentation]) extends ExecutionToken
+
+case class Constant(name: Word,
+                    value: Data,
+                    override val doc: Option[Documentation] = None) extends ExecutionToken {
+  override val effect = dataStack(push(value))
+}
+
+case class Variable(name: Word,
+                    addr: Address,
+                    override val doc: Option[Documentation] = None) extends ExecutionToken {
+  override val effect = dataStack(push(addr))
+}
+
 case class UserDefined(name: Word,
                        addr: Address,
                        override val immediate: Boolean = false,
-                       override val size: Option[Int] = None)
-   extends InnerInterpreter {
-
+                       override val size: Option[Int] = None) extends ExecutionToken with InnerInterpreter {
   override def markAsImmediate = copy(immediate = true)
 }
 
-case class Anonymous(addr: Address) extends InnerInterpreter {
+case class Anonymous(addr: Address) extends ExecutionToken with InnerInterpreter {
   val name = f"__anon_$addr%08X"
   override val internal = true
 }
