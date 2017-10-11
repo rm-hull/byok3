@@ -97,7 +97,7 @@
 
 : COMPILE  ( <name> --, save xt and compile later ) ' (compile) ; immediate
 
-: :NONAME  ( -- xt , begin compilation of headerless secondary ) align here code> ] ;
+\ : :NONAME  ( -- xt , begin compilation of headerless secondary ) align here ( code> ) ] ;
 
 \ Error codes defined in ANSI Exception word set -------------------
 : ERR_ABORT       -1 ;

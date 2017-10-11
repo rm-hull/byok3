@@ -71,17 +71,9 @@ case class Variable(name: Word,
   override val effect = dataStack(push(addr))
 }
 
-/**
-  * Inner interpreter
-  */
-case class UserDefined(name: Word,
-                       addr: Address,
-                       override val immediate: Boolean = false,
-                       override val size: Option[Int] = None)
-  extends ExecutionToken with Executor {
+trait InnerInterpreter extends ExecutionToken with Executor {
 
-  override def markAsImmediate = copy(immediate = true)
-  override def setAddress(addr: Address) = copy(addr = addr)
+  val addr: Address
 
   override val effect = for {
     xt <- memory(peek(addr))
@@ -102,4 +94,20 @@ case class UserDefined(name: Word,
     _ <- XT(next)
     rsEmpty <- returnStack(inspect(_.isEmpty))
   } yield rsEmpty
+}
+
+case class UserDefined(name: Word,
+                       addr: Address,
+                       override val immediate: Boolean = false,
+                       override val size: Option[Int] = None)
+   extends InnerInterpreter {
+
+  override def markAsImmediate = copy(immediate = true)
+  override def setAddress(addr: Address) = copy(addr = addr)
+}
+
+case class Anonymous(addr: Address) extends InnerInterpreter {
+  val name = s"__anon_$addr"
+
+  override def setAddress(addr: Address) = copy(addr = addr)
 }
