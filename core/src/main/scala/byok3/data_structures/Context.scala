@@ -56,9 +56,9 @@ case class Context(mem: CoreMemory,
       .copy(error = Some(err), ds = List.empty, rs = List.empty)
 
   def prompt = status match {
-    case Right(Smudge) => s"${LIGHT_GREY}|  "
-    case Right(BYE) => s"${LIGHT_GREY}> SYSTEM STOPPED\n"
-    case Right(OK) => s"  ${WHITE}${BOLD}ok${LIGHT_GREY}${stackDepthIndicator}\n"
+    case Right(Smudge) => s"${LIGHT_GREY}|  ${RESET}"
+    case Right(BYE) => s"${LIGHT_GREY}> SYSTEM STOPPED${RESET}\n"
+    case Right(OK) => s"  ${WHITE}${BOLD}ok${LIGHT_GREY}${stackDepthIndicator}${RESET}\n"
     case Left(err) => s"${RED}${BOLD}Error ${err.errno}:${RESET} ${err.message}\n"
   }
 

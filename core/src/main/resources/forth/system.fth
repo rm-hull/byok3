@@ -82,8 +82,7 @@
 
 : SEE ( <name> -- )
     ' dup
-    16 + @ \ offset in execution token for alloc size
-    cells swap >body swap
+    >body swap >size
     disassemble ;
 
 \ Compiler support -------------------------------------------------
@@ -97,8 +96,6 @@
     compile, ;
 
 : COMPILE  ( <name> --, save xt and compile later ) ' (compile) ; immediate
-
-: :NONAME  ( -- xt , begin compilation of headerless secondary ) align here ] ;
 
 \ Error codes defined in ANSI Exception word set -------------------
 : ERR_ABORT       -1 ;
@@ -136,11 +133,10 @@
     ?comp ' [compile] literal
 ; immediate
 
-
 : (DOES>)  ( xt -- , modify previous definition to execute code at xt )
-        latest >body \ get address of code for new word
-        cell + \ offset to second cell in create word
-        !      \ store execution token of DOES> code in new word
+        latest >body   \ get address of code for new word
+        3 cell* +      \ offset to EXIT cell in create word
+        !              \ store execution token of DOES> code in new word
 ;
 
 : DOES>   ( -- , define execution code for CREATE word )
@@ -151,11 +147,10 @@
         [compile] ;         \ terminate part of code before does>
 		r>
         :noname       ( addrz xt )
+        compile rdrop       \ drop a stack frame (call becomes goto)
         swap !              \ save execution token in literal
 ; immediate
 
-0 1- constant -1
-0 2- constant -2
 
 : 2! ( x1 x2 addr -- , store x2 followed by x1 )
         swap over ! cell+ ! ;
@@ -163,10 +158,10 @@
         dup cell+ @ swap @ ;
 
 : 2* ( n -- n*2 )
-        1 lshift
+        2 *
 ;
 : 2/ ( n -- n/2 )
-        1 rshift
+        2 /
 ;
 
 
@@ -358,16 +353,16 @@ ustack 0stackp
 : (S")  ( -- c-addr cnt ) r> count 2dup + aligned >r ;
 : (.")  ( -- , type following string ) r> count 2dup + aligned >r type ;
 : ",    ( addr len -- , place string into dict ) tuck 'word place 1+ allot align ;
-: ,"    ( -- ) 34 parse ", ;
+: ,"    ( -- ) [char] " parse ", ;
 
 : .(  ( <string> --, type string delimited by parens )
-    41 parse type
+    [char] ) parse type
 ; immediate
 
 : ."  ( <string> -- , type string )
     state @ 1 =
     IF compile (.")  ,"
-    ELSE 34 parse type
+    ELSE [char] " parse type
     THEN
 ; immediate
 
@@ -482,3 +477,38 @@ variable pictured_output_len \ hidden?
     WHILE swap digit hold
     REPEAT
     digit hold ;
+
+
+: (WARNING")  ( flag $message -- )
+    swap
+    IF count type
+    ELSE drop
+    THEN
+;
+
+: WARNING" ( flag <message> -- , print warning if true. )
+	[compile] "  ( compile message )
+	state @
+	IF  compile (warning")
+	ELSE (warning")
+	THEN
+; IMMEDIATE
+
+: ABORT" ( flag <message> -- , print warning if true. )
+	[compile] "  ( compile message )
+	state @
+	IF  compile (abort")
+	ELSE (abort")
+	THEN
+; IMMEDIATE
+
+: DEFER ( "name" -- )
+   CREATE ['] ABORT ,
+   DOES> ( ... -- ... ) @ EXECUTE ;
+
+: DEFER! ( xt2 xt1 -- )
+   >BODY 4 CELL* + ! ;
+
+: DEFER@ ( xt1 -- xt2 )
+   >BODY 4 CELL* + @ ;
+

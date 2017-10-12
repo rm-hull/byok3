@@ -31,6 +31,7 @@ import byok3.data_structures._
 import byok3.helpers._
 import byok3.implicits._
 import byok3.primitives.Memory.comma
+import byok3.types.AppState
 import cats.data.StateT._
 import cats.implicits._
 
@@ -65,16 +66,38 @@ object Compiler {
     _ <- machineState(Smudge)
   } yield ()
 
+  @Documentation("Begin compilation of headerless secondary", stackEffect = "( -- xt )")
+  val `:NONAME` = for {
+    status <- machineState
+    _ <- guard(status != Smudge, Error(-29)) // compiler nesting
+    nest <- dictionary(addressOf("__NEST"))
+    addr <- comma(nest)
+    word = Anonymous(addr)
+    _ <- dictionary(add(word))
+    xt <- dictionary(addressOf(word.name))
+    _ <- dataStack(push(xt))
+    _ <- machineState(Smudge)
+  } yield ()
+
+  private def addToDictionary(word: Option[UserDefined]): AppState[Unit] = word match {
+    case None => pure(())
+    case Some(userDefinedWord) => for {
+      dp <- DP()
+      wordSize = dp - userDefinedWord.addr
+      _ <- dictionary(add(userDefinedWord.copy(size = Some(wordSize))))
+      _ <- modify[Try, Context](_.copy(compiling = None))
+    } yield ()
+  }
+
   @Immediate
   @Documentation("End the current definition, allow it to be found in the dictionary and enter interpretation state, consuming colon-sys", stackEffect = "( C: colon-sys -- )")
   val `;` = for {
+    status <- machineState
+    _ <- guard(status == Smudge, Error(-14)) // used only during compilation
     exit <- dictionary(addressOf("EXIT"))
     _ <- comma(exit)
-    userDefinedWord <- inspectF[Try, Context, UserDefined](_.compiling.toTry(Error(-14))) // used only during compilation
-    dp <- DP()
-    wordSize = dp - userDefinedWord.addr
-    _ <- dictionary(add(userDefinedWord.copy(size = Some(wordSize))))
-    _ <- modify[Try, Context](_.copy(compiling = None))
+    userDefinedWord <- inspect[Try, Context, Option[UserDefined]](_.compiling)
+    _ <- addToDictionary(userDefinedWord)
     _ <- machineState(OK)
   } yield ()
 
@@ -86,7 +109,9 @@ object Compiler {
 
   @Documentation("", stackEffect = "( -- xt )")
   val LATEST = for {
-    xt <- dictionary(inspect(_.length - 1))
+    state <- machineState
+    offset = if (state == Smudge) 0 else 1
+    xt <- dictionary(inspect(_.length - offset))
     _ <- dataStack(push(xt))
   } yield ()
 

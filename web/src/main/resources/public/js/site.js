@@ -55,12 +55,14 @@ t.onTerminalReady = function() {
   var currHist = 0;
   var history = [];
   var insertMode = true;
+  var offset = 1;
 
   io.onReadline = function(str) {
     busy(true);
     sendCommand(input, function(err, result) {
-      t.io.print((result || err).replaceAll('\n', '\r\n'));
       busy(false);
+      t.io.print(ESC('0G') + (result || err).replaceAll('\n', '\r\n'));
+      offset = (result === null || !result.endsWith('|  ' + ESC("0m"))) ? 1 : 4;
     });
   };
 
@@ -70,10 +72,15 @@ t.onTerminalReady = function() {
     var chr = str.charCodeAt(0);
     if (chr === 13) {
 
-      if (history.indexOf(input) < 0) {
-        history.push(input);
-        currHist = history.length;
+      var histIdx = history.indexOf(input.trim());
+      if (histIdx >= 0) {
+        history.splice(histIdx, 1);
       }
+      if (input.trim() !== "") {
+        history.push(input.trim());
+      }
+      currHist = history.length;
+
       io.onReadline(input);
       io.println('');
       input = '';
@@ -85,7 +92,7 @@ t.onTerminalReady = function() {
     } else if (chr === 5) { // Ctrl-E
       pos = input.length;
 
-    } else if (chr === 127) { // Backspace
+    } else if (chr === 127 && pos > 0) { // Backspace
       input = input.deleteCharAt(pos)
       pos -= 1;
 
@@ -95,12 +102,12 @@ t.onTerminalReady = function() {
     } else if (str === ESC('A') && currHist > 0) { // Cursor up
       currHist -= 1;
       input = history[currHist];
-      pos = 0;
+      pos = input.length;
 
-    } else if (str === ESC('B') && currHist < history.length - 1) { // Cursor down
+    } else if (str === ESC('B') && currHist < history.length) { // Cursor down
       currHist += 1;
-      input = history[currHist];
-      pos = 0;
+      input = currHist < history.length ? history[currHist] : "";
+      pos = input.length;
 
     } else if (str === ESC('C') && pos < input.length) { // Cursor right
       pos += 1;
@@ -108,7 +115,7 @@ t.onTerminalReady = function() {
     } else if (str === ESC('D') && pos > 0) { // Cursor left
       pos -= 1;
 
-    } else if (chr >= 32 && chr <= 127 && (pos + str.length) < maxLineLength) {
+    } else if (chr >= 32 && chr < 127 && (pos + str.length) < maxLineLength) {
       if (insertMode) {
         input = input.insertAt(pos, str);
         pos += str.length;
@@ -117,7 +124,7 @@ t.onTerminalReady = function() {
       }
     }
 
-    io.print(ESC('0G') + ESC('2K') + input + ESC((pos + 1) + 'G'));
+    io.print(ESC(offset + 'G') + ESC('K') + input + ESC((offset + pos) + 'G'));
   };
 
   sendCommand('', function(err, result) {
