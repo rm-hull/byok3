@@ -131,7 +131,10 @@ object Dictionary {
     modify[Try, Dict](_.replace(exeTok.name, exeTok))
 
   def forget(token: Word): StateT[Try, Dict, Unit] =
-      modify[Try, Dict](_.forget(token))
+    modify[Try, Dict](_.forget(token))
+
+  def exists(token: Word): StateT[Try, Dict, Boolean] =
+    inspect(_.get(token).isDefined)
 
   def addressOf(token: Word): StateT[Try, Dict, Int] =
     inspectF[Try, Dict, Int](_.indexOf(token).toTry(Error(-13, token)))
@@ -140,7 +143,7 @@ object Dictionary {
     inspectF[Try, Dict, ExecutionToken](_.get(index).toTry(Error(-13)))
 
   def instruction(token: Word): StateT[Try, Dict, ExecutionToken] =
-    inspectF[Try, Dict, ExecutionToken](_.get(token).toTry(Error(-13)))
+    inspectF[Try, Dict, ExecutionToken](_.get(token).toTry(Error(-13, token)))
 
   def last(): StateT[Try, Dict, ExecutionToken] =
     inspectF[Try, Dict, ExecutionToken](dict => dict.get(dict.length - 1).toTry(Error(-13)))

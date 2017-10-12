@@ -27,6 +27,7 @@ import byok3.Disassembler
 import byok3.annonation.Documentation
 import byok3.data_structures.Context._
 import byok3.data_structures.CoreMemory._
+import byok3.data_structures.Dictionary.instruction
 import byok3.data_structures.Stack.{pop, push}
 import byok3.data_structures._
 import byok3.types.{AppState, Stack}
@@ -225,6 +226,22 @@ object IO {
     Source.fromResource("help.txt").getLines.foreach(println)
     noOp
   }
+
+  @Documentation("Displays documentation for the word", stackEffect = "( \"<spaces>name\" -- )")
+  val DOC = for {
+    token <- nextToken()
+    name = token.value.toUpperCase
+    _ <- guard(name.nonEmpty, Error(-16))
+    token <- dictionary(instruction(name))
+    _ <- unsafeIO {
+      token.doc.foreach { doc =>
+        println(doc.stackEffect)
+        println()
+        if (token.immediate) print("[IMMEDIATE] ")
+        println(doc.value)
+      }
+    }
+  } yield ()
 
   def diagnostics(label: String): AppState[Unit] = for {
     state <- deref("STATE")

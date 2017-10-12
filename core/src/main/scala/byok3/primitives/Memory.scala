@@ -106,13 +106,20 @@ object Memory {
     _ <- memory(modify(_.move(a2, a1, u * CELL_SIZE)))
   } yield ()
 
-
   @Documentation("", stackEffect = "( a1 a2 u --  )")
   val CMOVE = for {
     u <- dataStack(pop)
     a2 <- dataStack(pop)
     a1 <- dataStack(pop)
     _ <- memory(modify(_.char_move(a2, a1, u)))
+  } yield ()
+
+  @Documentation("If u is greater than zero, store char in each of u consecutive characters of memory beginning at c-addr", stackEffect = "( c-addr u char -- )")
+  val FILL = for {
+    char <- dataStack(pop)
+    u <- dataStack(pop)
+    addr <- dataStack(pop)
+    _ <- memory(modify(_.char_fill(addr, u, char)))
   } yield ()
 
   @Documentation("Skip leading space delimiters. Parse name delimited by a space. Create a definition for name with the execution semantics: `name Execution: ( -- a-addr )`. Reserve one cell of data space at an aligned address", stackEffect = "( \"<spaces>name\" -- )")

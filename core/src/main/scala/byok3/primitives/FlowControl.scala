@@ -63,13 +63,20 @@ object FlowControl {
   } yield ()
 
   @Documentation("TODO", stackEffect = "( i*x -- )")
-  val THROW: AppState[Unit] =
+  val THROW =
     dataStack(pop).flatMapF[Unit](err => Failure(Error(err)))
 
   val `?ERROR` = for {
     err <- dataStack(pop)
     cond <- dataStack(pop)
   } yield if (cond == 0) () else throw Error(err)
+
+  @Documentation("Remove x1 from the stack. If any bit of x1 is not zero, display ccc and perform an implementation-defined abort sequence that includes the function of ABORT", stackEffect = "( \"ccc<quote>\" x -- )")
+  val `(ABORT")` = for {
+    caddr <- dataStack(pop)
+    text <- memory(cfetch(caddr))
+    cond <- dataStack(pop)
+  } yield if (cond == 0) () else throw Error(-2, text)
 
   @Documentation("Skip leading space delimiters. Parse name delimited by a space. Find name and return xt, the execution token for name", stackEffect = "( \"<spaces>name\" -- xt )")
   val `'` = for {
@@ -78,6 +85,21 @@ object FlowControl {
     _ <- guard(name.nonEmpty, Error(-16))
     xt <- dictionary(addressOf(name))
     _ <- dataStack(push(xt))
+  } yield ()
+
+  @Documentation("Find the definition named in the counted string at c-addr. If the definition is not found, return c-addr and zero. If the definition is found, return its execution token xt. If the definition is immediate, also return one (1), otherwise also return minus-one (-1)", stackEffect = "( c-addr -- c-addr 0 | xt 1 | xt -1 )")
+  val FIND = for {
+    caddr <- dataStack(pop)
+    name <- memory(cfetch(caddr))
+    ucName = name.toUpperCase
+    exists <- dictionary(exists(ucName))
+    _ <- if (exists) {
+      for {
+        xt <- dictionary(addressOf(ucName))
+        token <- dictionary(instruction(ucName))
+        _ <- dataStack(sequence(push(xt), push(if (token.immediate) 1 else -1)))
+      } yield ()
+    } else dataStack(sequence(push(caddr), push(0)))
   } yield ()
 
   @Documentation("Remove xt from the stack and perform the semantics identified by it. Other stack effects are due to the word EXECUTEd", stackEffect = "( i*x xt -- j*x )")
