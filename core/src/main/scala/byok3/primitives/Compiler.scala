@@ -21,6 +21,7 @@
 
 package byok3.primitives
 
+import byok3.Interpreter
 import byok3.annonation.{Documentation, Immediate}
 import byok3.data_structures.Context._
 import byok3.data_structures.CoreMemory._
@@ -166,5 +167,16 @@ object Compiler {
     name = token.value.toUpperCase
     _ <- guard(name.nonEmpty, Error(-16))
     _ <- dictionary(forget(name))
+  } yield ()
+
+  @Documentation("Save the current input source specification. Store minus-one (-1) in SOURCE-ID if it is present. Make the string described by c-addr and u both the input source and input buffer, set >IN to zero, and interpret. When the parse area is empty, restore the prior input source specification. Other stack effects are due to the words EVALUATEd", stackEffect = "( i * x c-addr u -- j * x )")
+  val EVALUATE = for {
+    // TODO: set SOURCE-ID
+    u <- dataStack(pop)
+    addr <- dataStack(pop)
+    input <- inspect[Try, Context, Tokenizer](_.input)
+    text <- memory(fetch(addr, u))
+    _ <- Interpreter(text)
+    _ <- modify[Try, Context](_.copy(input = input))
   } yield ()
 }
