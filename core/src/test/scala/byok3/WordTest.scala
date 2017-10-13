@@ -2,13 +2,16 @@ package byok3
 
 import java.io.File
 
-import byok3.data_structures.Context
+import byok3.data_structures.Error
+import byok3.data_structures.MachineState.OK
+import cats.implicits._
 import org.scalatest.{FunSuite, Matchers}
 
+import scala.util.{Failure, Success}
 
 class WordTest extends FunSuite with Matchers {
 
-  var ctx = Context(0x100000).eval("include forth/system.fth")
+  var ctx = emptyContext
 
   test("Context should initialize correctly") {
     ctx.error shouldBe None
@@ -26,7 +29,7 @@ class WordTest extends FunSuite with Matchers {
   walkFolder("/forth") { file =>
     test(s"${new File(file).getName}") {
       val res = capturingOutput {
-         ctx = ctx.eval(s"include ${file.substring(1)}")
+        ctx = ctx.eval(s"include ${file.substring(1)}")
       }
 
       if (res.contains("INCORRECT RESULT:") || res.contains("WRONG NUMBER OF RESULTS:"))
@@ -35,7 +38,7 @@ class WordTest extends FunSuite with Matchers {
       if (res.trim.nonEmpty)
         println(res.trim)
 
-      ctx.error shouldBe None
+      ctx.status shouldBe Right(OK)
     }
   }
 }

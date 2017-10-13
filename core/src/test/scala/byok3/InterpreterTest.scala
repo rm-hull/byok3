@@ -1,16 +1,12 @@
 package byok3
 
-import byok3.data_structures.{Context, Error}
+import byok3.data_structures.Error
 import cats.implicits._
 import org.scalatest.{FunSuite, Matchers}
 
-import scala.io.Source
 import scala.util.Success
 
 class InterpreterTest extends FunSuite with Matchers {
-
-  val lines = Source.fromResource("forth/system.fth").getLines.toStream
-  val emptyContext = Context(0x10000).load(lines)
 
   test("should push values onto the data stack") {
     val ctx = Interpreter("9  5 3").runS(emptyContext)
@@ -140,7 +136,7 @@ class InterpreterTest extends FunSuite with Matchers {
       _ <- Interpreter("8 ?DOZEN")
     } yield ()
 
-    val actual = capturingOutput{
+    val actual = capturingOutput {
       ops.runS(emptyContext)
     }
     actual shouldEqual "not a dozen"

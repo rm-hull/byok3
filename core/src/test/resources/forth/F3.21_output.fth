@@ -1,6 +1,8 @@
 \ ------------------------------------------------------------------------
 TESTING OUTPUT: . ." CR EMIT SPACE SPACES TYPE U.
 
+HEX
+
 : OUTPUT-TEST
    ." YOU SHOULD SEE THE STANDARD GRAPHIC CHARACTERS:" CR
    41 BL DO I EMIT LOOP CR

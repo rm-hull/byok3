@@ -36,12 +36,14 @@ import cats.data.StateT._
 import cats.implicits._
 
 import scala.annotation.tailrec
+import scala.collection.immutable.Stream.Empty
 import scala.util.{Failure, Success, Try}
 
 
 case class Context(mem: CoreMemory,
                    dictionary: Dict = Dictionary(),
                    error: Option[Error] = None,
+                   position: Option[Position] = None,
                    input: Tokenizer = EndOfData,
                    ds: Stack[Int] = List.empty, // data stack
                    rs: Stack[Int] = List.empty, // return stack
@@ -59,7 +61,7 @@ case class Context(mem: CoreMemory,
     case Right(Smudge) => s"${LIGHT_GREY}|  ${RESET}"
     case Right(BYE) => s"${LIGHT_GREY}> SYSTEM STOPPED${RESET}\n"
     case Right(OK) => s"  ${WHITE}${BOLD}ok${LIGHT_GREY}${stackDepthIndicator}${RESET}\n"
-    case Left(err) => s"${RED}${BOLD}Error ${err.errno}:${RESET} ${err.message}\n"
+    case Left(err) => s"${RED}${BOLD}Error ${err.errno}:${RESET} ${err.getMessage}\n"
   }
 
   @deprecated("Candidate for removal", since = "14/10/2017") // TODO
@@ -70,7 +72,7 @@ case class Context(mem: CoreMemory,
     copy(input = input.next(delim))
 
   def reset =
-    copy(error = None)
+    copy(error = None, position = None)
 
   private def exec(token: Word) =
     find(token).fold[Try[Context]](Failure(Error(-13, token))) {
@@ -82,11 +84,11 @@ case class Context(mem: CoreMemory,
       .runA(this)
       .toEither
       .left
-      .map(Error(_))
+      .map(Error(_, position))
 
     error match {
       case None => state
-      case Some(err) => Left(err)
+      case Some(err) => Left(Error(err, position))
     }
   }
 
@@ -96,17 +98,19 @@ case class Context(mem: CoreMemory,
 
   lazy val disassembler = new Disassembler(this)
 
-  def eval(text: String) =
-    Interpreter(text).runS(this) match {
-      case Failure(ex: Throwable) => error(Error(ex))
-      case Success(ctx) => ctx
-    }
+  def eval(text: String) = Interpreter(text).runS(this) match {
+    case Failure(ex: Throwable) => error(Error(ex))
+    case Success(ctx) => ctx
+  }
 
   @tailrec
-  final def load(lines: Stream[String]): Context = lines match {
-    case Stream.cons(line, rest) if error.isEmpty => eval(line).load(rest)
-    case _ => this
+  final def load(lines: Stream[(String, Position)]): Context = lines match {
+    case (line, position) #:: rest if error.isEmpty => eval(line).setPosition(position).load(rest)
+    case Empty => reset
+    case _ => this // not exhausted, possibly errored
   }
+
+  private def setPosition(pos: Position) = copy(position = Some(pos))
 
   def include(filename: String) =
     copy(included = included + filename)

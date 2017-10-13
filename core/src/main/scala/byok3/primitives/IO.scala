@@ -55,7 +55,7 @@ object IO {
     lines <- unsafeIO {
       Try(Source.fromFile(filename)).orElse(
         Try(Source.fromResource(filename)))
-        .map(_.getLines.toStream)
+        .map(_.getLines.toStream.zipWithIndex.map { case(line, idx) => (line, Position(filename, idx + 1)) })
         .getOrElse(throw Error(-38))
     }
     _ <- modify[Try, Context](_.include(filename).load(lines))
