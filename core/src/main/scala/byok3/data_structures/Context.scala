@@ -78,7 +78,7 @@ case class Context(mem: CoreMemory,
     }
 
   def status: Either[Error, MachineState.Value] = {
-    val state = machineState
+    lazy val state = machineState
       .runA(this)
       .toEither
       .left
