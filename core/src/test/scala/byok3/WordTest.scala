@@ -32,7 +32,9 @@ class WordTest extends FunSuite with Matchers {
       if (res.contains("INCORRECT RESULT:") || res.contains("WRONG NUMBER OF RESULTS:"))
         fail(res)
 
-      println(res)
+      if (res.trim.nonEmpty)
+        println(res.trim)
+
       ctx.error shouldBe None
     }
   }
