@@ -23,6 +23,7 @@ package byok3.primitives
 
 import java.time.LocalDate
 
+import byok3.AnsiColor._
 import byok3.Disassembler
 import byok3.annonation.Documentation
 import byok3.data_structures.Context._
@@ -96,6 +97,12 @@ object IO {
       print(ascii.toChar)
     }
   } yield ()
+
+  @Documentation("clears the screen", stackEffect = "( -- )")
+  val CLEAR = unsafeIO {
+    print(CLEAR_SCREEN)
+    print(GOTO_HOME)
+  }
 
   @Documentation("waits for key, returns ascii", "( -- ascii )")
   val KEY = for {
