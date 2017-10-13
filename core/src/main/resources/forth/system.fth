@@ -40,7 +40,7 @@
 : CELL*  ( n -- n*cell )  cells ;
 
 : CHAR+  ( n -- n+size_of_char ) 1+ ;
-\ : CHARS  ( n -- n*size_of_char, don't do anything ) ; immediate
+: CHARS  ( n -- n*size_of_char, don't do anything ) ; immediate
 
 \ useful stack manipulation words
 : -ROT ( a b c -- c a b ) rot rot ;
