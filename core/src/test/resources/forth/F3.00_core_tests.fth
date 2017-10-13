@@ -20,7 +20,7 @@
 
 require forth/tester.fth
 
-1 VERBOSE !
+0 VERBOSE !
 HEX
 
 TESTING CORE WORDS
