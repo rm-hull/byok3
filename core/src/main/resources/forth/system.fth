@@ -299,7 +299,6 @@ ustack 0stackp
 ; immediate
 
 : SPACE  bl emit ;
-: SPACES  512 min 0 max 0 ?DO space LOOP ;
 : 0SP depth 0 ?do drop loop ;
 
 \ : >NEWLINE ( -- , CR if needed )
