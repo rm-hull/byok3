@@ -1,0 +1,33 @@
+\ ------------------------------------------------------------------------
+TESTING FILL MOVE
+
+CREATE FBUF 00 C, 00 C, 00 C,
+CREATE SBUF 12 C, 34 C, 56 C,
+: SEEBUF FBUF C@  FBUF CHAR+ C@  FBUF CHAR+ CHAR+ C@ ;
+
+{ FBUF 0 20 FILL -> }
+{ SEEBUF -> 00 00 00 }
+
+{ FBUF 1 20 FILL -> }
+{ SEEBUF -> 20 00 00 }
+
+{ FBUF 3 20 FILL -> }
+{ SEEBUF -> 20 20 20 }
+
+{ FBUF FBUF 3 CHARS MOVE -> }		\ BIZARRE SPECIAL CASE
+{ SEEBUF -> 20 20 20 }
+
+{ SBUF FBUF 0 CHARS MOVE -> }
+{ SEEBUF -> 20 20 20 }
+
+{ SBUF FBUF 1 CHARS MOVE -> }
+{ SEEBUF -> 12 20 20 }
+
+{ SBUF FBUF 3 CHARS MOVE -> }
+{ SEEBUF -> 12 34 56 }
+
+{ FBUF FBUF CHAR+ 2 CHARS MOVE -> }
+{ SEEBUF -> 12 12 34 }
+
+{ FBUF CHAR+ FBUF 2 CHARS MOVE -> }
+{ SEEBUF -> 12 34 34 }
