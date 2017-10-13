@@ -154,7 +154,7 @@ case class CoreMemory(size: Int, private val addressSpace: AddressSpace) {
   @tailrec
   final def char_fill(dest: Address, len: Int, char: Int): CoreMemory = {
     boundsCheck(dest)
-    if (len > 0) char_poke(dest, char).char_fill(dest + 1, len -1, char)
+    if (len > 0) char_poke(dest, char).char_fill(dest + 1, len - 1, char)
     else this
   }
 
