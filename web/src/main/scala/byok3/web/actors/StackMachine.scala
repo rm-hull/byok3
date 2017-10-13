@@ -61,9 +61,10 @@ class StackMachine(name: String, var ctx: Context) extends Actor with ActorLoggi
       log.info(s"$name: $input (sender = ${sender()})")
 
       sender() ! capturingOutput {
-        if (printBanner)
+        if (printBanner) {
           Predef.println(Banner())
           printBanner = false
+        }
 
         print(MID_GREY)
         ctx = ctx.eval(input)
