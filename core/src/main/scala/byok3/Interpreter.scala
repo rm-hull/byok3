@@ -27,6 +27,7 @@ import byok3.data_structures.Stack._
 import byok3.data_structures._
 import byok3.implicits._
 import byok3.primitives.Compiler._
+import byok3.primitives.IO._
 import byok3.types.{AppState, Word}
 import cats.data.StateT._
 import cats.implicits._
@@ -61,6 +62,7 @@ object Interpreter extends Executor {
 
   private def runOrCompile(xt: ExecutionToken) = for {
     status <- machineState
+    _ <- trace(xt.name)
     _ <- if (xt.immediate || status != Smudge) xt.effect else xt.compile
   } yield ()
 
