@@ -262,14 +262,14 @@ object IO {
     _ <- unsafeIO {
       val indent = "  " * rs.length
       val instr = s"$indent$label"
-      print(f"$instr%-48s  state:${state}  dp:${dp}%08X  ip:${ip}%08X  w:${w}%08X  xt:${xt}%08X")
-      print(s"  ds: ${ds.reverse.map(n => f"${n}").mkString(" ")}")
-      println(s"  rs: ${rs.reverse.map(n => f"${n}%08X").mkString(" ")}")
+      print(f"\r$RESET$instr%-32s ")
+      print(f"${DARK_GREY}state:${state} dp:${dp}%08X ip:${ip}%08X w:${w}%08X xt:${xt}%08X  ")
+      println(s"|  ${ds.reverse.mkString(" ")}$RESET")
     }
   } yield ()
 
   def trace(label: String) = for {
     echo <- deref("ECHO")
-    _ <- if (echo == 1) diagnostics(label) else noOp
+    _ <- if (echo == 0) noOp else diagnostics(label)
   } yield ()
 }
