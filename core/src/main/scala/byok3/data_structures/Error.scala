@@ -23,7 +23,10 @@ package byok3.data_structures
 
 import java.io.FileNotFoundException
 
-case class Error(errno: Int, message: String) extends RuntimeException(message.trim)
+case class Position(file: String, line: Int)
+case class Error(errno: Int, message: String, pos: Option[Position])
+  extends RuntimeException(pos.fold(message.trim) { p =>
+    s"${message.trim}, in file: ${p.file}:${p.line}" })
 
 case object Error {
 
@@ -73,18 +76,21 @@ case object Error {
 
   def apply(errno: Int, additionalInfo: String): Error = {
     val msg = if (errno > 0) "user defined error" else sysErrors.getOrElse(errno, "undefined")
-    new Error(errno, if (additionalInfo.trim.isEmpty) msg else s"$msg: $additionalInfo")
+    new Error(errno, if (additionalInfo.trim.isEmpty) msg else s"$msg: $additionalInfo", None)
   }
 
-  def apply(ex: Throwable): Error = ex match {
-    case err: Error => err
-    case _: NotImplementedError => Error(-21)
-    case _: UnsupportedOperationException => Error(-21)
-    case _: FileNotFoundException => Error(-38)
-    case _: NoSuchElementException => Error(-4)
-    case _: IndexOutOfBoundsException => Error(-9, ex.getMessage)
-    case ar: ArithmeticException if ar.getMessage == "/ by zero" => Error(-10)
-    case _ => Error(0, s"[${ex.getClass.getName}] ${ex.getMessage}")
+  def apply(ex: Throwable, position: Option[Position] = None): Error = {
+    val err = ex match {
+      case err: Error => err
+      case _: NotImplementedError => Error(-21)
+      case _: UnsupportedOperationException => Error(-21)
+      case _: FileNotFoundException => Error(-38)
+      case _: NoSuchElementException => Error(-4)
+      case _: IndexOutOfBoundsException => Error(-9, ex.getMessage)
+      case ar: ArithmeticException if ar.getMessage == "/ by zero" => Error(-10)
+      case _ => Error(0, s"[${ex.getClass.getName}] ${ex.getMessage}")
+    }
+    err.copy(pos = position)
   }
 }
 

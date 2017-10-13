@@ -29,8 +29,6 @@ import byok3.Banner
 import byok3.data_structures.Context
 import byok3.data_structures.MachineState.BYE
 
-import scala.io.Source
-
 case class EndOfFileException() extends Exception
 
 object StackMachine {
@@ -44,7 +42,7 @@ object StackMachine {
     .copy(rawConsoleInput = None)
 
   private def load(filename: String)(ctx: Context) =
-    ctx.load(Source.fromResource(filename).getLines().toStream)
+    ctx.eval(s"include $filename")
 }
 
 

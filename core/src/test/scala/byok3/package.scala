@@ -1,5 +1,6 @@
 import java.io.ByteArrayOutputStream
 
+import byok3.data_structures.Context
 import org.scalatest.Matchers
 
 
@@ -13,4 +14,6 @@ package object byok3 extends Matchers {
       baos.close
     }
   }
+
+  val emptyContext = Context(0x100000).eval("include forth/system.fth")
 }

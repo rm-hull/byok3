@@ -24,7 +24,7 @@ package byok3.console
 import byok3.AnsiColor._
 import byok3.{Banner, Interruptible}
 import byok3.data_structures.MachineState.BYE
-import byok3.data_structures.{Context, Error}
+import byok3.data_structures.{Context, Error, Position}
 import cats.effect.IO
 import org.jline.reader.LineReader.Option._
 import org.jline.reader.{EndOfFileException, LineReaderBuilder, UserInterruptException}
@@ -91,22 +91,6 @@ object REPL {
   }
 
   private def load(filename: String)(ctx: Context): Context = {
-
-    val lines = Source.fromResource(filename).getLines().zipWithIndex
-
-    def read(ctx: Context): IO[String] = IO {
-      if (lines.hasNext) {
-        val (text, line) = lines.next()
-        Predef.print(s"${ProgressIndicator(line)}\r")
-        ctx.error.foreach { err =>
-          println(s"${RED}${BOLD}Error ${err.errno}:${RESET} ${err.message} occurred in ${BOLD}$filename, line: ${line - 1}${RESET}")
-          throw new EndOfFileException()
-        }
-        text
-      }
-      else throw new EndOfFileException()
-    }
-
-    loop(read)(ctx.include(filename))
+    ctx.eval(s"include $filename")
   }
 }
