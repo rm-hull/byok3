@@ -92,9 +92,7 @@ object REPL {
 
   private def load(filename: String)(ctx: Context): Context = {
 
-    val lines = Source.fromResource(filename)
-      .getLines()
-      .zip(Stream.from(1).toIterator)
+    val lines = Source.fromResource(filename).getLines().zipWithIndex
 
     def read(ctx: Context): IO[String] = IO {
       if (lines.hasNext) {
