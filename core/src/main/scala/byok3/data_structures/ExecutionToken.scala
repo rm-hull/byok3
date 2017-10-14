@@ -59,8 +59,10 @@ sealed trait InnerInterpreter extends Executor {
     xt <- memory(peek(addr))
     _ <- W(addr)
     _ <- XT(xt)
-    rsEmpty <- returnStack(inspect(_.isEmpty))
-    _ <- if (rsEmpty) modify(run) else __NEST
+    // TODO: Why was this necessary - look back over commit history !?
+    //rsEmpty <- returnStack(inspect(_.isEmpty))
+    //_ <- if (rsEmpty) modify(run) else __NEST
+    _ <- modify(run)
   } yield ()
 
   override def step = for {

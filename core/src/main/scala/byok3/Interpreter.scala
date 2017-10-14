@@ -64,6 +64,7 @@ object Interpreter extends Executor {
     get[Try, Context].flatMap { ctx =>
       ctx.input match {
         case Token(token, _, _) =>
+          // TODO: Candidate for refactor - use dictionary(instruction()) lens instead?
           ctx.find(token)
             .map(runOrCompile)
             .getOrElse(parseNumber(token))
