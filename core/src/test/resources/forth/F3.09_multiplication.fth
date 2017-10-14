@@ -28,7 +28,7 @@ TESTING MULTIPLY: S>D * M* UM*
 { MAX-INT MIN-INT M* -> MSB MSB 2/ }
 { MAX-INT MAX-INT M* -> 1 MSB 2/ INVERT }
 
-{ 0 0 * -> 0 }				\ TEST IDENTITIES
+{ 0 0 * -> 0 }                \ TEST IDENTITIES
 { 0 1 * -> 0 }
 { 1 0 * -> 0 }
 { 1 2 * -> 2 }

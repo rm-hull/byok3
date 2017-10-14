@@ -143,9 +143,9 @@
         0 [compile] literal \ dummy literal to hold xt
         here cell-          \ address of zero in literal
         compile (does>)     \ call (DOES>) from new creation word
-		>r                  \ move addrz to return stack so ; doesn't see stack garbage
+        >r                  \ move addrz to return stack so ; doesn't see stack garbage
         [compile] ;         \ terminate part of code before does>
-		r>
+        r>
         :noname       ( addrz xt )
         compile rdrop       \ drop a stack frame (call becomes goto)
         swap !              \ save execution token in literal
@@ -204,7 +204,7 @@
         @
 ;
 : STACKP ( stack -- ptr , to next empty location on stack )
-	dup @ +
+    dup @ +
 ;
 
 : 0STACKP  ( stack -- , clear stack)
@@ -404,8 +404,8 @@ ustack 0stackp
 ; immediate
 
 : SLITERAL ( addr cnt -- , compile string )
-	compile (S")
-	",
+    compile (S")
+    ",
 ; IMMEDIATE
 
 : $APPEND ( addr count $1 -- , append text to $1 )
@@ -434,11 +434,11 @@ ustack 0stackp
 \ Auto Initialization
 : AUTO.INIT  ( -- )
 \ Kernel finds AUTO.INIT and executes it after loading dictionary.
-\	." Begin AUTO.INIT ------" cr
+\    ." Begin AUTO.INIT ------" cr
 ;
 : AUTO.TERM  ( -- )
 \ Kernel finds AUTO.TERM and executes it on bye.
-\	." End AUTO.TERM ------" cr
+\    ." End AUTO.TERM ------" cr
 ;
 
 : INCLUDE? ( <word> <file> -- , load file if word not defined )
@@ -494,19 +494,19 @@ variable pictured_output_len \ hidden?
 ;
 
 : WARNING" ( flag <message> -- , print warning if true. )
-	[compile] "  ( compile message )
-	state @
-	IF  compile (warning")
-	ELSE (warning")
-	THEN
+    [compile] "  ( compile message )
+    state @
+    IF  compile (warning")
+    ELSE (warning")
+    THEN
 ; IMMEDIATE
 
 : ABORT" ( flag <message> -- , print warning if true. )
-	[compile] "  ( compile message )
-	state @
-	IF  compile (abort")
-	ELSE (abort")
-	THEN
+    [compile] "  ( compile message )
+    state @
+    IF  compile (abort")
+    ELSE (abort")
+    THEN
 ; IMMEDIATE
 
 : DEFER ( "name" -- )
