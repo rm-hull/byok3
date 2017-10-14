@@ -20,7 +20,7 @@ TESTING DEFINING WORDS: : ; CONSTANT VARIABLE CREATE DOES> >BODY
 { : DOES2 DOES> @ 2 + ; -> }
 { CREATE CR1 -> }
 { CR1 -> HERE }
-{ ' CR1 >BODY -> HERE }
+{ ' CR1 >BODY 4 CELLS + -> HERE }
 { 1 , -> }
 { CR1 @ -> 1 }
 { DOES1 -> }
@@ -30,6 +30,6 @@ TESTING DEFINING WORDS: : ; CONSTANT VARIABLE CREATE DOES> >BODY
 
 { : WEIRD: CREATE DOES> 1 + DOES> 2 + ; -> }
 { WEIRD: W1 -> }
-{ ' W1 >BODY -> HERE }
+{ ' W1 >BODY 4 CELLS + -> HERE }
 { W1 -> HERE 1 + }
 { W1 -> HERE 2 + }
