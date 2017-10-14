@@ -482,6 +482,10 @@ variable pictured_output_len \ hidden?
     digit hold ;
 
 
+: LWORD  ( char -- addr )
+        parse-word here place here \ 00002 , use PARSE-WORD
+;
+
 : (WARNING")  ( flag $message -- )
     swap
     IF count type
@@ -522,3 +526,13 @@ variable pictured_output_len \ hidden?
 \      ' DEFER!
 \    THEN ; IMMEDIATE
 
+
+\ : $ ( <number> -- N , convert next number as hex )
+\     base @ hex
+\     32 lword number? num_type_single = not
+\     abort" Not a single number!"
+\     swap base !
+\     state @
+\     IF [compile] literal
+\     THEN
+\ ; immediate
