@@ -30,8 +30,7 @@ import byok3.data_structures.MachineState.{OK, Smudge}
 import byok3.data_structures.Stack.{pop, push}
 import byok3.data_structures._
 import byok3.helpers._
-import byok3.implicits._
-import byok3.primitives.Memory.comma
+import byok3.primitives.Memory.{comma, PAD}
 import byok3.types.AppState
 import cats.data.StateT._
 import cats.implicits._
@@ -137,7 +136,7 @@ object Compiler {
 
   @Documentation("the address and length of the name of the execution token", stackEffect = "( xt -- len a-addr)")
   val `NAME>` = for {
-    _ <- exec("PAD")
+    _ <- PAD
     addr <- dataStack(pop)
     xt <- dataStack(pop)
     instr <- dictionary(instruction(xt))

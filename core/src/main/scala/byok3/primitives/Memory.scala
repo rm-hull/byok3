@@ -27,7 +27,7 @@ import byok3.data_structures.CoreMemory.{peek, poke, _}
 import byok3.data_structures.Dictionary._
 import byok3.data_structures.Stack.{pop, push}
 import byok3.data_structures._
-import byok3.types.{Address, Data}
+import byok3.types.Data
 import cats.data.StateT._
 import cats.implicits._
 
@@ -148,9 +148,15 @@ object Memory {
     _ <- memory(poke(tin, token.offset))
   } yield ()
 
+  @Documentation("c-addr is the address of a transient region that can be used to hold data for intermediate processing", stackEffect = "( -- c-addr )")
+  val PAD = for {
+    dp <- DP()
+    _ <- dataStack(push(dp + 128))
+  } yield ()
+
   @Documentation("Skip leading delimiters. Parse characters ccc delimited by char. c-addr is the address of a transient region containing the parsed word as a counted string. If the parse area was empty or contained no characters other than the delimiter, the resulting string has a zero length. A program may replace characters within the string", stackEffect = "( char \"<chars>ccc<char>\" -- c-addr )")
   val WORD = for {
-    _ <- exec("PAD")
+    _ <- PAD
     addr <- dataStack(pop)
     ascii <- dataStack(pop)
     token <- nextToken(delim = s"\\Q${ascii.toChar}\\E")

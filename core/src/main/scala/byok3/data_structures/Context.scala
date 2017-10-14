@@ -25,9 +25,10 @@ import byok3.AnsiColor._
 import byok3.annonation.Documentation
 import byok3.data_structures.Context._
 import byok3.data_structures.CoreMemory._
-import byok3.data_structures.Dictionary.add
+import byok3.data_structures.Dictionary.{add, instruction}
 import byok3.data_structures.MachineState.{BYE, OK, Smudge}
 import byok3.data_structures.Stack.pop
+import byok3.primitives.IO.trace
 import byok3.primitives.Memory.comma
 import byok3.types.{Address, AppState, Data, Dict, Stack, Word}
 import byok3.{Disassembler, Interpreter}
@@ -73,11 +74,6 @@ case class Context(mem: CoreMemory,
 
   def reset =
     copy(error = None, position = None)
-
-  private def exec(token: Word) =
-    find(token).fold[Try[Context]](Failure(Error(-13, token))) {
-      xt => xt.effect.runS(this)
-    }
 
   def status: Either[Error, MachineState.Value] = {
     lazy val state = machineState
@@ -190,11 +186,15 @@ object Context {
     state <- deref("STATE")
   } yield MachineState(state)
 
-  def exec(token: Word): AppState[Unit] =
-    modifyF(_.exec(token))
+  def exec(token: Word): AppState[Unit] = for {
+    xt <- dictionary(instruction(token))
+    _ <- trace(xt.name)
+    _ <- xt.effect
+  } yield ()
 
   def deref(token: Word): AppState[Int] = for {
-    _ <- exec(token)
+    xt <- dictionary(instruction(token))
+    _ <- xt.effect
     addr <- dataStack(pop)
     ref <- memory(peek(addr))
   } yield ref

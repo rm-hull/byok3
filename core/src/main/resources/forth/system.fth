@@ -54,8 +54,6 @@
 : DECIMAL  10 base ! ;
 : HEX      16 base ! ;
 
-: PAD ( -- addr ) here 128 + ;
-
 : MOVE$  ( a1 n a2 -- ) swap cmove ;
 
 : BETWEEN ( n lo hi -- flag , true if between lo & hi )
