@@ -13,8 +13,8 @@ HERE 1 ,
 HERE 2 ,
 CONSTANT 2ND
 CONSTANT 1ST
-{ 1ST 2ND U< -> <TRUE> }			\ HERE MUST GROW WITH ALLOT
-{ 1ST CELL+ -> 2ND }			\ ... BY ONE CELL
+{ 1ST 2ND U< -> <TRUE> }          \ HERE MUST GROW WITH ALLOT
+{ 1ST CELL+ -> 2ND }              \ ... BY ONE CELL
 { 1ST 1 CELLS + -> 2ND }
 { 1ST @ 2ND @ -> 1 2 }
 { 5 1ST ! -> }
@@ -24,14 +24,14 @@ CONSTANT 1ST
 { 1ST 2@ -> 6 5 }
 { 2 1 1ST 2! -> }
 { 1ST 2@ -> 2 1 }
-{ 1S 1ST !  1ST @ -> 1S }		\ CAN STORE CELL-WIDE VALUE
+{ 1S 1ST !  1ST @ -> 1S }        \ CAN STORE CELL-WIDE VALUE
 
 HERE 1 C,
 HERE 2 C,
 CONSTANT 2NDC
 CONSTANT 1STC
-{ 1STC 2NDC U< -> <TRUE> }		\ HERE MUST GROW WITH ALLOT
-{ 1STC CHAR+ -> 2NDC }			\ ... BY ONE CHAR
+{ 1STC 2NDC U< -> <TRUE> }        \ HERE MUST GROW WITH ALLOT
+{ 1STC CHAR+ -> 2NDC }            \ ... BY ONE CHAR
 { 1STC 1 CHARS + -> 2NDC }
 { 1STC C@ 2NDC C@ -> 1 2 }
 { 3 1STC C! -> }
