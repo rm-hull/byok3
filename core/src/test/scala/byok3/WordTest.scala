@@ -2,12 +2,8 @@ package byok3
 
 import java.io.File
 
-import byok3.data_structures.Error
 import byok3.data_structures.MachineState.OK
-import cats.implicits._
 import org.scalatest.{FunSuite, Matchers}
-
-import scala.util.{Failure, Success}
 
 class WordTest extends FunSuite with Matchers {
 
