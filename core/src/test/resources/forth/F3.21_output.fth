@@ -23,4 +23,4 @@ HEX
    ." UNSIGNED: " 0 U. MAX-UINT U. CR
 ;
 
-{ OUTPUT-TEST -> }
+T{ OUTPUT-TEST -> }T
