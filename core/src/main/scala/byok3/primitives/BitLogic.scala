@@ -44,4 +44,7 @@ object BitLogic {
 
   @Documentation("logical shift right u1 by u2 bits", stackEffect = "( u1 u2 -- u3 )")
   val RSHIFT = dataStack(arity2stackOp(_ >>> _))
+
+  @Documentation("arithmetic shift right u1 by u2 bits", stackEffect = "( u1 u2 -- u3 )")
+  val ARSHIFT = dataStack(arity2stackOp(_ >> _))
 }
