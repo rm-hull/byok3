@@ -163,8 +163,9 @@ object FlowControl {
     step <- dataStack(pop)
     index <- returnStack(pop)
     limit <- returnStack(speek)
+    w = index - limit
     _ <- returnStack(push(index + step))
-    _ <- if (index + step != limit) BRANCH
+    _ <- if ((index + step - limit ^ w) > 0) BRANCH
          else sequence(`ip++`, RDROP, RDROP)
   } yield ()
 
