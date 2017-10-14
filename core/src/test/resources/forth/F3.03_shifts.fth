@@ -1,8 +1,8 @@
+\ @IGNORED
+
 \ ------------------------------------------------------------------------
 TESTING 2* 2/ LSHIFT RSHIFT
 
-( WE TRUST 1S, INVERT, AND BITSSET?; WE WILL CONFIRM RSHIFT LATER )
-1S 1 RSHIFT INVERT CONSTANT MSB
 { MSB BITSSET? -> 0 0 }
 
 { 0S 2* -> 0S }

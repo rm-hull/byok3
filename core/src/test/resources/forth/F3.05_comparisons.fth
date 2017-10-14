@@ -1,8 +1,8 @@
+\ @IGNORED
+
 \ ------------------------------------------------------------------------
 TESTING COMPARISONS: 0= = 0< < > U< MIN MAX
 
-0S CONSTANT <FALSE>
-1S CONSTANT <TRUE>
 
 { 0 0= -> <TRUE> }
 { 1 0= -> <FALSE> }
