@@ -99,7 +99,7 @@ object IO {
   } yield ()
 
   @Documentation("clears the screen", stackEffect = "( -- )")
-  val CLEAR = unsafeIO {
+  val CLS = unsafeIO {
     print(CLEAR_SCREEN)
     print(GOTO_HOME)
   }
