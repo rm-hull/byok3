@@ -62,6 +62,7 @@ case class Context(mem: CoreMemory,
     case Left(err) => s"${RED}${BOLD}Error ${err.errno}:${RESET} ${err.message}\n"
   }
 
+  @deprecated("Candidate for removal", since = "14/10/2017") // TODO
   def find(token: Word) =
     dictionary.get(token.toUpperCase)
 
