@@ -72,14 +72,14 @@ class MemoryTest extends PrimitivesTestBase {
     ctx.ds shouldEqual List(8, offset)
   }
 
-  test("should return zero length if unable parse to the next delimiter") {
+  test("should return remaining content if unable parse to the next delimiter") {
     val offset = 9
     val ops = sequence(
       input("IGNORED: HELLO WORLD").map(_ => ()),
       dataStack(push('!'.toInt)),
       PARSE)
     val ctx = ops.runS(emptyContext).get
-    ctx.ds shouldEqual List(0, offset)
+    ctx.ds shouldEqual List(11, offset)
   }
 
   test("should push HERE to the stack") {
