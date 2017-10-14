@@ -38,7 +38,9 @@ trait Executor {
     step.run(ctx) match {
       case Failure(ex: Throwable) => ctx.error(Error(ex))
       case Success((next, true)) => next
-      case Success((next, false)) => if (isInterrupted) next.error(Error(-28)) else run(next)
+      case Success((next, false)) if next.error.isDefined => next
+      case Success((next, false)) if isInterrupted => next.error(Error(-28))
+      case Success((next, false)) => run(next)
     }
   }
 }
