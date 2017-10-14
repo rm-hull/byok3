@@ -12,7 +12,7 @@ DECIMAL
      LOOP  DROP ;
 
 : SHAPE CREATE  8 0 DO  C,  LOOP
-  DOES> 1 - DUP 8 + DO  I C@ .row  -1 +LOOP  CR ;
+  DOES> DUP 7 + DO  I C@ .row  -1 +LOOP  CR ;
 
 HEX
 18 18 3C 5A 99 24 24 24  SHAPE man
