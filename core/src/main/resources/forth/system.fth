@@ -456,35 +456,6 @@ ustack 0stackp
     WHILE drop
     REPEAT ;
 
-variable pictured_output     \ hidden?
-variable pictured_output_len \ hidden?
-
-: <# ( -- ) pad pictured_output !  0 pictured_output_len ! ;
-: #> ( -- addr n ) drop pictured_output @ pictured_output_len @ ;
-
-: HOLD ( c -- )
-    pictured_output @ dup dup 1+ pictured_output_len @ cmove c!
-    1 pictured_output_len +!
-;
-
-\ ------------------------ INPUT -------------------------------
-
-: SIGN ( n -- ) < 0 IF 45 hold THEN
-;
-
-: DIGIT ( n -- ascii )
-   dup 10 < IF 48 ELSE 87 THEN + ;
-
-: # ( n -- n )
-    base @ /mod swap digit hold ;
-
-: #S ( n -- )
-    BEGIN base @ /mod dup
-    WHILE swap digit hold
-    REPEAT
-    digit hold ;
-
-
 : LWORD  ( char -- addr )
         parse-word here place here \ 00002 , use PARSE-WORD
 ;
