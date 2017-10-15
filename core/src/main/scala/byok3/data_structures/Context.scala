@@ -157,6 +157,10 @@ object Context {
   def guard[S](predicate: => Boolean, onFail: Error): StateT[Try, S, Unit] =
     inspectF(_ => if (predicate) Success(()) else Failure(onFail))
 
+  @inline
+  def conditional[S](predicate: => Boolean, onTrue: StateT[Try, S, Unit]): StateT[Try, S, Unit] =
+    if (predicate) onTrue else pure[Try, S, Unit](())
+
   def dataStack[A](block: StateT[Try, Stack[Int], A]): AppState[A] =
     block.transformS(_.ds, (ctx, stack) => ctx.copy(ds = stack))
 

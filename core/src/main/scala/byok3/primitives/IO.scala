@@ -214,7 +214,7 @@ object IO {
     addr <- dataStack(pop)
     filename <- memory(fetch(addr, len))
     included <- inspect[Try, Context, Set[String]](_.included)
-    _ <- if (included.contains(filename)) noOp else loadSource(filename)
+    _ <- conditional(!included.contains(filename), loadSource(filename))
   } yield ()
 
   @Documentation("include-file the file only if it is not included already", "( \"ccc<file>\" -- )")
@@ -268,6 +268,6 @@ object IO {
 
   def trace(label: String) = for {
     echo <- deref("ECHO")
-    _ <- if (echo == 0) noOp else diagnostics(label)
+    _ <- conditional(echo != 0, diagnostics(label))
   } yield ()
 }
