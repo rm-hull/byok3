@@ -173,7 +173,7 @@ object StackManipulation {
 
   @Documentation("duplicate top stack element if it is non-zero", stackEffect = "( x -- 0 | x x )")
   val `?DUP` = dataStack {
-    peek.flatMap(x => if (x == 0) pure(()) else push(x))
+    peek.flatMap(x => conditional(x != 0, push(x)))
   }
 
   @Documentation("remove u. Copy the xu to the top of the stack", stackEffect = "( xu ... x1 x0 u -- xu ... x1 x0 xu )")
