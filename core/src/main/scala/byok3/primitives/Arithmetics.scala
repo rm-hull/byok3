@@ -80,4 +80,7 @@ object Arithmetics {
 
   @Documentation("multiplies then divides (n1 x n2) / n3, returning the remainder in n4 and quotient in n5", stackEffect = "( n1 n2 n3 -- n4 n5)")
   val `*/MOD` = dataStack(arity3stackOp2[Int](_ * _ / _)(_ * _ / _))
+  def sgn(n: Int) =
+    if (n < 0) -1 else 0
+
 }

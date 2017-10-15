@@ -26,6 +26,7 @@ import byok3.data_structures.MachineState._
 import byok3.data_structures.Stack._
 import byok3.data_structures._
 import byok3.implicits._
+import byok3.primitives.Arithmetics._
 import byok3.primitives.Compiler._
 import byok3.primitives.IO._
 import byok3.types.{AppState, Word}
@@ -34,33 +35,26 @@ import cats.implicits._
 
 import scala.util.Try
 
-
 /**
   * Outer interpreter
   */
 object Interpreter extends Executor {
 
-  private val radixPrefix = Map('#' -> 10, '$' -> 16, '%' -> 2)
-
-  private def parsePrefix(value: String) = {
-    val radix = radixPrefix.get(value.charAt(0))
-    radix.toTry(Error(-13, value))
-      .flatMap(r => Try(Integer.parseInt(value.substring(1), r)))
-  }
-
-  private def toNumber(value: String, radix: Int) =
-    Try(Integer.parseInt(value, radix))
-      .orElse(parsePrefix(value))
-      .getOrElse(throw Error(-13, value))
-
-  private def pushNumber(token: Word) = for {
+  private def pushNumber(n: Int) = for {
     status <- machineState
-    base <- deref("BASE")
-    n = toNumber(token, base)
     _ <- if (status == Smudge) literal(n) else dataStack(push(n))
   } yield ()
 
-  private def runOrCompile(xt: ExecutionToken) = for {
+  private def parseNumber(token: Word): AppState[Unit] = for {
+    base <- deref("BASE")
+    isDouble = token.endsWith(".")
+    tok = if (isDouble) token.substring(0, token.length - 1) else token
+    n = tok.toNumber(base).getOrElse(throw Error(-13, token))
+    _ <- pushNumber(n)
+    _ <- conditional(isDouble, pushNumber(sgn(n)))
+  } yield ()
+
+  private def runOrCompile(xt: ExecutionToken): AppState[Unit] = for {
     status <- machineState
     _ <- trace(xt.name)
     _ <- if (xt.immediate || status != Smudge) xt.effect else xt.compile
@@ -72,8 +66,8 @@ object Interpreter extends Executor {
         case Token(token, _, _) =>
           ctx.find(token)
             .map(runOrCompile)
-            .getOrElse(pushNumber(token))
-        case _ => pure(())
+            .getOrElse(parseNumber(token))
+        case _ => noOp
       }
     }
 
