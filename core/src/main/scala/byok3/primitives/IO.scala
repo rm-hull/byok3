@@ -102,7 +102,7 @@ object IO {
     print(GOTO_HOME)
   }
 
-  @Documentation("waits for key, returns ascii", "( -- ascii )")
+  @Documentation("waits for key, returns ascii", stackEffect="( -- ascii )")
   val KEY = for {
     ctx <- get[Try, Context]
     ascii <- unsafeIO {
@@ -110,6 +110,12 @@ object IO {
       rawInput.read()
     }
     _ <- dataStack(push(ascii))
+  } yield ()
+
+  @Documentation("determines if there is capable terminal present", stackEffect="( -- 0 | -1 )")
+  val `?TERMINAL` = for {
+    ctx <- get[Try, Context]
+    _ <- dataStack(push(ctx.rawConsoleInput.isDefined))
   } yield ()
 
   @Documentation("outputs u space characters", stackEffect = "( u -- )")

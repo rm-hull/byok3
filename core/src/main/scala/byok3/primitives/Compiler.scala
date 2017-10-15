@@ -168,6 +168,15 @@ object Compiler {
     _ <- dictionary(forget(name))
   } yield ()
 
+  @Documentation("Restores the previous definition (if any) for a word. Use with caution", stackEffect = "( c-addr u -- )")
+  val `(FORGET)` = for {
+    u <- dataStack(pop)
+    addr <- dataStack(pop)
+    name <- memory(fetch(addr, u))
+    _ <- guard(name.nonEmpty, Error(-16))
+    _ <- dictionary(forget(name))
+  } yield ()
+
   @Documentation("Save the current input source specification. Store minus-one (-1) in SOURCE-ID if it is present. Make the string described by c-addr and u both the input source and input buffer, set >IN to zero, and interpret. When the parse area is empty, restore the prior input source specification. Other stack effects are due to the words EVALUATEd", stackEffect = "( i * x c-addr u -- j * x )")
   val EVALUATE = for {
     // TODO: set SOURCE-ID

@@ -32,7 +32,7 @@ class WordTest extends FunSuite with Matchers {
 
   private def runForth(file: String) = {
     val res = capturingOutput {
-      ctx = ctx.eval(s"include $file")
+      ctx = ctx.eval(s"hex include $file")
     }
 
     if (res.contains("INCORRECT RESULT:") || res.contains("WRONG NUMBER OF RESULTS:"))

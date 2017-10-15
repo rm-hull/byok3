@@ -23,7 +23,7 @@ package byok3.data_structures
 
 import byok3.annonation.{Documentation, Immediate, Internal}
 import byok3.implicits._
-import byok3.primitives.{Arithmetics, BitLogic, Comparison, Compiler, FlowControl, IO, Memory, StackManipulation}
+import byok3.primitives._
 import byok3.types.{AppState, Dict, Stack, Word}
 import cats.data.StateT
 import cats.data.StateT._
@@ -44,7 +44,7 @@ class Dictionary[K, A](private val byKey: Map[K, Stack[Int]], private val byPosn
       case _ => throw new NoSuchElementException(key.toString)
     }
 
-  def forget(key: K): Dictionary[K, A]  =
+  def forget(key: K): Dictionary[K, A] =
     byKey.get(key) match {
       case Some(_ :: rest) => new Dictionary(byKey.updated(key, rest), byPosn)
       case _ => throw new NoSuchElementException(key.toString)
@@ -109,12 +109,13 @@ object Dictionary {
         getExecutionTokens(BitLogic) ++
         getExecutionTokens(Comparison) ++
         getExecutionTokens(Compiler) ++
+        getExecutionTokens(DoublePrecisionNumbers) ++
         getExecutionTokens(FlowControl) ++
         getExecutionTokens(IO) ++
         getExecutionTokens(Memory) ++
         getExecutionTokens(StackManipulation) ++
         Seq(
-          Constant("TRUE", -1),   // TODO: move to system.fth?
+          Constant("TRUE", -1), // TODO: move to system.fth?
           Constant("FALSE", 0))
 
     tokens.foldLeft[Dict](Dictionary.empty) {

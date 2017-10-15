@@ -71,4 +71,13 @@ object Stack {
     _ <- push(f1(a, b, c))
     _ <- push(f2(a, b, c))
   } yield ()
+
+  def arity4stackOp2[A](f1: (A, A, A, A) => A)(f2: (A, A, A, A) => A): StateT[Try, Stack[A], Unit] = for {
+    d <- pop
+    c <- pop
+    b <- pop
+    a <- pop
+    _ <- push(f1(a, b, c, d))
+    _ <- push(f2(a, b, c, d))
+  } yield ()
 }
