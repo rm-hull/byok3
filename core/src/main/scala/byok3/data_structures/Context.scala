@@ -149,9 +149,11 @@ object Context {
   @inline
   def noOp: AppState[Unit] = pure(())
 
+  @inline
   def requires[S](predicate: S => Boolean, onFail: Error): StateT[Try, S, Unit] =
     inspectF(s => if (predicate(s)) Success(()) else Failure(onFail))
 
+  @inline
   def guard[S](predicate: => Boolean, onFail: Error): StateT[Try, S, Unit] =
     inspectF(_ => if (predicate) Success(()) else Failure(onFail))
 
