@@ -21,7 +21,6 @@
 
 variable private-start
 variable private-stop
-$20 constant FLAG_SMUDGE
 
 : PRIVATE{
     latest private-start !
@@ -34,15 +33,14 @@ $20 constant FLAG_SMUDGE
 : PRIVATIZE  ( -- , smudge all words between PRIVATE{ and }PRIVATE )
     private-start @ 0= abort" Missing PRIVATE{"
     private-stop @ 0= abort" Missing }PRIVATE"
-    private-stop @
-    BEGIN
-        dup private-start @ u>    \ 19970701
-    WHILE
-\        ." Smudge " dup id. cr
-        dup c@ flag_smudge or over c!
-        prevname
-    REPEAT
-    drop
+    private-stop @ 1+
+    private-start @ 1+
+    DO
+      I NAME>
+      2DUP TYPE CR
+      (FORGET)
+    LOOP
+
     0 private-start !
     0 private-stop !
 ;
