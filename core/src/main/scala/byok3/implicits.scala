@@ -21,6 +21,8 @@
 
 package byok3
 
+import byok3.data_structures.Error
+
 import scala.util.{Failure, Success, Try}
 
 package object implicits {
@@ -36,4 +38,19 @@ package object implicits {
       head ::: tail
     }
   }
+
+  implicit class StringOps(s: String) {
+
+    private val radixPrefix = Map('#' -> 10, '$' -> 16, '%' -> 2)
+
+    private def parsePrefix(value: String) = {
+      val radix = radixPrefix.get(value.charAt(0))
+      radix.toTry(Error(-13, value))
+        .flatMap(r => Try(Integer.parseInt(value.substring(1), r)))
+    }
+
+    def toNumber(radix: Int) =
+      Try(Integer.parseInt(s, radix)).orElse(parsePrefix(s))
+  }
+
 }
