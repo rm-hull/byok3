@@ -28,7 +28,7 @@ class DisassemblerTest extends FunSuite {
          |${MID_GREY}00000140:  55 00 00 00  |U...|  (LIT)
          |${MID_GREY}00000144:  09 00 00 00  |....|  9
          |${MID_GREY}00000148:  02 00 00 00  |....|  *
-         |${MID_GREY}0000014C:  31 00 00 00  |1...|  EXIT
+         |${MID_GREY}0000014C:  38 00 00 00  |8...|  EXIT
          |""".stripMargin
 
     val actual = capturingOutput(disassembler.print(0x0124, 0x2C))
