@@ -198,9 +198,6 @@ variable HLD    \ points to last character added
 : (.)   ( n -- c-addr cnt )
 	dup abs 0 <# #s rot sign #>
 ;
-: .     ( n -- , print signed number)
-   (.)  type space
-;
 : .R    ( n l -- , print right justified)
 	>r  (.)  r> over - spaces type
 ;
