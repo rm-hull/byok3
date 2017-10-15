@@ -41,8 +41,6 @@ import scala.util.Try
 
 object IO {
 
-  private def noOp: AppState[Unit] = pure(())
-
   private def unsafeIO[A](block: => A): AppState[A] =
     StateT(s => Try((s, block)))
 
