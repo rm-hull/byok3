@@ -50,12 +50,24 @@ object IO {
   private def isValidFilename(filename: String) =
     !(filename.isEmpty || filename.trim.startsWith("/") || filename.contains(".."))
 
+  private object ProgressIndicator {
+    private val indicators = List("|", "/", "-", "\\")
+
+    def apply(line: Int) = {
+      indicators(line / 10 % indicators.length)
+    }
+  }
+
+
   private def loadSource(filename: String) = for {
     _ <- guard(isValidFilename(filename), Error(-38))
     lines <- unsafeIO {
       Try(Source.fromFile(filename)).orElse(
         Try(Source.fromResource(filename)))
-        .map(_.getLines.toStream.zipWithIndex.map { case(line, idx) => (line, Position(filename, idx + 1)) })
+        .map(_.getLines.toStream.zipWithIndex.map { case(line, idx) =>
+          print(s"\r${ProgressIndicator(idx)}\r")
+          (line, Position(filename, idx + 1))
+        })
         .getOrElse(throw Error(-38))
     }
     _ <- modify[Try, Context](_.include(filename).load(lines))
