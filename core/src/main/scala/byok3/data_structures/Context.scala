@@ -146,6 +146,9 @@ object Context {
     _ <- dictionary(add(Constant(name, addr, doc)))
   } yield ()
 
+  @inline
+  def noOp: AppState[Unit] = pure(())
+
   def requires[S](predicate: S => Boolean, onFail: Error): StateT[Try, S, Unit] =
     inspectF(s => if (predicate(s)) Success(()) else Failure(onFail))
 

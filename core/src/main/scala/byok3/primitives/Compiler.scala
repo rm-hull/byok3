@@ -81,7 +81,7 @@ object Compiler {
   } yield ()
 
   private def addToDictionary(word: Option[UserDefined]): AppState[Unit] = word match {
-    case None => pure(())
+    case None => noOp
     case Some(userDefinedWord) => for {
       dp <- DP()
       wordSize = dp - userDefinedWord.addr
