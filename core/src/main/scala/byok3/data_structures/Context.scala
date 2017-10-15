@@ -118,8 +118,8 @@ object Context {
 
   private def bootstrap(dp: Address) = {
     for {
-    // Can't initialise DP as init requires DP to already be set up:
-    // poke the DP with the next cell's address
+      // Can't initialise DP as init requires DP to already be set up:
+      // poke the DP with the next cell's address
       _ <- memory(poke(dp, inc(dp)))
       _ <- dictionary(add(Constant("DP", dp)))
       _ <- dictionary(add(Constant("CELL", CELL_SIZE)))
@@ -200,7 +200,7 @@ object Context {
   } yield ref
 
   def input(text: String): AppState[Boolean] = for {
-  // TODO: check to make sure text.len < TIB size
+    // TODO: check to make sure text.len < TIB size
     _ <- guard(text.length < 0x100, Error(-9, "input string too long"))
     tib <- deref("TIB")
     _ <- modify[Try, Context](_.copy(input = Tokenizer(text)))
