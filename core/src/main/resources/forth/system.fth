@@ -33,7 +33,7 @@
 : >= ( a b -- f , true if A >= b ) < 0= ;
 : NOT ( n -- !n , logical negation ) 0= ;
 : DNEGATE ( d -- -d , negate by doing 0-d )
-        0 swap -
+        0 0 2swap d-
 ;
 : CELL+  ( n -- n+cell )  cell + ;
 : CELL-  ( n -- n-cell )  cell - ;
