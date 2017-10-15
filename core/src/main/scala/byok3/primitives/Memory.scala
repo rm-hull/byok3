@@ -179,5 +179,17 @@ object Memory {
     _ <- dataStack(push(dp))
   } yield ()
 
+  @Documentation("Compare the string specified by c-addr1 u1 to the string specified by c-addr2 u2. The strings are compared, beginning at the given addresses, character by character, up to the length of the shorter string or until a difference is found. If the two strings are identical, n is zero. If the two strings are identical up to the length of the shorter string, n is minus-one (-1) if u1 is less than u2 and one (1) otherwise", stackEffect = "( c-addr1 u1 c-addr2 u2 -- n )")
+  val COMPARE = for {
+    u2 <- dataStack(pop)
+    addr2 <- dataStack(pop)
+    u1 <- dataStack(pop)
+    addr1 <- dataStack(pop)
 
+    word1 <- memory(fetch(addr1, u1))
+    word2 <- memory(fetch(addr2, u2))
+
+    result = word1.compare(word2)
+    _ <- dataStack(push(result))
+  } yield ()
 }
