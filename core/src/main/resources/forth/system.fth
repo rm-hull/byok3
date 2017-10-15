@@ -324,6 +324,11 @@ ustack 0stackp
 
 : D>S ( d -- s ) drop ;
 
+: D2*  ( d -- d*2 )
+        2* over 31 rshift or  swap
+        2* swap
+;
+
 : PARSE-WORD ( "<spaces>name<space>" -- c-addr u ) bl parse ;
 : /STRING  ( addr len n -- addr' len' ) over min rot over  + -rot - ;
 : PLACE    ( addr len to -- , move string ) 3dup 1+ swap cmove c! drop ;
