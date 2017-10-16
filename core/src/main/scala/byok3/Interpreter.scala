@@ -26,7 +26,7 @@ import byok3.data_structures.MachineState._
 import byok3.data_structures.Stack._
 import byok3.data_structures._
 import byok3.implicits._
-import byok3.primitives.Arithmetics._
+import byok3.primitives.DoublePrecisionNumbers._
 import byok3.primitives.Compiler._
 import byok3.primitives.IO._
 import byok3.types.{AppState, Word}
