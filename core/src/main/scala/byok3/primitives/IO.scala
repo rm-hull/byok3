@@ -71,7 +71,7 @@ object IO {
         })
         .getOrElse(throw Error(-38))
     }
-    _ <- modify[Try, Context](_.include(filename).load(lines))
+    _ <- modify[Try, Context](_.include(filename, lines))
   } yield ()
 
   @Documentation("convert signed number n to string of digits, and output", stackEffect = "( n -- )")
