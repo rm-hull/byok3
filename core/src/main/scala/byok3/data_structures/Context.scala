@@ -94,10 +94,11 @@ case class Context(mem: CoreMemory,
 
   lazy val disassembler = new Disassembler(this)
 
-  def eval(text: String) = Interpreter(text).runS(this) match {
-    case Failure(ex: Throwable) => error(Error(ex))
-    case Success(ctx) => ctx
-  }
+  def eval(text: String) =
+    Interpreter(text).runS(this) match {
+      case Failure(ex: Throwable) => error(Error(ex))
+      case Success(ctx) => ctx
+    }
 
   @tailrec
   final def load(lines: Stream[(String, Position)]): Context = lines match {
