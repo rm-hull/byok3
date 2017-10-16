@@ -268,6 +268,6 @@ object IO {
 
   def trace(label: String) = for {
     echo <- deref("ECHO")
-    _ <- conditional(echo != 0, diagnostics(label))
+    _ <- conditional(echo, diagnostics(label))
   } yield ()
 }

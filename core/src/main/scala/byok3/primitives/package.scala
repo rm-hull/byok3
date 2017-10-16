@@ -25,5 +25,7 @@ package object primitives {
 
   implicit def truth(condition: Boolean) = if (condition) -1 else 0
 
+  implicit def truth(condition: Int) = (condition == -1)
+
   def unsigned(n: Int) = if (n < 0) n + 0x80000000 else n
 }
