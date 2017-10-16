@@ -101,7 +101,7 @@ case class Context(mem: CoreMemory,
     }
 
   @tailrec
-  final def load(lines: Stream[(String, Position)]): Context = lines match {
+  private def load(lines: Stream[(String, Position)]): Context = lines match {
     case (line, position) #:: rest if error.isEmpty => eval(line).setPosition(position).load(rest)
     case Empty => reset
     case _ => this // not exhausted, possibly errored
@@ -109,8 +109,8 @@ case class Context(mem: CoreMemory,
 
   private def setPosition(pos: Position) = copy(position = Some(pos))
 
-  def include(filename: String) =
-    copy(included = included + filename)
+  def include(filename: String, lines: Stream[(String, Position)]) =
+    copy(included = included + filename).load(lines)
 
   def stackDepthIndicator = "." * math.min(16, ds.length)
 }
