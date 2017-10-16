@@ -63,7 +63,7 @@ object REPL {
     IO {
       wordCompleter.setContext(ctx)
       val input = lineReader.readLine(ctx.prompt)
-      Interruptible.trigger(println)
+      Interruptible.trigger(() => println())
       Console.withOut(terminal.output) {
         Predef.print(MID_GREY)
       }
