@@ -96,7 +96,7 @@ case class Context(mem: CoreMemory,
 
   def eval(text: String) =
     Interpreter(text).runS(this) match {
-      case Failure(ex: Throwable) => error(Error(ex))
+      case Failure(ex) => error(Error(ex))
       case Success(ctx) => ctx
     }
 
