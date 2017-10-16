@@ -26,21 +26,21 @@ include? {                  forth/locals.fth
 \ include? [if]    condcomp.fth
 
 \ load floating point support if basic support is in kernel
-exists? F*
-   [IF]  include? task-floats.fth floats.fth
-   [THEN]
+\ exists? F*
+\    [IF]  include? task-floats.fth floats.fth
+\    [THEN]
 
 \ useful but optional stuff follows --------------------
 
-include? task-member.fth   member.fth
-include? :struct c_struct.fth
-include? smif{   smart_if.fth
-include? file?   filefind.fth
-include? see     see.fth
-include? words.like wordslik.fth
-include? trace   trace.fth
-include? ESC[    termio.fth
-include? HISTORY history.fth
-include? SDAD    savedicd.fth
-
-map
+\ include? task-member.fth   member.fth
+\ include? :struct c_struct.fth
+\ include? smif{   smart_if.fth
+\ include? file?   filefind.fth
+\ include? see     see.fth
+\ include? words.like wordslik.fth
+\ include? trace   trace.fth
+\ include? ESC[    termio.fth
+\ include? HISTORY history.fth
+\ include? SDAD    savedicd.fth
+\
+\ map
