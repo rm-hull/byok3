@@ -204,10 +204,13 @@ object Context {
     // TODO: check to make sure text.len < TIB size
     _ <- guard(text.length < 0x100, Error(-9, "input string too long"))
     tib <- deref("TIB")
-    _ <- modify[Try, Context](_.copy(input = Tokenizer(text)))
+    input = Tokenizer(text)
+    _ <- modify[Try, Context](_.copy(input = input))
     _ <- memory(copy(tib, text))
-    ctx <- get[Try, Context]
-  } yield ctx.input == EndOfData
+    _ <- exec(">IN")
+    tin <- dataStack(pop)
+    _ <- memory(poke(tin, input.offset))
+  } yield input == EndOfData
 
   def nextToken(delim: String = Tokenizer.delimiters): AppState[Tokenizer] = for {
     _ <- modify[Try, Context](_.nextToken(delim))
