@@ -34,6 +34,8 @@ import byok3.types._
 import cats.data.StateT._
 import cats.implicits._
 
+import scala.util.Try
+
 
 sealed trait ExecutionToken {
   val name: Word
@@ -54,15 +56,14 @@ sealed trait ExecutionToken {
 sealed trait InnerInterpreter extends Executor {
 
   val addr: Address
+  val immediate: Boolean
 
   val effect = for {
     xt <- memory(peek(addr))
     _ <- W(addr)
     _ <- XT(xt)
-    // TODO: Why was this necessary - look back over commit history !?
-    //rsEmpty <- returnStack(inspect(_.isEmpty))
-    //_ <- if (rsEmpty) modify(run) else __NEST
-    _ <- modify(run)
+    rsEmpty <- inspect[Try, Context, Boolean](_.rs.isEmpty)
+    _ <- if (rsEmpty || immediate) modify(run) else __NEST
   } yield ()
 
   override def step = for {
@@ -74,7 +75,7 @@ sealed trait InnerInterpreter extends Executor {
     next <- memory(peek(ip))
     _ <- IP(inc(ip))
     _ <- XT(next)
-    rsEmpty <- returnStack(inspect(_.isEmpty))
+    rsEmpty <- inspect[Try, Context, Boolean](_.rs.isEmpty)
   } yield rsEmpty
 }
 
