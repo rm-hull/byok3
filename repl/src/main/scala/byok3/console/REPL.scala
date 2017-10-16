@@ -52,12 +52,9 @@ object REPL {
   def main(args: Array[String]): Unit = {
     println(Banner())
 
-    val systemLibs = Seq("forth/system.fth")
-
-    val ctx = systemLibs.map(load)
-      .reduce(_ andThen _)
-      .apply(Context(0x500000))
+    val ctx = Context(0x500000)
       .copy(rawConsoleInput = Some(TerminalRawInput(terminal)))
+      .eval("include forth/system.fth")
 
     loop(read)(ctx)
     println("exiting...")
@@ -88,9 +85,5 @@ object REPL {
       case Failure(ex: EndOfFileException) => ctx
       case Failure(ex) => throw ex
     }
-  }
-
-  private def load(filename: String)(ctx: Context): Context = {
-    ctx.eval(s"include $filename")
   }
 }
