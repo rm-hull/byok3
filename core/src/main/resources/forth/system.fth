@@ -18,9 +18,6 @@
 \ *********************************************************************
 : BL 32 ;
 
-: SPACE  ( -- )  bl emit ;
-: CR  ( -- , cause output to appear at the beginning of the next line )  10 emit ;
-
 : $MOVE  ( $src $dst ) over c@ 1+ cmove ;
 
 : COUNT  dup 1+ swap c@ ;

@@ -131,6 +131,16 @@ object IO {
     _ <- dataStack(push(ctx.rawConsoleInput.isDefined))
   } yield ()
 
+  @Documentation("outputs a single space character", stackEffect = "( -- )")
+  val SPACE = unsafeIO {
+    print(" ")
+  }
+
+  @Documentation("cause output to appear at the beginning of the next line", stackEffect = "( -- )")
+  val CR = unsafeIO {
+    println()
+  }
+
   @Documentation("outputs u space characters", stackEffect = "( u -- )")
   val SPACES = for {
     n <- dataStack(pop)
