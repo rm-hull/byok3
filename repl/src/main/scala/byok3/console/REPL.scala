@@ -22,16 +22,15 @@
 package byok3.console
 
 import byok3.AnsiColor._
-import byok3.{Banner, Interruptible}
 import byok3.data_structures.MachineState.BYE
-import byok3.data_structures.{Context, Error, Position}
+import byok3.data_structures.{Context, Error}
+import byok3.{Banner, Interruptible}
 import cats.effect.IO
 import org.jline.reader.LineReader.Option._
 import org.jline.reader.{EndOfFileException, LineReaderBuilder, UserInterruptException}
 import org.jline.terminal.TerminalBuilder
 
 import scala.annotation.tailrec
-import scala.io.Source
 import scala.util.{Failure, Success, Try}
 
 object REPL {
