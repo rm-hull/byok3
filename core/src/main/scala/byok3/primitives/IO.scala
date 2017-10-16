@@ -58,14 +58,15 @@ object IO {
     }
   }
 
-
   private def loadSource(filename: String) = for {
     _ <- guard(isValidFilename(filename), Error(-38))
+    _ <- `?TERMINAL`
+    term <- dataStack(pop)
     lines <- unsafeIO {
       Try(Source.fromFile(filename)).orElse(
         Try(Source.fromResource(filename)))
         .map(_.getLines.toStream.zipWithIndex.map { case(line, idx) =>
-          print(s"\r${ProgressIndicator(idx)}\r")
+          if (term) print(s"\r${ProgressIndicator(idx)}\r")
           (line, Position(filename, idx + 1))
         })
         .getOrElse(throw Error(-38))
