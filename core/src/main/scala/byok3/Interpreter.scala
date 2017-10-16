@@ -49,7 +49,7 @@ object Interpreter extends Executor {
     base <- deref("BASE")
     isDouble = token.endsWith(".")
     tok = if (isDouble) token.substring(0, token.length - 1) else token
-    n = tok.toNumber(base).getOrElse(throw Error(-13, token))
+    n = tok.toNumber(base).orElse(tok.fromChar).getOrElse(throw Error(-13, token))
     _ <- pushNumber(n)
     _ <- conditional(isDouble, pushNumber(sgn(n)))
   } yield ()

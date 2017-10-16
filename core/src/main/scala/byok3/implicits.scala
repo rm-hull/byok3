@@ -41,6 +41,7 @@ package object implicits {
 
   implicit class StringOps(s: String) {
 
+    private val quotedChar = "\'(.)\'".r
     private val radixPrefix = Map('#' -> 10, '$' -> 16, '%' -> 2)
 
     private def parsePrefix(value: String) = {
@@ -51,6 +52,11 @@ package object implicits {
 
     def toNumber(radix: Int) =
       Try(Integer.parseInt(s, radix)).orElse(parsePrefix(s))
+
+    def fromChar = s match {
+      case quotedChar(ch) => Success(ch.codePointAt(0))
+      case _ => Failure(new NumberFormatException(s"For input string: $s"))
+    }
   }
 
 }
