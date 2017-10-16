@@ -1,6 +1,6 @@
 import sbt.Keys.scalacOptions
 
-val BaseVersion = "0.2.0"
+val BaseVersion = "0.3.0"
 scalaVersion := "2.12.3"
 
 lazy val commonSettings = Seq(
