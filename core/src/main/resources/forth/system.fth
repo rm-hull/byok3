@@ -503,12 +503,4 @@ ustack 0stackp
 \ Ignore
 : ANEW ( -- )  bl parse 2drop ; immediate
 
-\ : $ ( <number> -- N , convert next number as hex )
-\     base @ hex
-\     bl lword number? num_type_single = not
-\     abort" Not a single number!"
-\     swap base !
-\     state @
-\     IF [compile] literal
-\     THEN
-\ ; immediate
+include forth/loadp4th.fth
