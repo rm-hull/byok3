@@ -189,9 +189,6 @@ variable HLD    \ points to last character added
 : (U.)  ( u -- c-addr cnt )
 	0 (ud.)
 ;
-: U.    ( u -- , print unsigned number )
-	0 ud.
-;
 : U.R   ( u n -- , print right justified )
 	>r  (u.)  r> over - spaces  type
 ;
