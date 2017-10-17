@@ -98,20 +98,29 @@ object Memory {
     _ <- dataStack(push(x))
   } yield ()
 
-  @Documentation("", stackEffect = "( a1 a2 u --  )")
-  val MOVE = for {
-    u <- dataStack(pop)
-    a2 <- dataStack(pop)
-    a1 <- dataStack(pop)
-    _ <- memory(modify(_.move(a2, a1, u * CELL_SIZE)))
-  } yield ()
 
-  @Documentation("", stackEffect = "( a1 a2 u --  )")
+  @Documentation("If u is greater than zero, copy u consecutive characters from the data space starting at c-addr1 to that starting at c-addr2, proceeding character-by-character from lower addresses to higher addresses", stackEffect = "( c-addr1 c-addr2 u -- )")
   val CMOVE = for {
     u <- dataStack(pop)
     a2 <- dataStack(pop)
     a1 <- dataStack(pop)
-    _ <- memory(modify(_.char_move(a2, a1, u)))
+    _ <- memory(modify(_.move_fwd(a2, a1, u)))
+  } yield ()
+
+  @Documentation("If u is greater than zero, copy u consecutive characters from the data space starting at c-addr1 to that starting at c-addr2, proceeding character-by-character from higher addresses to lower addresses", stackEffect = "( c-addr1 c-addr2 u -- )")
+  val `CMOVE>` = for {
+    u <- dataStack(pop)
+    a2 <- dataStack(pop)
+    a1 <- dataStack(pop)
+    _ <- memory(modify(_.move_back(a2, a1, u)))
+  } yield ()
+
+  @Documentation("If u is greater than zero, copy the contents of u consecutive address units at addr1 to the u consecutive address units at addr2. After MOVE completes, the u consecutive address units at addr2 contain exactly what the u consecutive address units at addr1 contained before the move", stackEffect = "( addr1 addr2 u -- )")
+  val MOVE = for {
+    u <- dataStack(pop)
+    a2 <- dataStack(pop)
+    a1 <- dataStack(pop)
+    _ <- memory(modify(_.move(a2, a1, u)))
   } yield ()
 
   @Documentation("If u is greater than zero, store char in each of u consecutive characters of memory beginning at c-addr", stackEffect = "( c-addr u char -- )")
