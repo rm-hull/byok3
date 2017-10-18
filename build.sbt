@@ -3,6 +3,7 @@ import sbt.Keys.scalacOptions
 val BaseVersion = "0.3.0"
 scalaVersion := "2.12.3"
 
+
 lazy val commonSettings = Seq(
   version := BaseVersion,
   startYear := Some(2017),
@@ -68,10 +69,14 @@ lazy val web = (project in file("web"))
       "com.typesafe.akka" %% "akka-stream" % "2.5.6",
       "com.typesafe.akka" %% "akka-actor"  % "2.5.6",
       "com.typesafe.akka" %% "akka-slf4j"  % "2.5.6",
-      "ch.qos.logback" % "logback-classic" % "1.2.3"
+      "ch.qos.logback" % "logback-classic" % "1.2.3",
+      "com.lonelyplanet" %% "prometheus-akka-http" % "0.3.3"
     ),
     WebKeys.packagePrefix in Assets := "public/",
-    managedClasspath in Runtime += (packageBin in Assets).value
+    managedClasspath in Runtime += (packageBin in Assets).value,
+    resolvers ++= Seq(
+      Resolver.bintrayRepo("lonelyplanet", "maven")
+    )
   )
 
 
