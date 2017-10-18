@@ -32,6 +32,7 @@ import akka.pattern.ask
 import akka.util.Timeout
 import byok3.AnsiColor
 import byok3.web.actors.{Event, Supervisor, Text, UnknownSession}
+import nl.grons.metrics.scala.DefaultInstrumented
 
 import scala.concurrent.ExecutionContext
 
@@ -56,31 +57,37 @@ trait SupervisorAPI {
 }
 
 
-trait RestRoutes extends SupervisorAPI {
+trait RestRoutes extends SupervisorAPI with DefaultInstrumented {
 
-  def extractAccept: PartialFunction[HttpHeader, MediaType] = {
+  private[this] def extractAccept: PartialFunction[HttpHeader, MediaType] = {
     case Accept(`text/html`) => `text/html`
     case Accept(_) => `text/plain`
   }
 
+  healthCheck("alive") { true }
+
+  private[this] val eval = metrics.timer("byok3")
+
   val routes =
     path("byok3") {
       post {
-        entity(as[String]) { input =>
-          optionalCookie("session") { cookie =>
-            onSuccess(evaluate(cookie.map(_.value), input)) {
-              case Text(Some(session), output) =>
-                setCookie(HttpCookiePair("session", session).toCookie()) {
-                  headerValueByName("Accept") {
-                    case "text/html" => complete(HttpEntity(`text/html(UTF-8)`, AnsiColor.strip(output)))
-                    case _ => complete(HttpEntity(`text/plain(UTF-8)`, output))
+        eval.time {
+          entity(as[String]) { input =>
+            optionalCookie("session") { cookie =>
+              onSuccess(evaluate(cookie.map(_.value), input)) {
+                case Text(Some(session), output) =>
+                  setCookie(HttpCookiePair("session", session).toCookie()) {
+                    headerValueByName("Accept") {
+                      case "text/html" => complete(HttpEntity(`text/html(UTF-8)`, AnsiColor.strip(output)))
+                      case _ => complete(HttpEntity(`text/plain(UTF-8)`, output))
+                    }
                   }
-                }
 
-              case Text(None, _) | UnknownSession =>
-                deleteCookie("session") {
-                  complete(NotFound)
-                }
+                case Text(None, _) | UnknownSession =>
+                  deleteCookie("session") {
+                    complete(NotFound)
+                  }
+              }
             }
           }
         }
