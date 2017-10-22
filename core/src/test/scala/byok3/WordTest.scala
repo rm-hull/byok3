@@ -3,6 +3,7 @@ package byok3
 import java.io.File
 
 import byok3.data_structures.MachineState.OK
+import byok3.helpers.capturingOutput
 import org.scalatest.{FunSuite, Matchers}
 
 import scala.io.Source

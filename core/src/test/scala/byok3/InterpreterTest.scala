@@ -1,6 +1,7 @@
 package byok3
 
 import byok3.data_structures.Error
+import byok3.helpers.capturingOutput
 import cats.implicits._
 import org.scalatest.{FunSuite, Matchers}
 

@@ -21,21 +21,18 @@
 
 package byok3.web.actors
 
-import java.io.{PipedInputStream, PipedOutputStream}
-
 import akka.actor._
 import byok3.AnsiColor._
 import byok3.Banner
 import byok3.data_structures.Context
 import byok3.data_structures.MachineState.BYE
+import byok3.helpers._
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.io.Source
+import scala.concurrent.ExecutionContext
 
 
 object StackMachine {
-  def props(name: String) = Props(new StackMachine(name, root))
+  def props(name: String)(implicit ec: ExecutionContext) = Props(new StackMachine(name, root))
 
   val systemLibs = Seq("forth/system.fth")
 
@@ -49,7 +46,8 @@ object StackMachine {
 }
 
 
-class StackMachine(name: String, var ctx: Context) extends Actor with ActorLogging {
+class StackMachine(name: String, var ctx: Context)(implicit val ec: ExecutionContext)
+  extends Actor with ActorLogging {
 
   private var printBanner = true
 
@@ -75,23 +73,5 @@ class StackMachine(name: String, var ctx: Context) extends Actor with ActorLoggi
           context.stop(self)
       }
     }
-  }
-
-  private def streamOutput[A](program: => A): Stream[String] = {
-    val pis = new PipedInputStream
-    val pos = new PipedOutputStream(pis)
-
-    Future {
-      try {
-        Console.withOut(pos) {
-          program
-        }
-      } finally {
-        pos.close
-      }
-    }
-
-    val br = Source.fromInputStream(pis).bufferedReader()
-    Stream.continually(br.readLine()).takeWhile(_ != null)
   }
 }

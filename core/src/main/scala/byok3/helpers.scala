@@ -21,11 +21,15 @@
 
 package byok3
 
+import java.io.{ByteArrayOutputStream, PipedInputStream, PipedOutputStream}
+
 import cats.data.StateT
 import cats.data.StateT.pure
 import cats.{Applicative, FlatMap}
 
-import scala.language.higherKinds
+import scala.concurrent.{ExecutionContext, Future}
+import scala.io.Source
+import scala.language.{higherKinds, reflectiveCalls}
 
 package object helpers {
 
@@ -33,4 +37,37 @@ package object helpers {
     sas.foldRight(pure[F, S, List[A]](List.empty)) {
       (f, acc) => f.map2(acc)(_ :: _)
     }
+
+  def capturingOutput[A](block: => A): String = {
+    using(new ByteArrayOutputStream) { baos =>
+      Console.withOut(baos) {
+        block
+      }
+      baos.toString
+    }
+  }
+
+  def streamOutput[A](block: => A)(implicit ec: ExecutionContext): Stream[String] = {
+    val pis = new PipedInputStream
+    val pos = new PipedOutputStream(pis)
+
+    Future {
+      using(pos) { _ =>
+        Console.withOut(pos) {
+          block
+        }
+      }
+    }
+
+    val br = Source.fromInputStream(pis).bufferedReader()
+    Stream.continually(br.readLine()).takeWhile(_ != null)
+  }
+
+  def using[A, T <: {def close()}](resource: T)(block: T => A) = {
+    try {
+      block(resource)
+    } finally {
+      if (resource != null) resource.close()
+    }
+  }
 }

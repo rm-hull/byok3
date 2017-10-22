@@ -1,11 +1,12 @@
 package byok3
 
+import byok3.AnsiColor._
 import byok3.data_structures.Context
-import AnsiColor._
+import byok3.helpers.capturingOutput
 import cats.implicits._
-import org.scalatest.FunSuite
+import org.scalatest.{FunSuite, Matchers}
 
-class DisassemblerTest extends FunSuite {
+class DisassemblerTest extends FunSuite with Matchers {
 
   val ops = for {
     _ <- Interpreter(": SQR DUP * ;")
