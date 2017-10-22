@@ -23,9 +23,6 @@ lazy val commonSettings = Seq(
       url=url("http://www.destructuring-bind.org"))
   ),
 
-  scalaVersion := "2.12.3",
-  scalacOptions := Seq("-unchecked", "-deprecation", "-feature", "-language:implicitConversions"),
-
   // test dependencies
   libraryDependencies ++= Seq(
     "org.scalatest" %% "scalatest" % "3.0.4" % Test,
