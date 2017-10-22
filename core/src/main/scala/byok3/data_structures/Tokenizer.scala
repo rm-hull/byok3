@@ -58,7 +58,7 @@ case class Token(value: String, offset: Int, in: String) extends Tokenizer {
     }
   }
 
-  override lazy val exhausted = in.endsWith(value) && in.length - offset == value.length
+  @volatile override lazy val exhausted = in.endsWith(value) && in.length - offset == value.length
 }
 
 

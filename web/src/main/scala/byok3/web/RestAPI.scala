@@ -50,7 +50,7 @@ trait SupervisorAPI {
   implicit def executionContext: ExecutionContext
   implicit def requestTimeout: Timeout
 
-  lazy val supervisor = createSupervisor()
+  @volatile lazy val supervisor = createSupervisor()
 
   def evaluate(session: Option[String], line: String) =
     supervisor.ask(KeyboardInput(session, line)).mapTo[Event]

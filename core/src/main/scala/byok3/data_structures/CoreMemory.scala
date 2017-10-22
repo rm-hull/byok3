@@ -139,7 +139,7 @@ case class CoreMemory(size: Int, private val addressSpace: AddressSpace) {
     else this
   }
 
-  lazy val hexDump = new HexDump(this)
+  @volatile lazy val hexDump = new HexDump(this)
 }
 
 case object CoreMemory {

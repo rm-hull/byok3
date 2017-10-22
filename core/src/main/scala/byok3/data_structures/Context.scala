@@ -76,7 +76,7 @@ case class Context(mem: CoreMemory,
     copy(error = None, position = None)
 
   def status: Either[Error, MachineState.Value] = {
-    lazy val state = machineState
+    @volatile lazy val state = machineState
       .runA(this)
       .toEither
       .left
@@ -92,7 +92,7 @@ case class Context(mem: CoreMemory,
     if (token.isEmpty) throw Error(-16) // attempt to use zero-length string as name
     else copy(compiling = Some(UserDefined(token, addr)))
 
-  lazy val disassembler = new Disassembler(this)
+  @volatile lazy val disassembler = new Disassembler(this)
 
   def eval(text: String) =
     Interpreter(text).runS(this) match {
