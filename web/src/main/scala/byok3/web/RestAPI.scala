@@ -22,16 +22,17 @@
 package byok3.web
 
 import akka.actor.{ActorRef, ActorSystem}
+import akka.http.scaladsl.marshalling.{Marshaller, ToResponseMarshaller}
 import akka.http.scaladsl.model.ContentTypes._
-import akka.http.scaladsl.model.MediaTypes._
+import akka.http.scaladsl.model.HttpEntity.ChunkStreamPart
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.server.Directives._
 import akka.pattern.ask
+import akka.stream.scaladsl.Source
 import akka.util.Timeout
-import byok3.AnsiColor
-import byok3.web.actors.{Event, Supervisor, Text, UnknownSession}
+import byok3.web.actors._
 
 import scala.concurrent.ExecutionContext
 
@@ -52,16 +53,17 @@ trait SupervisorAPI {
   lazy val supervisor = createSupervisor()
 
   def evaluate(session: Option[String], line: String) =
-    supervisor.ask(Text(session, line)).mapTo[Event]
+    supervisor.ask(KeyboardInput(session, line)).mapTo[Event]
 }
 
 
 trait RestRoutes extends SupervisorAPI {
 
-  def extractAccept: PartialFunction[HttpHeader, MediaType] = {
-    case Accept(`text/html`) => `text/html`
-    case Accept(_) => `text/plain`
-  }
+  implicit val toResponseMarshaller: ToResponseMarshaller[Source[String, Any]] =
+    Marshaller.opaque { lines =>
+      val data = lines.map(line => ChunkStreamPart("\r" + line + "\n"))
+      HttpResponse(entity = HttpEntity.Chunked(`text/plain(UTF-8)`, data))
+    }
 
   val routes =
     path("byok3") {
@@ -69,15 +71,14 @@ trait RestRoutes extends SupervisorAPI {
         entity(as[String]) { input =>
           optionalCookie("session") { cookie =>
             onSuccess(evaluate(cookie.map(_.value), input)) {
-              case Text(Some(session), output) =>
+              case ProgramOutput(Some(session), output) =>
                 setCookie(HttpCookiePair("session", session).toCookie()) {
-                  headerValueByName("Accept") {
-                    case "text/html" => complete(HttpEntity(`text/html(UTF-8)`, AnsiColor.strip(output)))
-                    case _ => complete(HttpEntity(`text/plain(UTF-8)`, output))
+                  complete {
+                    Source(output)
                   }
                 }
 
-              case Text(None, _) | UnknownSession =>
+              case ProgramOutput(None, _) | UnknownSession =>
                 deleteCookie("session") {
                   complete(NotFound)
                 }

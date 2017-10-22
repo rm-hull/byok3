@@ -21,7 +21,7 @@
 
 package byok3.web.actors
 
-import java.io.ByteArrayOutputStream
+import java.io.{PipedInputStream, PipedOutputStream}
 
 import akka.actor._
 import byok3.AnsiColor._
@@ -29,7 +29,10 @@ import byok3.Banner
 import byok3.data_structures.Context
 import byok3.data_structures.MachineState.BYE
 
-case class EndOfFileException() extends Exception
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.io.Source
+
 
 object StackMachine {
   def props(name: String) = Props(new StackMachine(name, root))
@@ -58,9 +61,9 @@ class StackMachine(name: String, var ctx: Context) extends Actor with ActorLoggi
 
       log.info(s"$name: $input (sender = ${sender()})")
 
-      sender() ! capturingOutput {
+      sender() ! streamOutput {
         if (printBanner) {
-          Predef.println(Banner())
+          println(Banner())
           printBanner = false
         }
 
@@ -74,15 +77,21 @@ class StackMachine(name: String, var ctx: Context) extends Actor with ActorLoggi
     }
   }
 
-  private def capturingOutput(program: => Any): String = {
-    val baos = new ByteArrayOutputStream
-    try {
-      Console.withOut(baos) {
-        program
+  private def streamOutput[A](program: => A): Stream[String] = {
+    val pis = new PipedInputStream
+    val pos = new PipedOutputStream(pis)
+
+    Future {
+      try {
+        Console.withOut(pos) {
+          program
+        }
+      } finally {
+        pos.close
       }
-      baos.toString
-    } finally {
-      baos.close
     }
+
+    val br = Source.fromInputStream(pis).bufferedReader()
+    Stream.continually(br.readLine()).takeWhile(_ != null)
   }
 }

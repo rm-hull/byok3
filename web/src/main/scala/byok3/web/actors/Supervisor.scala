@@ -26,14 +26,15 @@ import java.util.UUID
 import akka.actor._
 import akka.pattern.{ask, pipe}
 import akka.util.Timeout
-import byok3.web.actors.Supervisor._
-import byok3.web.actors.StackMachine._
 
 import scala.concurrent.ExecutionContext
 
 
+sealed trait Command
+case class KeyboardInput(session: Option[String], text: String) extends Command
+
 sealed trait Event
-case class Text(session: Option[String], text: String) extends Event
+case class ProgramOutput(session: Option[String], text: Stream[String]) extends Event
 case object UnknownSession extends Event
 
 
@@ -48,7 +49,7 @@ class Supervisor(implicit timeout: Timeout, ec: ExecutionContext) extends Actor 
     context.actorOf(StackMachine.props(name), name)
 
   private def forward(machine: ActorRef, session: String, input: String)(implicit timeout: Timeout) =
-    machine.ask(input).mapTo[String].map(s => Text(Some(session), s))
+    machine.ask(input).mapTo[Stream[String]].map(s => ProgramOutput(Some(session), s))
 
   override def preStart() =
     log.info(s"Starting supervisor: $self")
@@ -56,7 +57,7 @@ class Supervisor(implicit timeout: Timeout, ec: ExecutionContext) extends Actor 
 
   def receive = {
     // Create a new stack machine
-    case Text(None, input) => {
+    case KeyboardInput(None, input) => {
       val session = UUID.randomUUID.toString
       val machine = createStackMachine(session)
       val response = forward(machine, session, input)
@@ -64,7 +65,7 @@ class Supervisor(implicit timeout: Timeout, ec: ExecutionContext) extends Actor 
     }
 
     // Forward onto correct stack machine
-    case Text(Some(session), input) => {
+    case KeyboardInput(Some(session), input) => {
       context.child(session).fold(sender() ! UnknownSession) { machine =>
         val response = forward(machine, session, input)
         pipe(response) to sender()

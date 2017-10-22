@@ -27,12 +27,17 @@ function isBusy() {
 
 function sendCommand(text, cb) {
   var xhr = new XMLHttpRequest();
+  var loaded = 0;
 
   xhr.open('POST', '/byok3', true);
   xhr.setRequestHeader('Accept', 'text/plain');
   xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-  xhr.onload = function() {
-    cb(null, xhr.responseText);
+  xhr.onprogress = function(event) {
+    var latestText = xhr.responseText.slice(loaded)
+    if (latestText != null) {
+      cb(null, latestText || '');
+    }
+    loaded = event.loaded;
   };
   xhr.onerror = function(e) {
     cb("Unknown error occured: server response not received.", null);
@@ -61,8 +66,12 @@ t.onTerminalReady = function() {
     busy(true);
     sendCommand(input, function(err, result) {
       busy(false);
+      var smudge = result.endsWith('|  ' + ESC("0m") + '\n');
+      if (smudge) {
+        result = result.slice(0, -1);
+      }
       t.io.print(ESC('0G') + (result || err).replaceAll('\n', '\r\n'));
-      offset = (result === null || !result.endsWith('|  ' + ESC("0m"))) ? 1 : 4;
+      offset = (result === null || !smudge) ? 1 : 4;
     });
   };
 
