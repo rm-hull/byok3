@@ -63,7 +63,7 @@ package object helpers {
     Stream.continually(br.readLine()).takeWhile(_ != null)
   }
 
-  def using[A, T <: {def close()}](resource: T)(block: T => A) = {
+  def using[A, T <: {def close(): Unit}](resource: T)(block: T => A) = {
     try {
       block(resource)
     } finally {

@@ -35,7 +35,7 @@ object Server extends RequestTimeout {
 
   val log = LoggerFactory.getLogger(getClass)
 
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
 
     val config = ConfigFactory.load()
     val host = config.getString("http.host")

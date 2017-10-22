@@ -25,9 +25,9 @@ class MemoryTest extends PrimitivesTestBase {
     val ops = sequence(
       dataStack(push(0x77)),
       dataStack(push(0x1000)),
-      `!`,
+      Memory.`!`,
       dataStack(push(0x1000)),
-      `@`)
+      Memory.`@`)
 
     val ctx = ops.runS(emptyContext).get
     ctx.ds shouldEqual List(0x77)
@@ -54,9 +54,9 @@ class MemoryTest extends PrimitivesTestBase {
       dataStack(push(0x2)),
       dataStack(push(0x77)),
       dataStack(push(0x1000)),
-      `!`,
+      Memory.`!`,
       dataStack(push(0x1000)),
-      `+!`)
+      Memory.`+!`)
 
     val ctx = ops.runS(emptyContext).get
     ctx.mem.peek(0x1000) shouldEqual 0x79
@@ -106,10 +106,10 @@ class MemoryTest extends PrimitivesTestBase {
     val ops = sequence(
       dataStack(push(19)),
       dataStack(push(28)),
-      `!`,
+      Memory.`!`,
       dataStack(push(28)),
       dataStack(push(IP)),
-      `!`,
+      Memory.`!`,
       `(LIT)`)
 
     val ctx = ops.runS(emptyContext).get
