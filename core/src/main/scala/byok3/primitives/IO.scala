@@ -289,8 +289,8 @@ object IO {
     _ <- unsafeIO {
       val indent = "  " * rs.length
       val instr = s"$indent$label"
-      print(f"\r$RESET$instr%-32s ")
-      print(f"${DARK_GREY}state:${state} dp:${dp}%08X ip:${ip}%08X w:${w}%08X xt:${xt}%08X  ")
+      print(f"$COLUMN_1$RESET$instr%-32s $DARK_GREY")
+      print(f"state:${state} dp:${dp}%08X ip:${ip}%08X w:${w}%08X xt:${xt}%08X  ")
       println(s"|  ${ds.reverse.mkString(" ")}$RESET")
     }
   } yield ()

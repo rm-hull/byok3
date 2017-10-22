@@ -27,6 +27,7 @@ trait ExtendedAnsiColors {
   val DARK_GREY = "\u001b[38;5;242m"
   val CLEAR_SCREEN = "\u001b[2J"
   val GOTO_HOME = "\u001b[0;0f"
+  val COLUMN_1 = "\u001b[1G"
 
   private val ansi = "\u001b\\[(\\d+;?)+m".r
 
