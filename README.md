@@ -31,7 +31,7 @@ To build the web service, execute:
 
 ## Demo
 
-A live web service is hosted on a [zeit now](https://zeit.co/now) node: https://byok3-gmotqralxi.now.sh/. 
+A live web service is hosted on a [zeit now](https://zeit.co/now) node: https://byok3-hggauhqcjk.now.sh. 
 Try the following commands:
 
 ```forth
