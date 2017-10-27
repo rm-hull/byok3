@@ -63,8 +63,12 @@ class Disassembler(ctx: Context) {
         case Some("(LIT)") => data
         case Some("BRANCH") | Some("0BRANCH") |
              Some("(LOOP)") | Some("(+LOOP)") |
-             Some("(LEAVE)") => f"$data ${YELLOW}(==> 0x${addr + data}%08X)${RESET}${MID_GREY}"
-        case _ if (data == nest) => s"${CYAN}${BOLD}: ${defns.get(addr).getOrElse("<unknown>")}${RESET}${MID_GREY}"
+             Some("(LEAVE)") => f"$data $YELLOW(==> 0x${addr + data}%08X)$RESET"
+        case _ if (data == nest) => {
+          val name = defns.get(addr).getOrElse("<unknown>")
+          val immediate = ctx.dictionary.get(name).fold(false) { _.immediate }
+          s"$CYAN$BOLD: $name${if (immediate) s" $MAGENTA#IMMEDIATE" else ""}$RESET"
+        }
         case _ => ctx.dictionary.get(data).fold(data.toString)(_.name)
       }
       Predef.println(line)
