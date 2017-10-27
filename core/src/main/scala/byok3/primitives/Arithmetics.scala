@@ -87,7 +87,11 @@ object Arithmetics {
 
 object DoublePrecisionNumbers {
 
-  val NBITS = 8 * CoreMemory.CELL_SIZE
+  private val NBITS = 8 * CoreMemory.CELL_SIZE
+  private val HNBITS = NBITS / 2
+
+  @inline private def lower(n: Int) = n & ((1 << HNBITS) - 1)
+  @inline private def upper(n: Int) = n >> HNBITS
 
   def sgn(n: Int) = if (n < 0) -1 else 0
 
@@ -102,7 +106,47 @@ object DoublePrecisionNumbers {
     } yield ()
   }
 
-  val `UM*` = `M*`
+  val `UM*` = dataStack {
+    for {
+      b <- pop[Int]
+      a <- pop[Int]
+      (hi, lo) = UMTIMES(unsigned(a), unsigned(b))
+      _ <- push(lo)
+      _ <- push(hi)
+    } yield ()
+  }
+
+  private def UMTIMES(a: Int, b: Int) = {
+    val (ahi, alo) = (upper(a), lower(a))
+    val (bhi, blo) = (upper(b), lower(b))
+    var hi = 0
+    var lo = 0
+    var temp = 0
+
+    // higher part
+    hi += ahi * bhi
+
+    // middle part (overlapping)
+    temp = ahi * blo
+    lo += lower(temp)
+    hi += upper(temp)
+
+    // middle part (overlapping)
+    temp = alo * bhi
+    lo += lower(temp)
+    hi += upper(temp)
+    temp = alo * blo
+    lo += upper(temp)
+
+    // process carry
+    hi += upper(lo)
+    lo = lower(lo)
+
+    // combine lower part of result
+    lo = (lo << HNBITS) + lower(temp);
+
+    (hi, lo)
+  }
 
   @Documentation("Double-length addition", stackEffect = "( al ah bl bh -- sl sh )")
   val `D+` = dataStack {

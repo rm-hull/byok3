@@ -15,7 +15,6 @@
 \ tests the Forth interpreter and compiler.
 \
 \ Note that all of the tests in this suite assume the current base is hexadecimal.
-
 \ ------------------------------------------------------------------------
 
 require forth/tester.fth
