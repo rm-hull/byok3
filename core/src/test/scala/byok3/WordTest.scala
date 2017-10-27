@@ -3,6 +3,7 @@ package byok3
 import java.io.File
 
 import byok3.data_structures.MachineState.OK
+import byok3.data_structures.Source.USER_INPUT_DEVICE
 import byok3.helpers.capturingOutput
 import org.scalatest.{FunSuite, Matchers}
 
@@ -33,7 +34,7 @@ class WordTest extends FunSuite with Matchers {
 
   private def runForth(file: String) = {
     val res = capturingOutput {
-      ctx = ctx.eval(s"hex include $file")
+      ctx = ctx.eval(s"hex include $file", USER_INPUT_DEVICE)
     }
 
     if (res.contains("INCORRECT RESULT:") || res.contains("WRONG NUMBER OF RESULTS:"))

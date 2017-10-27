@@ -23,6 +23,7 @@ package byok3.console
 
 import byok3.AnsiColor._
 import byok3.data_structures.MachineState.BYE
+import byok3.data_structures.Source._
 import byok3.data_structures.{Context, Error}
 import byok3.{Banner, Interruptible}
 import cats.effect.IO
@@ -53,7 +54,7 @@ object REPL {
 
     val ctx = Context(0x500000)
       .copy(rawConsoleInput = Some(TerminalRawInput(terminal)))
-      .eval("include forth/system.fth")
+      .eval("include forth/system.fth", USER_INPUT_DEVICE)
 
     loop(read)(ctx)
     println("exiting...")
@@ -75,7 +76,7 @@ object REPL {
   private def loop(reader: Context => IO[String])(ctx: Context): Context = {
     val program: IO[Context] = for {
       in <- reader(ctx)
-      next = ctx.eval(in)
+      next = ctx.eval(in, STRING)
     } yield next
 
     Try(program.unsafeRunSync) match {

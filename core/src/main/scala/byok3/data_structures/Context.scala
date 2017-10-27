@@ -26,11 +26,12 @@ import byok3.annonation.Documentation
 import byok3.data_structures.Context._
 import byok3.data_structures.CoreMemory._
 import byok3.data_structures.Dictionary.{add, instruction}
-import byok3.data_structures.MachineState.{BYE, OK, Smudge}
+import byok3.data_structures.MachineState._
+import byok3.data_structures.Source._
 import byok3.data_structures.Stack.pop
 import byok3.primitives.IO.trace
 import byok3.primitives.Memory.comma
-import byok3.types.{Address, AppState, Data, Dict, Stack, Word}
+import byok3.types._
 import byok3.{Disassembler, Interpreter}
 import cats.data.StateT
 import cats.data.StateT._
@@ -50,9 +51,10 @@ case class Context(mem: CoreMemory,
                    rs: Stack[Int] = List.empty, // return stack
                    compiling: Option[UserDefined] = None,
                    rawConsoleInput: Option[RawInput] = None,
-                   included: Set[String] = Set.empty) {
+                   included: Set[String] = Set.empty,
+                   source: Source.Value = STRING) {
 
-  def error(err: Error) =
+  def error(err: Error): Context =
   // reset the STATE to interpreter mode and then
   // drain the data and return stacks if there was an error
     machineState(OK).runS(this).get
@@ -94,15 +96,15 @@ case class Context(mem: CoreMemory,
 
   @volatile lazy val disassembler = new Disassembler(this)
 
-  def eval(text: String) =
-    Interpreter(text).runS(this) match {
+  def eval(text: String, source: Source.Value): Context =
+    Interpreter(text, source).runS(this) match {
       case Failure(ex) => error(Error(ex))
       case Success(ctx) => ctx
     }
 
   @tailrec
   private def load(lines: Stream[(String, Position)]): Context = lines match {
-    case (line, position) #:: rest if error.isEmpty => eval(line).setPosition(position).load(rest)
+    case (line, position) #:: rest if error.isEmpty => eval(line, USER_INPUT_DEVICE).setPosition(position).load(rest)
     case Empty => reset
     case _ => this // not exhausted, possibly errored
   }
@@ -211,6 +213,9 @@ object Context {
     tin <- dataStack(pop)
     _ <- memory(poke(tin, input.offset))
   } yield input == EndOfData
+
+  def setSource(source: Source.Value): AppState[Unit] =
+    modify(_.copy(source = source))
 
   def nextToken(delim: String = Tokenizer.delimiters): AppState[Tokenizer] = for {
     _ <- modify[Try, Context](_.nextToken(delim))

@@ -185,6 +185,12 @@ object Memory {
     _ <- dataStack(push(len))
   } yield ()
 
+  @Documentation("Identifies the input source, -1 = String, 0 = User input device", stackEffect = "( -- 0 | -1 )")
+  val `SOURCE-ID` = for {
+    source <- inspect[Try, Context, Source.Value](_.source)
+    _ <- dataStack(push(source.value))
+  } yield ()
+
   @Documentation("addr is the data-space pointer", stackEffect = "( -- addr )")
   val HERE = for {
     dp <- DP()

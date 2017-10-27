@@ -26,6 +26,7 @@ import byok3.AnsiColor._
 import byok3.Banner
 import byok3.data_structures.Context
 import byok3.data_structures.MachineState.BYE
+import byok3.data_structures.Source._
 import byok3.helpers._
 
 import scala.concurrent.ExecutionContext
@@ -42,7 +43,7 @@ object StackMachine {
     .copy(rawConsoleInput = None)
 
   private def load(filename: String)(ctx: Context) =
-    ctx.eval(s"include $filename")
+    ctx.eval(s"include $filename", USER_INPUT_DEVICE)
 }
 
 
@@ -66,7 +67,7 @@ class StackMachine(name: String, var ctx: Context)(implicit val ec: ExecutionCon
         }
 
         print(MID_GREY)
-        ctx = ctx.eval(input)
+        ctx = ctx.eval(input, STRING)
         print(ctx.prompt)
 
         if (ctx.status == Right(BYE))

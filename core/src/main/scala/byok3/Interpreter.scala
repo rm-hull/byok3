@@ -23,6 +23,7 @@ package byok3
 
 import byok3.data_structures.Context._
 import byok3.data_structures.MachineState._
+import byok3.data_structures.Source.STRING
 import byok3.data_structures.Stack._
 import byok3.data_structures._
 import byok3.implicits._
@@ -77,8 +78,9 @@ object Interpreter extends Executor {
     token <- nextToken()
   } yield token == EndOfData
 
-  def apply(text: String): AppState[Unit] = for {
+  def apply(text: String, source: Source.Value = STRING): AppState[Unit] = for {
     _ <- input(text)
+    _ <- setSource(source)
     _ <- modify[Try, Context](_.reset)
     _ <- modify(run)
   } yield ()

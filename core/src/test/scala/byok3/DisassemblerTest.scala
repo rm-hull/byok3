@@ -20,7 +20,7 @@ class DisassemblerTest extends FunSuite with Matchers {
   test("should print disassembly") {
     val expected =
       s"""${MID_GREY}00000124:  37 00 00 00  |7...|  ${CYAN}${BOLD}: <unknown>${RESET}
-         |${MID_GREY}00000128:  7E 00 00 00  |~...|  DUP
+         |${MID_GREY}00000128:  7F 00 00 00  |....|  DUP
          |${MID_GREY}0000012C:  02 00 00 00  |....|  *
          |${MID_GREY}00000130:  38 00 00 00  |8...|  EXIT
          |${MID_GREY}00000134:  37 00 00 00  |7...|  ${CYAN}${BOLD}: SQR${RESET}
