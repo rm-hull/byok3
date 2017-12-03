@@ -12,4 +12,4 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.2.2")
 addSbtPlugin("com.typesafe.sbt" % "sbt-twirl" % "1.3.12")
 addSbtPlugin("com.vmunier" % "sbt-web-scalajs" % "1.0.6")
 
-addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.5.3")
+//addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.5.6")
