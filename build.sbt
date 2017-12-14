@@ -31,6 +31,7 @@ lazy val commonSettings = Seq(
 )
 
 lazy val core = (project in file("core"))
+  .enablePlugins(AutomateHeaderPlugin)
   .settings(
     commonSettings,
     name := "byok3-core",
@@ -42,7 +43,7 @@ lazy val core = (project in file("core"))
 
 lazy val repl = (project in file("repl"))
   .dependsOn(core)
-  .enablePlugins(JavaAppPackaging)
+  .enablePlugins(JavaAppPackaging, AutomateHeaderPlugin)
   .settings(
     commonSettings,
     name := "byok3-repl",
@@ -55,7 +56,7 @@ lazy val repl = (project in file("repl"))
 
 lazy val web = (project in file("web"))
   .dependsOn(core)
-  .enablePlugins(SbtWeb, SbtTwirl, JavaAppPackaging)
+  .enablePlugins(SbtWeb, SbtTwirl, JavaAppPackaging, AutomateHeaderPlugin)
   .settings(
     commonSettings,
     name := "byok3-web",
