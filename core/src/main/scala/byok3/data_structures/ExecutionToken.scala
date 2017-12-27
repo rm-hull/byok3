@@ -32,7 +32,7 @@ import byok3.primitives.FlowControl.__NEST
 import byok3.primitives.IO.trace
 import byok3.types._
 import cats.data.StateT._
-import cats.implicits._
+import cats.instances.try_._
 
 import scala.util.Try
 

@@ -28,7 +28,7 @@ import byok3.data_structures.Stack._
 import byok3.implicits._
 import byok3.types.Stack
 import cats.data.StateT._
-import cats.implicits._
+import cats.instances.try_._
 
 import scala.util.Try
 

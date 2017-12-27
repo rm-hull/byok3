@@ -39,7 +39,7 @@ abstract class PrimitivesTestBase extends FunSuite with Matchers {
   protected val IP = exec("IP").runS(emptyContext).get.ds.head
 
   def assertDataStack(op: AppState[Unit], expected: List[Int],
-                      presets: StateT[Try, Context, List[Unit]] = sequence(dataStack(push(4)), dataStack(push(2)), dataStack(push(8)))) = {
+                      presets: StateT[Try, Context, Unit] = sequence(dataStack(push(4)), dataStack(push(2)), dataStack(push(8)))) = {
 
     val effects = for {
       _ <- presets

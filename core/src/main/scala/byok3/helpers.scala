@@ -24,7 +24,7 @@ package byok3
 import java.io.{ByteArrayOutputStream, PipedInputStream, PipedOutputStream}
 
 import cats.data.StateT
-import cats.data.StateT.pure
+import cats.data.StateT._
 import cats.{Applicative, FlatMap}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -33,10 +33,26 @@ import scala.language.{higherKinds, reflectiveCalls}
 
 package object helpers {
 
-  def sequence[F[_], S, A](sas: StateT[F, S, A]*)(implicit F: Applicative[F], F2: FlatMap[F]): StateT[F, S, List[A]] =
-    sas.foldRight(pure[F, S, List[A]](List.empty)) {
-      (f, acc) => f.map2(acc)(_ :: _)
+  def sequence[F[_], S, A](sas: StateT[F, S, A]*)(implicit F: FlatMap[F], F2: Applicative[F]): StateT[F, S, Unit] =
+    sas.foldLeft(pure[F, S, Unit]()) { (a, b) =>
+      applyF[F, S, Unit](
+        F.map2(a.runF, b.runF) { (ssa, ssb) =>
+          ssa.andThen { fsa =>
+            F.flatMap(fsa) { case (s, _) =>
+              F.map(ssb(s)) { case (s, _) =>
+                (s, ())
+              }
+            }
+          }
+        }
+      )
     }
+
+  //  def sequence[F[_], S, A](sas: StateT[F, S, List[A]]*)(implicit F: Applicative[F], F2: Functor[F]): StateT[F, S, Unit] =
+  //    sas.foldRight(pure[F, S, Unit]()) {
+  //      (f, acc) => f.bimap(s => s, lst => lst)
+  //    }
+
 
   def capturingOutput[A](block: => A): String = {
     using(new ByteArrayOutputStream) { baos =>
@@ -63,7 +79,7 @@ package object helpers {
     Stream.continually(br.readLine()).takeWhile(_ != null)
   }
 
-  def using[A, T <: {def close(): Unit}](resource: T)(block: T => A) = {
+  def using[A, T <: {def close() : Unit}](resource: T)(block: T => A) = {
     try {
       block(resource)
     } finally {

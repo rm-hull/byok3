@@ -32,7 +32,7 @@ import byok3.primitives.Compiler._
 import byok3.primitives.IO._
 import byok3.types.{AppState, Word}
 import cats.data.StateT._
-import cats.implicits._
+import cats.instances.try_._
 
 import scala.util.Try
 

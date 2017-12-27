@@ -29,7 +29,6 @@ import byok3.data_structures.Stack.{pop, push, peek => speek}
 import byok3.data_structures.{Error, IP, MachineState, W}
 import byok3.helpers._
 import byok3.primitives.StackManipulation.RDROP
-import byok3.types.AppState
 import cats.data.StateT._
 import cats.implicits._
 

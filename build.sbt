@@ -2,7 +2,7 @@ import sbt.Keys.scalacOptions
 
 val BaseVersion = "0.3.0"
 scalaVersion := "2.12.4"
-scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-language:implicitConversions")
+scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-language:implicitConversions", "-Ypartial-unification")
 
 lazy val commonSettings = Seq(
   version := BaseVersion,
@@ -36,8 +36,8 @@ lazy val core = (project in file("core"))
     commonSettings,
     name := "byok3-core",
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats" % "0.9.0",
-      "org.typelevel" %% "cats-effect" % "0.3"
+      "org.typelevel" %% "cats-core" % "1.0.0",
+      "org.typelevel" %% "cats-effect" % "0.5"
     )
   )
 
