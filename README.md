@@ -3,10 +3,10 @@
 [![Coverage Status](https://coveralls.io/repos/github/rm-hull/byok3/badge.svg?branch=master)](https://coveralls.io/github/rm-hull/byok3?branch=master)
 [![Dependency Status](https://www.versioneye.com/user/projects/5973b5240fb24f0056362d48/badge.svg)](https://www.versioneye.com/user/projects/5973b5240fb24f0056362d48)
 [![Docker Pulls](https://img.shields.io/docker/pulls/richardhull/byok3.svg?maxAge=2592000)](https://hub.docker.com/r/richardhull/byok3/)
-[![Maintenance](https://img.shields.io/maintenance/yes/2017.svg?maxAge=2592000)]()
+[![Maintenance](https://img.shields.io/maintenance/yes/2018.svg?maxAge=2592000)]()
 
-BYOK (_BYE-OK_) is a [Scala](https://www.scala-lang.org/) program that implements a 
-[Forth](http://lars.nocrew.org/forth2012/index.html) virtual machine. It can be run 
+BYOK (_BYE-OK_) is a [Scala](https://www.scala-lang.org/) program that implements a
+[Forth](http://lars.nocrew.org/forth2012/index.html) virtual machine. It can be run
 either as a command-line REPL, or through a browser. It will almost certainly never
 be useful for any purpose besides that which it has already fulfilled: forcing me to
 think quite carefully about how forth works.
@@ -18,8 +18,8 @@ Download [SBT](http://www.scala-sbt.org/), then clone the repository and build t
     $ git clone https://github.com/rm-hull/byok3.git
     $ cd byok3
     $ sbt repl/assembly
-    
-This produces the REPL as a self-contained jar file `target/scala-2.12/byok3-repl.jar` 
+
+This produces the REPL as a self-contained jar file `target/scala-2.12/byok3-repl.jar`
 which can be executed with:
 
     $ java -jar repl/target/scala-2.12/byok3-repl.jar
@@ -31,7 +31,7 @@ To build the web service, execute:
 
 ## Demo
 
-A live web service is hosted on a [zeit now](https://zeit.co/now) node: https://byok3-hggauhqcjk.now.sh. 
+A live web service is hosted on a [zeit now](https://zeit.co/now) node: https://byok3-hggauhqcjk.now.sh.
 Try the following commands:
 
 ```forth
@@ -98,44 +98,44 @@ Enter 'mandel' to draw the Mandelbrot Set.
   ok
 mandel
 
-                                                                                *                   
-                                                                            *                       
-                                                                          ****                      
-                                                                       *********                    
-                                                                       *********                    
-                                                        *  *     *  *   *******                *    
-                                                          **** ***********************     *        
-                                                          ************************************      
-                                                    **** ************************************       
-                                                       ***************************************    * 
-                                                    *********************************************** 
-                                 *** ***** ***      ********************************************    
-                                 ***************   ***********************************************  
-                               ******************************************************************   
-                         **********************************************************************     
-         **  * * *  ***********************************************************************         
-                          *********************************************************************     
-                               ******************************************************************   
-                                ****************   **********************************************   
-                                 *** *********      ********************************************    
-                                                    *********************************************** 
-                                                       ***************************************      
-                                                     *** ************************************       
-                                                          ************************************      
-                                                          **** ***********************     * * *    
-                                                        *  *     *  *   *******   *                 
-                                                                       *********                    
-                                                                       *********                    
-                                                                          ****                      
-                                                                            *                       
-                                                                               *                    
+                                                                                *
+                                                                            *
+                                                                          ****
+                                                                       *********
+                                                                       *********
+                                                        *  *     *  *   *******                *
+                                                          **** ***********************     *
+                                                          ************************************
+                                                    **** ************************************
+                                                       ***************************************    *
+                                                    ***********************************************
+                                 *** ***** ***      ********************************************
+                                 ***************   ***********************************************
+                               ******************************************************************
+                         **********************************************************************
+         **  * * *  ***********************************************************************
+                          *********************************************************************
+                               ******************************************************************
+                                ****************   **********************************************
+                                 *** *********      ********************************************
+                                                    ***********************************************
+                                                       ***************************************
+                                                     *** ************************************
+                                                          ************************************
+                                                          **** ***********************     * * *
+                                                        *  *     *  *   *******   *
+                                                                       *********
+                                                                       *********
+                                                                          ****
+                                                                            *
+                                                                               *
 ```
 
 Alternatively, watch a screencast:
 
 [![asciicast](https://asciinema.org/a/kXEtkGGKCLPNpoiiai6g7WB55.png)](https://asciinema.org/a/kXEtkGGKCLPNpoiiai6g7WB55)
 
-## Implementation Notes 
+## Implementation Notes
 
 The forth virtual machine is based on a stateful [Context](https://github.com/rm-hull/byok3/blob/master/src/main/scala/byok3/data_structures/Context.scala) which is composed of the following parts
 
@@ -143,17 +143,17 @@ The forth virtual machine is based on a stateful [Context](https://github.com/rm
 * A data stack
 * A return stack
 * A dictionaty of words
-* A number of flags (compiling state, error) 
+* A number of flags (compiling state, error)
 
-Ordinarily, a forth machine would most likely represent all these in terms of 
+Ordinarily, a forth machine would most likely represent all these in terms of
 the core memory, but this implementation does not. That may change in the future.
 
 The context is wrapped inside [cats](https://github.com/typelevel/cats)' State
-monad,  specifically the type signature being: `StateT[Try, Context, A]`, and 
+monad,  specifically the type signature being: `StateT[Try, Context, A]`, and
 aliased as `AppState[A]`.
 
-The `Try` part allows us to force the state to become invalidate either by using 
-`inspectF`, `modifyF`, etc. or by letting the implicit `Applicatve[Try]` 
+The `Try` part allows us to force the state to become invalidate either by using
+`inspectF`, `modifyF`, etc. or by letting the implicit `Applicatve[Try]`
 automatically take care of thrown exceptions.
 
 This means that all the internal words can be expressed succinctly with for-comprehensions,
@@ -193,7 +193,7 @@ to recursively step through the words under consideration.
 ## License
 
 ### The MIT License (MIT)
-   
+
 Copyright (c) 2017 Richard Hull
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
