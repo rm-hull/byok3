@@ -37,7 +37,7 @@ lazy val core = (project in file("core"))
     name := "byok3-core",
     libraryDependencies ++= Seq(
       "org.typelevel" %% "cats-core" % "1.0.0",
-      "org.typelevel" %% "cats-effect" % "0.5"
+      "org.typelevel" %% "cats-effect" % "0.6"
     )
   )
 
@@ -50,7 +50,7 @@ lazy val repl = (project in file("repl"))
     assemblyJarName in assembly := "byok3-repl.jar",
     mainClass in (Compile, run) := Some("byok3.console.REPL"),
     libraryDependencies ++= Seq(
-      "org.jline" % "jline" % "3.5.1"
+      "org.jline" % "jline" % "3.5.2"
     )
   )
 
@@ -63,10 +63,10 @@ lazy val web = (project in file("web"))
     assemblyJarName in assembly := "byok3-web.jar",
     mainClass in (Compile, run) := Some("byok3.web.Server"),
     libraryDependencies ++= Seq(
-      "com.typesafe.akka" %% "akka-http" % "10.0.10",
-      "com.typesafe.akka" %% "akka-stream" % "2.5.6",
-      "com.typesafe.akka" %% "akka-actor"  % "2.5.6",
-      "com.typesafe.akka" %% "akka-slf4j"  % "2.5.6",
+      "com.typesafe.akka" %% "akka-http" % "10.0.11",
+      "com.typesafe.akka" %% "akka-stream" % "2.5.8",
+      "com.typesafe.akka" %% "akka-actor"  % "2.5.8",
+      "com.typesafe.akka" %% "akka-slf4j"  % "2.5.8",
       "ch.qos.logback" % "logback-classic" % "1.2.3"
     ),
     WebKeys.packagePrefix in Assets := "public/",
