@@ -174,7 +174,7 @@ to recursively step through the words under consideration.
 
 ## TODO
 
-* Move `DOES>` and `(DOES>)` to internal words (current implementation does not work).
+* ~~Move `DOES>` and `(DOES>)` to internal words (current implementation does not work).~~
 * Implement `LOAD` and `LIST` block commands.
 * Investigate if word input can be colorized with [JLine3](https://github.com/jline/jline3).
 * Block editor
@@ -189,6 +189,7 @@ to recursively step through the words under consideration.
 * http://lars.nocrew.org/forth2012/index.html
 * https://rwmj.wordpress.com/2010/08/07/jonesforth-git-repository/
 * http://galileo.phys.virginia.edu/classes/551.jvn.fall01/primer.htm
+* https://github.com/nornagon/jonesforth/blob/master/jonesforth.S
 
 ## License
 
