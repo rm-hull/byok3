@@ -63,7 +63,7 @@ lazy val web = (project in file("web"))
     assemblyJarName in assembly := "byok3-web.jar",
     mainClass in (Compile, run) := Some("byok3.web.Server"),
     libraryDependencies ++= Seq(
-      "com.typesafe.akka" %% "akka-http" % "10.0.11",
+      "com.typesafe.akka" %% "akka-http" % "10.1.0",
       "com.typesafe.akka" %% "akka-stream" % "2.5.11",
       "com.typesafe.akka" %% "akka-actor"  % "2.5.11",
       "com.typesafe.akka" %% "akka-slf4j"  % "2.5.11",
