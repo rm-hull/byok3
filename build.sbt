@@ -36,8 +36,8 @@ lazy val core = (project in file("core"))
     commonSettings,
     name := "byok3-core",
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats-core" % "1.0.1",
-      "org.typelevel" %% "cats-effect" % "0.9"
+      "org.typelevel" %% "cats-core" % "1.1.0",
+      "org.typelevel" %% "cats-effect" % "0.10"
     )
   )
 
@@ -50,7 +50,7 @@ lazy val repl = (project in file("repl"))
     assemblyJarName in assembly := "byok3-repl.jar",
     mainClass in (Compile, run) := Some("byok3.console.REPL"),
     libraryDependencies ++= Seq(
-      "org.jline" % "jline" % "3.6.1"
+      "org.jline" % "jline" % "3.6.2"
     )
   )
 
@@ -63,7 +63,7 @@ lazy val web = (project in file("web"))
     assemblyJarName in assembly := "byok3-web.jar",
     mainClass in (Compile, run) := Some("byok3.web.Server"),
     libraryDependencies ++= Seq(
-      "com.typesafe.akka" %% "akka-http" % "10.1.0",
+      "com.typesafe.akka" %% "akka-http" % "10.1.1",
       "com.typesafe.akka" %% "akka-stream" % "2.5.11",
       "com.typesafe.akka" %% "akka-actor"  % "2.5.11",
       "com.typesafe.akka" %% "akka-slf4j"  % "2.5.11",
