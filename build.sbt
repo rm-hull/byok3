@@ -50,7 +50,7 @@ lazy val repl = (project in file("repl"))
     assemblyJarName in assembly := "byok3-repl.jar",
     mainClass in (Compile, run) := Some("byok3.console.REPL"),
     libraryDependencies ++= Seq(
-      "org.jline" % "jline" % "3.7.1"
+      "org.jline" % "jline" % "3.8.0"
     )
   )
 
@@ -63,7 +63,7 @@ lazy val web = (project in file("web"))
     assemblyJarName in assembly := "byok3-web.jar",
     mainClass in (Compile, run) := Some("byok3.web.Server"),
     libraryDependencies ++= Seq(
-      "com.typesafe.akka" %% "akka-http" % "10.1.1",
+      "com.typesafe.akka" %% "akka-http" % "10.1.3",
       "com.typesafe.akka" %% "akka-stream" % "2.5.13",
       "com.typesafe.akka" %% "akka-actor"  % "2.5.13",
       "com.typesafe.akka" %% "akka-slf4j"  % "2.5.13",
