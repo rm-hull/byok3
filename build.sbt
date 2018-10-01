@@ -1,7 +1,7 @@
 import sbt.Keys.scalacOptions
 
 val BaseVersion = "0.3.0"
-scalaVersion := "2.12.6"
+scalaVersion := "2.12.7"
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-language:implicitConversions", "-Ypartial-unification")
 
 lazy val commonSettings = Seq(
