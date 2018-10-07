@@ -54,25 +54,31 @@ class SyntaxHighlighter(implicit F: FlatMap[Try]) extends Highlighter {
   private def colorize(token: String, line: String, index: Int): String = {
 
     if (isComment(token, line, index)) {
-      return token.blue
+      return token.fg("grey_35")
     }
 
     if (isDefinition(token, line, index)) {
-      return token.yellow.bold
+      return token.fg("light_yellow").bold
+    }
+
+    if (isString(token, line, index)) {
+      return token.fg("green_4")
     }
 
     if (isLiteral(token, line, index)) {
-      return token.magenta
+      return token.fg("deep_sky_blue_2")
     }
 
     isDictionaryWord(token, line, index).map {
-      case _: SystemDefined => token.fg(131).bold
-      case _: Primitive => token.fg(131).bold // indian_red_1a
-      case _: Constant => token.fg(119)       // light_green
-      case _: Variable => token.cyan
-      case _: UserDefined =>  token.white
+      case _: SystemDefined => token.fg("dark_orange").bold
+      case _: Primitive => token.fg("dark_orange").bold
+      case _: Constant => token.fg("purple_3")
+      case _: Variable => token.fg("purple_3")
+      case _: UserDefined => token.white
       case _: Anonymous => token.red
-    }.getOrElse(token)
+    }.orElse {
+      if (line.endsWith(token)) Some(token.white) else None
+    }.getOrElse(token.black.onRed)
   }
 
   private def isComment(token: String, line: String, index: Int): Boolean = {
@@ -99,20 +105,11 @@ class SyntaxHighlighter(implicit F: FlatMap[Try]) extends Highlighter {
 
   private def isLiteral(token: String, line: String, index: Int): Boolean = {
     val base = ctx.flatMap(deref("BASE").runA(_).toOption).getOrElse(10)
-
-    // check if is a number (in current base) or if in quotes
-    // 'in quotes' == odd-number of dbl-quotes before index
-
-    if (token.toNumber(base).orElse(token.fromChar).isSuccess) {
-      return true
-    }
-
-    if (List("\"", ".\"").contains(token)) {
-      return true
-    }
-
-    line.substring(0, index).count(_ == '"') % 2 == 1
+    token.toNumber(base).orElse(token.fromChar).isSuccess
   }
+
+  private def isString(token: String, line: String, index: Int): Boolean =
+    List("\"", ".\"").contains(token) || line.substring(0, index).count(_ == '"') % 2 == 1
 
   private def isDictionaryWord(token: String, line: String, index: Int): Option[ExecutionToken] =
     ctx.flatMap(_.dictionary.get(token.toUpperCase))
