@@ -123,7 +123,10 @@ case class Context(mem: CoreMemory,
   def bootCompleted = copy(isBooting = false)
 
   def setInput(tokenizer: Tokenizer) = {
-    println(tokenizer)
+//    tokenizer match {
+//      case EndOfData => println(input)
+//      case _ => ()
+//    }
     copy(input = tokenizer)
   }
 }
