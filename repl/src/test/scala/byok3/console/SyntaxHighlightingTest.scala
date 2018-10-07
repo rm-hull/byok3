@@ -41,4 +41,13 @@ class SyntaxHighlightingTest extends FunSuite with Matchers {
         ("*", 26, " "),
         (";", 28, ""))
   }
+
+  test("should not strip leading spaces") {
+    new SyntaxHighlighter().tokenize("  34 5 + .") shouldEqual
+      List(
+        ("  34", 0, " "),
+        ("5", 5, " "),
+        ("+", 7, " "),
+        (".", 9, ""))
+  }
 }

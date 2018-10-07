@@ -51,9 +51,9 @@ package object implicits {
     }
 
     def toNumber(radix: Int) =
-      Try(Integer.parseInt(s, radix)).orElse(parsePrefix(s))
+      Try(Integer.parseInt(s.trim, radix)).orElse(parsePrefix(s.trim))
 
-    def fromChar = s match {
+    def fromChar = s.trim match {
       case quotedChar(ch) => Success(ch.codePointAt(0))
       case _ => Failure(new NumberFormatException(s"For input string: $s"))
     }
