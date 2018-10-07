@@ -118,16 +118,16 @@ case class UserDefined(name: Word,
                        addr: Address,
                        override val immediate: Boolean = false,
                        override val size: Option[Int] = None) extends ForthWord {
-  override def markAsImmediate = copy(immediate = true)
   override def size(n: Int) = copy(size = Some(n))
+  override def markAsImmediate = copy(immediate = true)
 }
 
 case class SystemDefined(name: Word,
                          addr: Address,
                          override val immediate: Boolean = false,
                          override val size: Option[Int] = None) extends ForthWord {
-  override def markAsImmediate = copy(immediate = true)
   override def size(n: Int) = copy(size = Some(n))
+  override def markAsImmediate = copy(immediate = true)
 }
 
 case class Anonymous(addr: Address) extends ExecutionToken with InnerInterpreter {

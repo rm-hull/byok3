@@ -58,7 +58,7 @@ object REPL {
     val ctx = Context(0x500000)
       .copy(rawConsoleInput = Some(TerminalRawInput(terminal)))
       .eval("include forth/system.fth", USER_INPUT_DEVICE)
-      .copy(isBooting = false)
+      .bootCompleted
 
     loop(read)(ctx)
     println("exiting...")

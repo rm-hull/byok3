@@ -27,5 +27,5 @@ package object byok3 {
 
   val emptyContext = Context(0x100000)
     .eval("include forth/system.fth", USER_INPUT_DEVICE)
-    .copy(isBooting = false)
+    .bootCompleted
 }

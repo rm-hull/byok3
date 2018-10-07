@@ -116,6 +116,8 @@ case class Context(mem: CoreMemory,
     copy(included = included + filename).load(lines)
 
   def stackDepthIndicator = "." * math.min(16, ds.length)
+
+  def bootCompleted = copy(isBooting = false)
 }
 
 object Context {
