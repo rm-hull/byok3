@@ -98,11 +98,36 @@ case class Variable(name: Word,
   override val effect = dataStack(push(addr))
 }
 
+sealed trait ForthWord extends ExecutionToken with InnerInterpreter {
+  val name: Word
+  val addr: Address
+
+  def size(n: Int): ForthWord = ???
+  override def markAsImmediate: ForthWord = ???
+}
+
+object ForthWord {
+  def apply(name: Word, addr: Address, systemLib: Boolean) =
+    if (systemLib)
+      SystemDefined(name, addr)
+    else
+      UserDefined(name, addr)
+}
+
 case class UserDefined(name: Word,
                        addr: Address,
                        override val immediate: Boolean = false,
-                       override val size: Option[Int] = None) extends ExecutionToken with InnerInterpreter {
+                       override val size: Option[Int] = None) extends ForthWord {
   override def markAsImmediate = copy(immediate = true)
+  override def size(n: Int) = copy(size = Some(n))
+}
+
+case class SystemDefined(name: Word,
+                         addr: Address,
+                         override val immediate: Boolean = false,
+                         override val size: Option[Int] = None) extends ForthWord {
+  override def markAsImmediate = copy(immediate = true)
+  override def size(n: Int) = copy(size = Some(n))
 }
 
 case class Anonymous(addr: Address) extends ExecutionToken with InnerInterpreter {

@@ -40,7 +40,7 @@ object StackMachine {
   val root = systemLibs.map(load)
     .reduce(_ andThen _)
     .apply(Context(0x50000))
-    .copy(rawConsoleInput = None)
+    .copy(rawConsoleInput = None, isBooting = false)
 
   private def load(filename: String)(ctx: Context) =
     ctx.eval(s"include $filename", USER_INPUT_DEVICE)
