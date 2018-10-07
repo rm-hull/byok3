@@ -54,6 +54,10 @@ class SyntaxHighlighter(implicit F: FlatMap[Try]) extends Highlighter {
   private def colorize(token: String, line: String, index: Int): String = {
 
     val trimmedToken = token.trim
+    if (isTODO(token, line, index)) {
+      return token.black.bg("light_yellow").bold
+    }
+
     if (isComment(trimmedToken, line, index)) {
       return token.fg("grey_35")
     }
@@ -108,6 +112,9 @@ class SyntaxHighlighter(implicit F: FlatMap[Try]) extends Highlighter {
     val base = ctx.flatMap(deref("BASE").runA(_).toOption).getOrElse(10)
     token.toNumber(base).orElse(token.fromChar).isSuccess
   }
+
+  private def isTODO(token: String, line: String, index: Int) =
+    token.startsWith("TODO") || token.startsWith("FIXME")
 
   private def isString(token: String, line: String, index: Int) =
     List("\"", ".\"").contains(token) || line.substring(0, index).count(_ == '"') % 2 == 1
