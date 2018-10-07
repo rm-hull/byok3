@@ -27,6 +27,7 @@ import byok3.data_structures.Source._
 import byok3.data_structures.{Context, Error}
 import byok3.{Banner, Interruptible}
 import cats.effect.IO
+import cats.implicits._
 import org.jline.reader.LineReader.Option._
 import org.jline.reader.{EndOfFileException, LineReaderBuilder, UserInterruptException}
 import org.jline.terminal.TerminalBuilder
@@ -38,11 +39,13 @@ object REPL {
 
   private val wordCompleter = new WordCompleter
   private val upperCaseParser = new UpperCaseParser
+  private val highlighter = new SyntaxHighlighter
   private val terminal = TerminalBuilder.terminal()
   private val lineReader = LineReaderBuilder.builder
     .terminal(terminal)
     .parser(upperCaseParser)
     .completer(wordCompleter)
+    .highlighter(highlighter)
     .build
 
   lineReader.setOpt(DISABLE_EVENT_EXPANSION)
@@ -55,6 +58,7 @@ object REPL {
     val ctx = Context(0x500000)
       .copy(rawConsoleInput = Some(TerminalRawInput(terminal)))
       .eval("include forth/system.fth", USER_INPUT_DEVICE)
+      .bootCompleted
 
     loop(read)(ctx)
     println("exiting...")
@@ -63,6 +67,7 @@ object REPL {
   private def read(ctx: Context) = {
     IO {
       wordCompleter.setContext(ctx)
+      highlighter.setContext(ctx)
       val input = lineReader.readLine(ctx.prompt)
       Interruptible.trigger(() => println())
       Console.withOut(terminal.output) {

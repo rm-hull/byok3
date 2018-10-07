@@ -23,7 +23,7 @@ package byok3
 
 import byok3.AnsiColor._
 import byok3.data_structures.CoreMemory._
-import byok3.data_structures.{Anonymous, Context, UserDefined}
+import byok3.data_structures.{Anonymous, Context, ForthWord}
 import byok3.types.Address
 
 
@@ -31,7 +31,7 @@ class Disassembler(ctx: Context) {
 
   val nest = ctx.dictionary.indexOf("__NEST").get
   val defns = ctx.dictionary.toMap.values.map {
-    case ud: UserDefined => Some((ud.addr, ud.name))
+    case word: ForthWord => Some((word.addr, word.name))
     case anon: Anonymous => Some((anon.addr, anon.name))
     case _ => None
   }.flatten.toMap

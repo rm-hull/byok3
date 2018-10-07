@@ -46,6 +46,7 @@ class WordCompleter extends Completer {
       case p: Primitive => new Candidate(p.name, p.name, "built-in", doc, null, key, true)
       case v: Variable => new Candidate(v.name, v.name, "variable", s"value: ${ctx.map(_.mem.peek(v.addr)).getOrElse("unknown")} ${blank(doc)}".trim, null, key, true)
       case c: Constant => new Candidate(c.name, c.name, "constant", s"constant: ${c.value} ${blank(doc)}".trim, null, key, true)
+      case s: SystemDefined => new Candidate(s.name, s.name, "system-defined", immediate(s, null), null, key, true)
       case u: UserDefined => new Candidate(u.name, u.name, "user-defined", immediate(u, null), null, key, true)
       case a: Anonymous => new Candidate(a.name, a.name, "anonymous", immediate(a, null), null, key, true)
     }

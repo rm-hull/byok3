@@ -19,13 +19,26 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import byok3.data_structures.Context
-import byok3.data_structures.Source.USER_INPUT_DEVICE
+package byok3.console
 
 
-package object byok3 {
+import org.scalatest.{FunSuite, Matchers}
+import cats.implicits._
 
-  val emptyContext = Context(0x100000)
-    .eval("include forth/system.fth", USER_INPUT_DEVICE)
-    .bootCompleted
+class SyntaxHighlightingTest extends FunSuite with Matchers {
+
+  test("should tokenize") {
+    new SyntaxHighlighter().tokenize(": SQUARE   ( n -- n ) DUP * ;") shouldEqual
+      List(
+        (":", 0, " "),
+        ("SQUARE", 2, "   "),
+        ("(", 11, " "),
+        ("n", 13, " "),
+        ("--", 15, " "),
+        ("n", 18, " "),
+        (")", 20, " "),
+        ("DUP", 22, " "),
+        ("*", 26, " "),
+        (";", 28, ""))
+  }
 }

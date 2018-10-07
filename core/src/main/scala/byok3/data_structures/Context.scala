@@ -49,10 +49,11 @@ case class Context(mem: CoreMemory,
                    input: Tokenizer = EndOfData,
                    ds: Stack[Int] = List.empty, // data stack
                    rs: Stack[Int] = List.empty, // return stack
-                   compiling: Option[UserDefined] = None,
+                   compiling: Option[ForthWord] = None,
                    rawConsoleInput: Option[RawInput] = None,
                    included: Set[String] = Set.empty,
-                   source: Source.Value = STRING) {
+                   source: Source.Value = STRING,
+                   isBooting: Boolean = true) {
 
   def error(err: Error): Context =
   // reset the STATE to interpreter mode and then
@@ -92,7 +93,7 @@ case class Context(mem: CoreMemory,
 
   def beginCompilation(token: Word, addr: Address) =
     if (token.isEmpty) throw Error(-16) // attempt to use zero-length string as name
-    else copy(compiling = Some(UserDefined(token, addr)))
+    else copy(compiling = Some(ForthWord(token, addr, isBooting)))
 
   @volatile lazy val disassembler = new Disassembler(this)
 
@@ -115,6 +116,8 @@ case class Context(mem: CoreMemory,
     copy(included = included + filename).load(lines)
 
   def stackDepthIndicator = "." * math.min(16, ds.length)
+
+  def bootCompleted = copy(isBooting = false)
 }
 
 object Context {

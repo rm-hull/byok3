@@ -30,7 +30,7 @@ import byok3.data_structures.MachineState.{OK, Smudge}
 import byok3.data_structures.Stack.{pop, push}
 import byok3.data_structures._
 import byok3.helpers._
-import byok3.primitives.Memory.{comma, PAD}
+import byok3.primitives.Memory.{PAD, comma}
 import byok3.types.AppState
 import cats.data.StateT._
 import cats.implicits._
@@ -79,12 +79,11 @@ object Compiler {
     _ <- machineState(Smudge)
   } yield ()
 
-  private def addToDictionary(word: Option[UserDefined]): AppState[Unit] = word match {
+  private def addToDictionary(word: Option[ForthWord]): AppState[Unit] = word match {
     case None => noOp
-    case Some(userDefinedWord) => for {
+    case Some(forthWord) => for {
       dp <- DP()
-      wordSize = dp - userDefinedWord.addr
-      _ <- dictionary(add(userDefinedWord.copy(size = Some(wordSize))))
+      _ <- dictionary(add(forthWord.size(dp - forthWord.addr)))
       _ <- modify[Try, Context](_.copy(compiling = None))
     } yield ()
   }
@@ -96,8 +95,8 @@ object Compiler {
     _ <- guard(status == Smudge, Error(-14)) // used only during compilation
     exit <- dictionary(addressOf("EXIT"))
     _ <- comma(exit)
-    userDefinedWord <- inspect[Try, Context, Option[UserDefined]](_.compiling)
-    _ <- addToDictionary(userDefinedWord)
+    forthWord <- inspect[Try, Context, Option[ForthWord]](_.compiling)
+    _ <- addToDictionary(forthWord)
     _ <- machineState(OK)
   } yield ()
 
@@ -157,7 +156,8 @@ object Compiler {
     _ <- literal(addr + (4 * CELL_SIZE))
     exit <- dictionary(addressOf("EXIT"))
     _ <- compile(exit)
-    _ <- dictionary(add(UserDefined(name, addr)))
+    ctx <- get[Try, Context]
+    _ <- dictionary(add(ForthWord(name, addr, ctx.isBooting)))
   } yield ()
 
   @Documentation("Restores the previous definition (if any) for a word. Use with caution", stackEffect = "( \"<spaces>name\" -- )")
