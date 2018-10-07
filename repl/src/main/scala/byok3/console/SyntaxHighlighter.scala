@@ -48,28 +48,29 @@ class SyntaxHighlighter(implicit F: FlatMap[Try]) extends Highlighter {
   }
 
   private[console] def tokenize(line: String): Iterable[(String, Int, String)] = {
-    "(\\S+)(\\s*)".r.findAllIn(line).matchData.toIterable.map { m => (m.group(1), m.start, m.group(2)) }
+    "(\\s*\\S+)(\\s*)".r.findAllIn(line).matchData.toIterable.map { m => (m.group(1), m.start, m.group(2)) }
   }
 
   private def colorize(token: String, line: String, index: Int): String = {
 
-    if (isComment(token, line, index)) {
+    val trimmedToken = token.trim
+    if (isComment(trimmedToken, line, index)) {
       return token.fg("grey_35")
     }
 
-    if (isDefinition(token, line, index)) {
+    if (isDefinition(trimmedToken, line, index)) {
       return token.fg("light_yellow").bold
     }
 
-    if (isString(token, line, index)) {
+    if (isString(trimmedToken, line, index)) {
       return token.fg("green_4")
     }
 
-    if (isLiteral(token, line, index)) {
+    if (isLiteral(trimmedToken, line, index)) {
       return token.fg("deep_sky_blue_2")
     }
 
-    isDictionaryWord(token, line, index).map {
+    isDictionaryWord(trimmedToken, line, index).map {
       case _: SystemDefined => token.fg("dark_orange").bold
       case _: Primitive => token.fg("dark_orange").bold
       case _: Constant => token.fg("purple_3")
@@ -77,7 +78,7 @@ class SyntaxHighlighter(implicit F: FlatMap[Try]) extends Highlighter {
       case _: UserDefined => token.white
       case _: Anonymous => token.red
     }.orElse {
-      if (line.endsWith(token)) Some(token.white) else None
+      if (isLastToken(token, line, index)) Some(token.white) else None
     }.getOrElse(token.black.onRed)
   }
 
@@ -100,17 +101,21 @@ class SyntaxHighlighter(implicit F: FlatMap[Try]) extends Highlighter {
     false
   }
 
-  private def isDefinition(token: String, line: String, index: Int): Boolean =
+  private def isDefinition(token: String, line: String, index: Int) =
     token == ":" || (index >= 2 && line.substring(index - 2, index) == ": ")
 
-  private def isLiteral(token: String, line: String, index: Int): Boolean = {
+  private def isLiteral(token: String, line: String, index: Int) = {
     val base = ctx.flatMap(deref("BASE").runA(_).toOption).getOrElse(10)
     token.toNumber(base).orElse(token.fromChar).isSuccess
   }
 
-  private def isString(token: String, line: String, index: Int): Boolean =
+  private def isString(token: String, line: String, index: Int) =
     List("\"", ".\"").contains(token) || line.substring(0, index).count(_ == '"') % 2 == 1
 
   private def isDictionaryWord(token: String, line: String, index: Int): Option[ExecutionToken] =
     ctx.flatMap(_.dictionary.get(token.toUpperCase))
+
+  private def isLastToken(token: String, line: String, index: Int) = {
+    line.endsWith(token) && index == line.length - token.length
+  }
 }
