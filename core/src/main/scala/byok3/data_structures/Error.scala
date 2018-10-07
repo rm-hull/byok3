@@ -23,7 +23,10 @@ package byok3.data_structures
 
 import java.io.FileNotFoundException
 
-case class Position(file: String, line: Int)
+case class Position(file: String, line: Int) {
+  override def toString = s"$file:$line"
+}
+
 case class Error(errno: Int, message: String, pos: Option[Position])
   extends RuntimeException(pos.fold(message.trim) { p =>
     s"${message.trim}, in file: ${p.file}:${p.line}" })

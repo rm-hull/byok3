@@ -76,7 +76,7 @@ case class Context(mem: CoreMemory,
     copy(input = input.next(delim))
 
   def reset =
-    copy(error = None, position = None)
+    copy(error = None)
 
   def status: Either[Error, MachineState.Value] = {
     @volatile lazy val state = machineState
@@ -93,7 +93,7 @@ case class Context(mem: CoreMemory,
 
   def beginCompilation(token: Word, addr: Address) =
     if (token.isEmpty) throw Error(-16) // attempt to use zero-length string as name
-    else copy(compiling = Some(ForthWord(token, addr, isBooting)))
+    else copy(compiling = Some(ForthWord(token, addr, position, isBooting)))
 
   @volatile lazy val disassembler = new Disassembler(this)
 
@@ -105,15 +105,17 @@ case class Context(mem: CoreMemory,
 
   @tailrec
   private def load(lines: Stream[(String, Position)]): Context = lines match {
-    case (line, position) #:: rest if error.isEmpty => eval(line, USER_INPUT_DEVICE).setPosition(position).load(rest)
+    case (line, position) #:: rest if error.isEmpty => setPosition(position).eval(line, USER_INPUT_DEVICE).load(rest)
     case Empty => reset
     case _ => this // not exhausted, possibly errored
   }
 
   private def setPosition(pos: Position) = copy(position = Some(pos))
 
+  private def resetPosition = copy(position = None)
+
   def include(filename: String, lines: Stream[(String, Position)]) =
-    copy(included = included + filename).load(lines)
+    copy(included = included + filename).load(lines).resetPosition
 
   def stackDepthIndicator = "." * math.min(16, ds.length)
 

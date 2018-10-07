@@ -83,7 +83,7 @@ object Compiler {
     case None => noOp
     case Some(forthWord) => for {
       dp <- DP()
-      _ <- dictionary(add(forthWord.size(dp - forthWord.addr)))
+      _ <- dictionary(add(forthWord.withSize(dp - forthWord.addr)))
       _ <- modify[Try, Context](_.copy(compiling = None))
     } yield ()
   }
@@ -119,7 +119,7 @@ object Compiler {
     xt <- dataStack(pop)
     instr <- dictionary(instruction(xt))
     pfa = instr match {
-      case ud: UserDefined => ud.addr
+      case word: ForthWord => word.addr
       case _ => throw Error(-31)
     }
     _ <- dataStack(push(pfa))
@@ -157,7 +157,7 @@ object Compiler {
     exit <- dictionary(addressOf("EXIT"))
     _ <- compile(exit)
     ctx <- get[Try, Context]
-    _ <- dictionary(add(ForthWord(name, addr, ctx.isBooting)))
+    _ <- dictionary(add(ForthWord(name, addr, ctx.position, ctx.isBooting)))
   } yield ()
 
   @Documentation("Restores the previous definition (if any) for a word. Use with caution", stackEffect = "( \"<spaces>name\" -- )")

@@ -274,6 +274,7 @@ object IO {
         if (token.immediate) print("[IMMEDIATE] ")
         println(doc.value)
       }
+      token.position.foreach(println)
     }
   } yield ()
 
