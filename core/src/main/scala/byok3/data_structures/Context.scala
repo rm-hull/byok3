@@ -73,7 +73,7 @@ case class Context(mem: CoreMemory,
     dictionary.get(token.toUpperCase)
 
   def nextToken(delim: String) =
-    copy(input = input.next(delim))
+    setInput(input.next(delim))
 
   def reset =
     copy(error = None)
@@ -105,7 +105,8 @@ case class Context(mem: CoreMemory,
 
   @tailrec
   private def load(lines: Stream[(String, Position)]): Context = lines match {
-    case (line, position) #:: rest if error.isEmpty => setPosition(position).eval(line, USER_INPUT_DEVICE).load(rest)
+    case (line, position) #:: rest if error.isEmpty =>
+      setPosition(position).eval(line, USER_INPUT_DEVICE).load(rest)
     case Empty => reset
     case _ => this // not exhausted, possibly errored
   }
@@ -120,6 +121,11 @@ case class Context(mem: CoreMemory,
   def stackDepthIndicator = "." * math.min(16, ds.length)
 
   def bootCompleted = copy(isBooting = false)
+
+  def setInput(tokenizer: Tokenizer) = {
+    println(tokenizer)
+    copy(input = tokenizer)
+  }
 }
 
 object Context {
@@ -212,7 +218,7 @@ object Context {
     _ <- guard(text.length < 0x100, Error(-9, "input string too long"))
     tib <- deref("TIB")
     input = Tokenizer(text)
-    _ <- modify[Try, Context](_.copy(input = input))
+    _ <- modify[Try, Context](_.setInput(input))
     _ <- memory(copy(tib, text))
     _ <- exec(">IN")
     tin <- dataStack(pop)

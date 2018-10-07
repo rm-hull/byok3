@@ -184,6 +184,6 @@ object Compiler {
     input <- inspect[Try, Context, Tokenizer](_.input)
     text <- memory(fetch(addr, u))
     _ <- Interpreter(text)
-    _ <- modify[Try, Context](_.copy(input = input))
+    _ <- modify[Try, Context](_.setInput(input))
   } yield ()
 }
