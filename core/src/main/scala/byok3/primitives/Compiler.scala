@@ -30,7 +30,7 @@ import byok3.data_structures.MachineState.{OK, Smudge}
 import byok3.data_structures.Stack.{pop, push}
 import byok3.data_structures._
 import byok3.helpers._
-import byok3.primitives.Memory.{comma, PAD}
+import byok3.primitives.Memory.{PAD, comma}
 import byok3.types.AppState
 import cats.data.StateT._
 import cats.implicits._

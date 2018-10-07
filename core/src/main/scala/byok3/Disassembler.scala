@@ -23,7 +23,7 @@ package byok3
 
 import byok3.AnsiColor._
 import byok3.data_structures.CoreMemory._
-import byok3.data_structures.{Anonymous, Context, ForthWord, UserDefined}
+import byok3.data_structures.{Anonymous, Context, ForthWord}
 import byok3.types.Address
 
 
