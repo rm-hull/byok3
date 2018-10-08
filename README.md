@@ -19,7 +19,7 @@ Download [SBT](http://www.scala-sbt.org/), then clone the repository and build t
     $ cd byok3
     $ sbt repl/assembly
 
-This produces the REPL as a self-contained jar file `target/scala-2.12/byok3-repl.jar`
+This produces the REPL as a self-contained jar file `repl/target/scala-2.12/byok3-repl.jar`
 which can be executed with:
 
     $ java -jar repl/target/scala-2.12/byok3-repl.jar
