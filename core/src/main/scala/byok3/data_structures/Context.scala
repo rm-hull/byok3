@@ -53,7 +53,9 @@ case class Context(mem: CoreMemory,
                    rawConsoleInput: Option[RawInput] = None,
                    included: Set[String] = Set.empty,
                    source: Source.Value = STRING,
-                   isBooting: Boolean = true) {
+                   isBooting: Boolean = true,
+                   captureTokens: Boolean = false,
+                   tokens: Seq[Tokenizer] = Seq.empty) {
 
   def error(err: Error): Context =
   // reset the STATE to interpreter mode and then
@@ -91,9 +93,14 @@ case class Context(mem: CoreMemory,
     }
   }
 
-  def beginCompilation(token: Word, addr: Address) =
-    if (token.isEmpty) throw Error(-16) // attempt to use zero-length string as name
-    else copy(compiling = Some(ForthWord(token, addr, position, isBooting)))
+  def startCapturingTokens =
+    copy(tokens = Seq(input))
+
+  def beginCompilation(word: Word, addr: Address) =
+    copy(compiling = Some(ForthWord(word, addr, position, isBooting)), tokens = tokens :+ input)
+
+  def endCompilation =
+    copy(compiling = None, tokens = Seq.empty)
 
   @volatile lazy val disassembler = new Disassembler(this)
 
@@ -123,11 +130,7 @@ case class Context(mem: CoreMemory,
   def bootCompleted = copy(isBooting = false)
 
   def setInput(tokenizer: Tokenizer) = {
-//    tokenizer match {
-//      case EndOfData => println(input)
-//      case _ => ()
-//    }
-    copy(input = tokenizer)
+    copy(input = tokenizer, tokens = if (compiling.isDefined) tokens :+ tokenizer else tokens)
   }
 }
 

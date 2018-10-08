@@ -45,6 +45,7 @@ sealed trait ExecutionToken {
   val size: Option[Int] = None
   val doc: Option[Documentation] = None
   val position: Option[Position] = None
+  val source: Option[String] = None
 
   def markAsImmediate: ExecutionToken = ???
 
@@ -102,11 +103,22 @@ case class Variable(name: Word,
 }
 
 sealed trait ForthWord extends ExecutionToken with InnerInterpreter {
-  val name: Word
   val addr: Address
 
   def withSize(n: Int): ForthWord = ???
-  override def markAsImmediate: ForthWord = ???
+  def withSourceTokens(tokens: Seq[Tokenizer]): ForthWord = ???
+
+  protected def reconstructSource(tokens: Seq[Tokenizer]) = {
+    val lines = tokens.foldLeft(Seq(Seq.empty[Token])) {
+      case (acc, token:Token) => acc.init :+ (acc.last :+ token)
+      case (acc, _) => acc :+ Seq.empty[Token]
+    }
+
+    Some(lines.flatMap(reconstructLine).mkString("\n"))
+  }
+
+  private def reconstructLine(tokens: Seq[Token]) =
+    tokens.headOption.map(_.in)
 }
 
 object ForthWord {
@@ -121,8 +133,11 @@ case class UserDefined(name: Word,
                        addr: Address,
                        override val position: Option[Position],
                        override val immediate: Boolean = false,
-                       override val size: Option[Int] = None) extends ForthWord {
+                       override val size: Option[Int] = None,
+                       override val source: Option[String] = None) extends ForthWord {
+
   override def withSize(n: Int) = copy(size = Some(n))
+  override def withSourceTokens(tokens: Seq[Tokenizer]): ForthWord = copy(source = reconstructSource(tokens))
   override def markAsImmediate = copy(immediate = true)
 }
 
@@ -130,8 +145,11 @@ case class SystemDefined(name: Word,
                          addr: Address,
                          override val position: Option[Position],
                          override val immediate: Boolean = false,
-                         override val size: Option[Int] = None) extends ForthWord {
+                         override val size: Option[Int] = None,
+                         override val source: Option[String] = None) extends ForthWord {
+
   override def withSize(n: Int) = copy(size = Some(n))
+  override def withSourceTokens(tokens: Seq[Tokenizer]): ForthWord = copy(source = reconstructSource(tokens))
   override def markAsImmediate = copy(immediate = true)
 }
 

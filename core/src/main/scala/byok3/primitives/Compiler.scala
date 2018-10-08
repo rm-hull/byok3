@@ -59,7 +59,9 @@ object Compiler {
   val `:` = for {
     status <- machineState
     _ <- guard(status != Smudge, Error(-29)) // compiler nesting
+    _ <- modify[Try, Context](_.startCapturingTokens)
     token <- nextToken()
+    _ <- guard(token.value.nonEmpty, Error(-16)) // attempt to use zero-length string as name
     nest <- dictionary(addressOf("__NEST"))
     addr <- comma(nest)
     _ <- modify[Try, Context](_.beginCompilation(token.value.toUpperCase, addr))
@@ -83,8 +85,10 @@ object Compiler {
     case None => noOp
     case Some(forthWord) => for {
       dp <- DP()
-      _ <- dictionary(add(forthWord.withSize(dp - forthWord.addr)))
-      _ <- modify[Try, Context](_.copy(compiling = None))
+      ctx <- get[Try, Context]
+      wordSize = dp - forthWord.addr
+      _ <- dictionary(add(forthWord.withSize(wordSize).withSourceTokens(ctx.tokens)))
+      _ <- modify[Try, Context](_.endCompilation)
     } yield ()
   }
 
