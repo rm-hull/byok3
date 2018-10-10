@@ -59,7 +59,9 @@ object Compiler {
   val `:` = for {
     status <- machineState
     _ <- guard(status != Smudge, Error(-29)) // compiler nesting
+    _ <- modify[Try, Context](_.startCapturingTokens)
     token <- nextToken()
+    _ <- guard(token.value.nonEmpty, Error(-16)) // attempt to use zero-length string as name
     nest <- dictionary(addressOf("__NEST"))
     addr <- comma(nest)
     _ <- modify[Try, Context](_.beginCompilation(token.value.toUpperCase, addr))
@@ -83,8 +85,10 @@ object Compiler {
     case None => noOp
     case Some(forthWord) => for {
       dp <- DP()
-      _ <- dictionary(add(forthWord.size(dp - forthWord.addr)))
-      _ <- modify[Try, Context](_.copy(compiling = None))
+      ctx <- get[Try, Context]
+      wordSize = dp - forthWord.addr
+      _ <- dictionary(add(forthWord.withSize(wordSize).withSourceTokens(ctx.tokens)))
+      _ <- modify[Try, Context](_.endCompilation)
     } yield ()
   }
 
@@ -119,7 +123,7 @@ object Compiler {
     xt <- dataStack(pop)
     instr <- dictionary(instruction(xt))
     pfa = instr match {
-      case ud: UserDefined => ud.addr
+      case word: ForthWord => word.addr
       case _ => throw Error(-31)
     }
     _ <- dataStack(push(pfa))
@@ -157,7 +161,7 @@ object Compiler {
     exit <- dictionary(addressOf("EXIT"))
     _ <- compile(exit)
     ctx <- get[Try, Context]
-    _ <- dictionary(add(ForthWord(name, addr, ctx.isBooting)))
+    _ <- dictionary(add(ForthWord(name, addr, ctx.position, ctx.isBooting)))
   } yield ()
 
   @Documentation("Restores the previous definition (if any) for a word. Use with caution", stackEffect = "( \"<spaces>name\" -- )")
@@ -184,6 +188,6 @@ object Compiler {
     input <- inspect[Try, Context, Tokenizer](_.input)
     text <- memory(fetch(addr, u))
     _ <- Interpreter(text)
-    _ <- modify[Try, Context](_.copy(input = input))
+    _ <- modify[Try, Context](_.setInput(input))
   } yield ()
 }

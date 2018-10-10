@@ -67,7 +67,8 @@ class Disassembler(ctx: Context) {
         case _ if (data == nest) => {
           val name = defns.get(addr).getOrElse("<unknown>")
           val immediate = ctx.dictionary.get(name).fold(false) { _.immediate }
-          s"$YELLOW$BOLD: $name${if (immediate) s" $MAGENTA#IMMEDIATE" else ""}$RESET"
+          val position = ctx.dictionary.get(name).flatMap(_.position).map(pos => s" $pos").getOrElse("")
+          s"$YELLOW$BOLD: $name${if (immediate) s" $MAGENTA#IMMEDIATE" else ""}$RESET$position"
         }
         case _ => ctx.dictionary.get(data).fold(data.toString)(_.name)
       }

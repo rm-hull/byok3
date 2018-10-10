@@ -53,7 +53,9 @@ case class Context(mem: CoreMemory,
                    rawConsoleInput: Option[RawInput] = None,
                    included: Set[String] = Set.empty,
                    source: Source.Value = STRING,
-                   isBooting: Boolean = true) {
+                   isBooting: Boolean = true,
+                   captureTokens: Boolean = false,
+                   tokens: Seq[Tokenizer] = Seq.empty) {
 
   def error(err: Error): Context =
   // reset the STATE to interpreter mode and then
@@ -73,10 +75,10 @@ case class Context(mem: CoreMemory,
     dictionary.get(token.toUpperCase)
 
   def nextToken(delim: String) =
-    copy(input = input.next(delim))
+    setInput(input.next(delim))
 
   def reset =
-    copy(error = None, position = None)
+    copy(error = None)
 
   def status: Either[Error, MachineState.Value] = {
     @volatile lazy val state = machineState
@@ -91,9 +93,14 @@ case class Context(mem: CoreMemory,
     }
   }
 
-  def beginCompilation(token: Word, addr: Address) =
-    if (token.isEmpty) throw Error(-16) // attempt to use zero-length string as name
-    else copy(compiling = Some(ForthWord(token, addr, isBooting)))
+  def startCapturingTokens =
+    copy(tokens = Seq(input))
+
+  def beginCompilation(word: Word, addr: Address) =
+    copy(compiling = Some(ForthWord(word, addr, position, isBooting)), tokens = tokens :+ input)
+
+  def endCompilation =
+    copy(compiling = None, tokens = Seq.empty)
 
   @volatile lazy val disassembler = new Disassembler(this)
 
@@ -105,19 +112,26 @@ case class Context(mem: CoreMemory,
 
   @tailrec
   private def load(lines: Stream[(String, Position)]): Context = lines match {
-    case (line, position) #:: rest if error.isEmpty => eval(line, USER_INPUT_DEVICE).setPosition(position).load(rest)
+    case (line, position) #:: rest if error.isEmpty =>
+      setPosition(position).eval(line, USER_INPUT_DEVICE).load(rest)
     case Empty => reset
     case _ => this // not exhausted, possibly errored
   }
 
   private def setPosition(pos: Position) = copy(position = Some(pos))
 
+  private def resetPosition = copy(position = None)
+
   def include(filename: String, lines: Stream[(String, Position)]) =
-    copy(included = included + filename).load(lines)
+    copy(included = included + filename).load(lines).resetPosition
 
   def stackDepthIndicator = "." * math.min(16, ds.length)
 
   def bootCompleted = copy(isBooting = false)
+
+  def setInput(tokenizer: Tokenizer) = {
+    copy(input = tokenizer, tokens = if (compiling.isDefined) tokens :+ tokenizer else tokens)
+  }
 }
 
 object Context {
@@ -210,7 +224,7 @@ object Context {
     _ <- guard(text.length < 0x100, Error(-9, "input string too long"))
     tib <- deref("TIB")
     input = Tokenizer(text)
-    _ <- modify[Try, Context](_.copy(input = input))
+    _ <- modify[Try, Context](_.setInput(input))
     _ <- memory(copy(tib, text))
     _ <- exec(">IN")
     tin <- dataStack(pop)

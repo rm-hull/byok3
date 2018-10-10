@@ -44,6 +44,8 @@ sealed trait ExecutionToken {
   val internal: Boolean = false
   val size: Option[Int] = None
   val doc: Option[Documentation] = None
+  val position: Option[Position] = None
+  val source: Option[String] = None
 
   def markAsImmediate: ExecutionToken = ???
 
@@ -88,45 +90,66 @@ case class Primitive(name: Word,
 
 case class Constant(name: Word,
                     value: Data,
-                    override val doc: Option[Documentation] = None) extends ExecutionToken {
+                    override val doc: Option[Documentation] = None,
+                    override val position: Option[Position] = None) extends ExecutionToken {
   override val effect = dataStack(push(value))
 }
 
 case class Variable(name: Word,
                     addr: Address,
-                    override val doc: Option[Documentation] = None) extends ExecutionToken {
+                    override val doc: Option[Documentation] = None,
+                    override val position: Option[Position] = None) extends ExecutionToken {
   override val effect = dataStack(push(addr))
 }
 
 sealed trait ForthWord extends ExecutionToken with InnerInterpreter {
-  val name: Word
   val addr: Address
 
-  def size(n: Int): ForthWord = ???
-  override def markAsImmediate: ForthWord = ???
+  def withSize(n: Int): ForthWord = ???
+  def withSourceTokens(tokens: Seq[Tokenizer]): ForthWord = ???
+
+  protected def reconstructSource(tokens: Seq[Tokenizer]) = {
+    val lines = tokens.foldLeft(Seq(Seq.empty[Token])) {
+      case (acc, token:Token) => acc.init :+ (acc.last :+ token)
+      case (acc, _) => acc :+ Seq.empty[Token]
+    }
+
+    Some(lines.flatMap(reconstructLine).mkString("\n"))
+  }
+
+  private def reconstructLine(tokens: Seq[Token]) =
+    tokens.headOption.map(_.in)
 }
 
 object ForthWord {
-  def apply(name: Word, addr: Address, systemLib: Boolean) =
+  def apply(name: Word, addr: Address, position: Option[Position], systemLib: Boolean) =
     if (systemLib)
-      SystemDefined(name, addr)
+      SystemDefined(name, addr, position)
     else
-      UserDefined(name, addr)
+      UserDefined(name, addr, position)
 }
 
 case class UserDefined(name: Word,
                        addr: Address,
+                       override val position: Option[Position],
                        override val immediate: Boolean = false,
-                       override val size: Option[Int] = None) extends ForthWord {
-  override def size(n: Int) = copy(size = Some(n))
+                       override val size: Option[Int] = None,
+                       override val source: Option[String] = None) extends ForthWord {
+
+  override def withSize(n: Int) = copy(size = Some(n))
+  override def withSourceTokens(tokens: Seq[Tokenizer]): ForthWord = copy(source = reconstructSource(tokens))
   override def markAsImmediate = copy(immediate = true)
 }
 
 case class SystemDefined(name: Word,
                          addr: Address,
+                         override val position: Option[Position],
                          override val immediate: Boolean = false,
-                         override val size: Option[Int] = None) extends ForthWord {
-  override def size(n: Int) = copy(size = Some(n))
+                         override val size: Option[Int] = None,
+                         override val source: Option[String] = None) extends ForthWord {
+
+  override def withSize(n: Int) = copy(size = Some(n))
+  override def withSourceTokens(tokens: Seq[Tokenizer]): ForthWord = copy(source = reconstructSource(tokens))
   override def markAsImmediate = copy(immediate = true)
 }
 

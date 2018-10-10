@@ -135,14 +135,16 @@ object Memory {
   val VARIABLE = for {
     addr <- comma(0)
     token <- nextToken()
-    _ <- dictionary(add(Variable(token.value.toUpperCase, addr)))
+    ctx <- get[Try, Context]
+    _ <- dictionary(add(Variable(token.value.toUpperCase, addr, position = ctx.position)))
   } yield ()
 
   @Documentation("Skip leading space delimiters. Parse name delimitedby a space. Create a definition for name with the execution semantics: `name Execution: ( -- x )`, which places x on the stack", stackEffect = "( x \"<spaces>name\" -- )")
   val CONSTANT = for {
     value <- dataStack(pop)
     token <- nextToken()
-    _ <- dictionary(add(Constant(token.value.toUpperCase, value)))
+    ctx <- get[Try, Context]
+    _ <- dictionary(add(Constant(token.value.toUpperCase, value, position = ctx.position)))
   } yield ()
 
   @Documentation("Parse ccc delimited by the delimiter char. c-addr is the address (within the input buffer) and u is the length of the parsed string. If the parse area was empty, the resulting string has a zero length", stackEffect = "( char \"ccc<char>\" -- c-addr u )")
