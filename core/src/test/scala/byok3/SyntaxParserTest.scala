@@ -22,6 +22,7 @@
 package byok3
 
 import byok3.SyntaxTokens._
+import byok3.data_structures.Constant
 import org.scalatest.{FunSuite, Matchers}
 
 import scala.util.Success
@@ -130,5 +131,75 @@ class SyntaxParserTest extends FunSuite with Matchers {
         Whitespace(" ")
       ))
   }
+
+  test("should parse a number literal") {
+    new SyntaxParser("  3145 ").InputLine.run() shouldEqual
+      Success(List(
+        Whitespace("  "),
+        NumberLiteral("3145"),
+        Whitespace(" ")
+      ))
+  }
+
+  test("should parse dictionary words") {
+    val words = Set("HELLO", "WORLD")
+    new SyntaxParser("  hello WORLD ", words).InputLine.run() shouldEqual
+      Success(List(
+        Whitespace("  "),
+        DictionaryWord("HELLO", Constant("HELLO", 45)),
+        Whitespace(" "),
+        DictionaryWord("WORLD", Constant("WORLD", 45)),
+        Whitespace(" ")
+      ))
+  }
+
+  test("should handle unknown token") {
+    val words = Set("HELLO", "WORLD")
+    new SyntaxParser(" HELLO GOOD\tBYE WORLD", words).InputLine.run() shouldEqual
+      Success(List(
+        Whitespace(" "),
+        DictionaryWord("HELLO", Constant("HELLO", 45)),
+        Whitespace(" "),
+        Unknown("GOOD"),
+        Whitespace("\t"),
+        Unknown("BYE"),
+        Whitespace(" "),
+        DictionaryWord("WORLD", Constant("WORLD", 45))
+      ))
+  }
+
+
+  test("should handle last token") {
+    val words = Set("HELLO")
+    new SyntaxParser(" HELLO GOOD\tBYE WORLD", words).InputLine.run() shouldEqual
+      Success(List(
+        Whitespace(" "),
+        DictionaryWord("HELLO", Constant("HELLO", 45)),
+        Whitespace(" "),
+        Unknown("GOOD"),
+        Whitespace("\t"),
+        Unknown("BYE"),
+        Whitespace(" "),
+        LastToken("WORLD")
+      ))
+  }
+
+  test("should handle simple definition token") {
+    val words = Set("DUP", "*", ";")
+    new SyntaxParser(": SQUARE ( n -- n ) DUP * ;", words).InputLine.run() shouldEqual
+      Success(List(
+        Definition(": SQUARE"),
+        Whitespace(" "),
+        Comment("( n -- n )"),
+        Whitespace(" "),
+        DictionaryWord("DUP", Constant("DUP", 45)),
+        Whitespace(" "),
+        DictionaryWord("*", Constant("*", 45)),
+        Whitespace(" "),
+        DictionaryWord(";", Constant(";", 45)),
+      ))
+  }
+
+  println(Darkula(": SQUARE ( n -- n ) DUP * ;", Set("DUP", "*", ";")))
 }
 
