@@ -23,6 +23,8 @@ package byok3
 
 import byok3.SyntaxTokens._
 import byok3.data_structures.Constant
+import byok3.data_structures.Source.USER_INPUT_DEVICE
+import org.parboiled2.ParseError
 import org.scalatest.{FunSuite, Matchers}
 
 import scala.util.Success
@@ -30,17 +32,17 @@ import scala.util.Success
 class SyntaxParserTest extends FunSuite with Matchers {
 
   test("should parse spaces as whitespace") {
-    new SyntaxParser("   ").InputLine.run() shouldEqual
+    new SyntaxParser("   ", emptyContext).InputLine.run() shouldEqual
       Success(List(Whitespace("   ")))
   }
 
   test("should parse newlines as whitespace") {
-    new SyntaxParser("  \n ").InputLine.run() shouldEqual
+    new SyntaxParser("  \n ", emptyContext).InputLine.run() shouldEqual
       Success(List(Whitespace("  \n ")))
   }
 
-  test("should parse a forth comment as a comment") {
-    new SyntaxParser("  ( hello world) ").InputLine.run() shouldEqual
+  test("should parse a forth comment") {
+    new SyntaxParser("  ( hello world) ", emptyContext).InputLine.run() shouldEqual
       Success(List(
         Whitespace("  "),
         Comment("( hello world)"),
@@ -48,8 +50,8 @@ class SyntaxParserTest extends FunSuite with Matchers {
       ))
   }
 
-  test("should parse a single open paren as a comment") {
-    new SyntaxParser("  (").InputLine.run() shouldEqual
+  test("should parse a single open paren") {
+    new SyntaxParser("  (", emptyContext).InputLine.run() shouldEqual
       Success(List(
         Whitespace("  "),
         Comment("(")
@@ -57,7 +59,7 @@ class SyntaxParserTest extends FunSuite with Matchers {
   }
 
   test("should parse an open forth comment to the end of input") {
-    new SyntaxParser("  ( hello world  ").InputLine.run() shouldEqual
+    new SyntaxParser("  ( hello world  ", emptyContext).InputLine.run() shouldEqual
       Success(List(
         Whitespace("  "),
         Comment("( hello world  ")
@@ -65,7 +67,7 @@ class SyntaxParserTest extends FunSuite with Matchers {
   }
 
   test("should embed string in comment") {
-    new SyntaxParser("  ( hello \" big \" world  )").InputLine.run() shouldEqual
+    new SyntaxParser("  ( hello \" big \" world  )", emptyContext).InputLine.run() shouldEqual
       Success(List(
         Whitespace("  "),
         Comment("( hello \" big \" world  )")
@@ -73,7 +75,7 @@ class SyntaxParserTest extends FunSuite with Matchers {
   }
 
   test("should parse a forth dot-comment as a comment") {
-    new SyntaxParser("  .( goodbye ) ").InputLine.run() shouldEqual
+    new SyntaxParser("  .( goodbye ) ", emptyContext).InputLine.run() shouldEqual
       Success(List(
         Whitespace("  "),
         Comment(".( goodbye )"),
@@ -82,7 +84,7 @@ class SyntaxParserTest extends FunSuite with Matchers {
   }
 
   test("should parse a forth backslash-comment as a comment") {
-    new SyntaxParser("  \\ so far so good").InputLine.run() shouldEqual
+    new SyntaxParser("  \\ so far so good", emptyContext).InputLine.run() shouldEqual
       Success(List(
         Whitespace("  "),
         Comment("\\ so far so good")
@@ -90,7 +92,7 @@ class SyntaxParserTest extends FunSuite with Matchers {
   }
 
   test("should parse a forth string as a string") {
-    new SyntaxParser("  \" hello world\" ").InputLine.run() shouldEqual
+    new SyntaxParser("  \" hello world\" ", emptyContext).InputLine.run() shouldEqual
       Success(List(
         Whitespace("  "),
         StringLiteral("\" hello world\""),
@@ -99,7 +101,7 @@ class SyntaxParserTest extends FunSuite with Matchers {
   }
 
   test("should embed parens in a string") {
-    new SyntaxParser("  \" hello ( cruel ) world\" ").InputLine.run() shouldEqual
+    new SyntaxParser("  \" hello ( cruel ) world\" ", emptyContext).InputLine.run() shouldEqual
       Success(List(
         Whitespace("  "),
         StringLiteral("\" hello ( cruel ) world\""),
@@ -108,7 +110,7 @@ class SyntaxParserTest extends FunSuite with Matchers {
   }
 
   test("should parse a single open double quote as a string") {
-    new SyntaxParser("  \"").InputLine.run() shouldEqual
+    new SyntaxParser("  \"", emptyContext).InputLine.run() shouldEqual
       Success(List(
         Whitespace("  "),
         StringLiteral("\"")
@@ -116,7 +118,7 @@ class SyntaxParserTest extends FunSuite with Matchers {
   }
 
   test("should parse an open string to the end of input") {
-    new SyntaxParser("  \" hello world  ").InputLine.run() shouldEqual
+    new SyntaxParser("  \" hello world  ", emptyContext).InputLine.run() shouldEqual
       Success(List(
         Whitespace("  "),
         StringLiteral("\" hello world  ")
@@ -124,7 +126,7 @@ class SyntaxParserTest extends FunSuite with Matchers {
   }
 
   test("should parse a forth dot-string as a comment") {
-    new SyntaxParser("  .\" goodbye \" ").InputLine.run() shouldEqual
+    new SyntaxParser("  .\" goodbye \" ", emptyContext).InputLine.run() shouldEqual
       Success(List(
         Whitespace("  "),
         StringLiteral(".\" goodbye \""),
@@ -133,7 +135,7 @@ class SyntaxParserTest extends FunSuite with Matchers {
   }
 
   test("should parse a number literal") {
-    new SyntaxParser("  3145 ").InputLine.run() shouldEqual
+    new SyntaxParser("  3145 ", emptyContext).InputLine.run() shouldEqual
       Success(List(
         Whitespace("  "),
         NumberLiteral("3145"),
@@ -142,64 +144,134 @@ class SyntaxParserTest extends FunSuite with Matchers {
   }
 
   test("should parse dictionary words") {
-    val words = Set("HELLO", "WORLD")
-    new SyntaxParser("  hello WORLD ", words).InputLine.run() shouldEqual
+    val ctx = emptyContext
+      .eval("10 CONSTANT HELLO", source = USER_INPUT_DEVICE)
+      .eval("20 CONSTANT WORLD", source = USER_INPUT_DEVICE)
+
+    new SyntaxParser("  hello  WORLD ", ctx).InputLine.run() shouldEqual
       Success(List(
         Whitespace("  "),
-        DictionaryWord("HELLO", Constant("HELLO", 45)),
-        Whitespace(" "),
-        DictionaryWord("WORLD", Constant("WORLD", 45)),
+        DictionaryWord(ctx.dictionary("HELLO")),
+        Whitespace("  "),
+        DictionaryWord(ctx.dictionary("WORLD")),
         Whitespace(" ")
       ))
   }
 
   test("should handle unknown token") {
-    val words = Set("HELLO", "WORLD")
-    new SyntaxParser(" HELLO GOOD\tBYE WORLD", words).InputLine.run() shouldEqual
+    val ctx = emptyContext
+      .eval("10 CONSTANT HELLO", source = USER_INPUT_DEVICE)
+      .eval("20 CONSTANT WORLD", source = USER_INPUT_DEVICE)
+
+    new SyntaxParser("WORLD  HELLO GOOD\tBYE WORLD", ctx).InputLine.run() shouldEqual
       Success(List(
-        Whitespace(" "),
-        DictionaryWord("HELLO", Constant("HELLO", 45)),
+        DictionaryWord(ctx.dictionary("WORLD")),
+        Whitespace("  "),
+        DictionaryWord(ctx.dictionary("HELLO")),
         Whitespace(" "),
         Unknown("GOOD"),
         Whitespace("\t"),
-        Unknown("BYE"),
+        DictionaryWord(ctx.dictionary("BYE")),
         Whitespace(" "),
-        DictionaryWord("WORLD", Constant("WORLD", 45))
+        DictionaryWord(ctx.dictionary("WORLD")),
       ))
   }
 
+  test("should handle dictionary word in isolation") {
+    val ctx = emptyContext
+      .eval("10 CONSTANT HELLO", source = USER_INPUT_DEVICE)
+      .eval("20 CONSTANT WORLD", source = USER_INPUT_DEVICE)
+
+    new SyntaxParser("WORLD", ctx).InputLine.run() shouldEqual
+      Success(List(
+        DictionaryWord(ctx.dictionary("WORLD"))
+      ))
+  }
+
+  test("should handle single last token") {
+    new SyntaxParser("  HELLO", emptyContext).InputLine.run() shouldEqual
+      Success(List(
+        Whitespace("  "),
+        LastToken("HELLO")
+      ))
+  }
 
   test("should handle last token") {
-    val words = Set("HELLO")
-    new SyntaxParser(" HELLO GOOD\tBYE WORLD", words).InputLine.run() shouldEqual
+    val ctx = emptyContext
+      .eval("10 CONSTANT HELLO", source = USER_INPUT_DEVICE)
+
+    new SyntaxParser("HELLO GOODBYE HELL", ctx).InputLine.run() shouldEqual
       Success(List(
+        DictionaryWord(ctx.dictionary("HELLO")),
         Whitespace(" "),
-        DictionaryWord("HELLO", Constant("HELLO", 45)),
+        Unknown("GOODBYE"),
         Whitespace(" "),
-        Unknown("GOOD"),
-        Whitespace("\t"),
-        Unknown("BYE"),
-        Whitespace(" "),
-        LastToken("WORLD")
+        LastToken("HELL")
       ))
   }
 
   test("should handle simple definition token") {
-    val words = Set("DUP", "*", ";")
-    new SyntaxParser(": SQUARE ( n -- n ) DUP * ;", words).InputLine.run() shouldEqual
+    val ctx = emptyContext
+    new SyntaxParser(": SQUARE ( n -- n ) DUP * ;", ctx).InputLine.run() shouldEqual
       Success(List(
         Definition(": SQUARE"),
         Whitespace(" "),
         Comment("( n -- n )"),
         Whitespace(" "),
-        DictionaryWord("DUP", Constant("DUP", 45)),
+        DictionaryWord(ctx.dictionary("DUP")),
         Whitespace(" "),
-        DictionaryWord("*", Constant("*", 45)),
+        DictionaryWord(ctx.dictionary("*")),
         Whitespace(" "),
-        DictionaryWord(";", Constant(";", 45)),
+        DictionaryWord(ctx.dictionary(";")),
       ))
   }
 
-  println(Darkula(": SQUARE ( n -- n ) DUP * ;", Set("DUP", "*", ";")))
+  test("should handle SQRT-CLOSER definition") {
+    val ctx = emptyContext
+    val defn = ": sqrt-closer  ( square guess -- square guess adjustment ) 2dup / over - 2 / ;"
+    new SyntaxParser(defn, ctx).InputLine.run() shouldEqual
+      Success(List(
+        Definition(": sqrt-closer"),
+        Whitespace("  "),
+        Comment("( square guess -- square guess adjustment )"),
+        Whitespace(" "),
+        DictionaryWord(ctx.dictionary("2DUP")),
+        Whitespace(" "),
+        DictionaryWord(ctx.dictionary("/")),
+        Whitespace(" "),
+        DictionaryWord(ctx.dictionary("OVER")),
+        Whitespace(" "),
+        DictionaryWord(ctx.dictionary("-")),
+        Whitespace(" "),
+        NumberLiteral("2"),
+        Whitespace(" "),
+        DictionaryWord(ctx.dictionary("/")),
+        Whitespace(" "),
+        DictionaryWord(ctx.dictionary(";"))
+      ))
+  }
+
+  test("should handle DOES> definition") {
+    val ctx = emptyContext
+    val defn =
+      """
+        |: DOES>   ( -- , define execution code for CREATE word )
+        |        0 [compile] literal \ dummy literal to hold xt
+        |        here cell-          \ address of zero in literal
+        |        compile (does>)     \ call (DOES>) from new creation word
+        |        >r                  \ move addrz to return stack so ; doesn't see stack garbage
+        |        [compile] ;         \ terminate part of code before does>
+        |        r>
+        |        :noname       ( addrz xt )
+        |        compile rdrop       \ drop a stack frame (call becomes goto)
+        |        swap !              \ save execution token in literal
+        |; immediate
+        |
+      """.stripMargin
+    val parser = new SyntaxParser(defn, ctx)
+    parser.InputLine.run().toEither.left.map {
+      case err:ParseError => err.format(parser)
+    } shouldEqual Success(List())
+  }
 }
 

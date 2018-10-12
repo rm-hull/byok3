@@ -22,34 +22,26 @@
 package byok3
 
 
-import byok3.SyntaxTokens.SyntaxToken
+import byok3.SyntaxTokens.{LastToken, SyntaxToken}
 import byok3.data_structures._
 import byok3.types.Word
 import org.parboiled2._
 import byok3.implicits._
+import shapeless.HNil
 
 import scala.util.Try
 
 object SyntaxTokens {
 
-  sealed trait SyntaxToken {
-    val value: String
-  }
+  sealed trait SyntaxToken
 
   case class Whitespace(value: String) extends SyntaxToken
-
   case class Comment(value: String) extends SyntaxToken
-
   case class StringLiteral(value: String) extends SyntaxToken
-
   case class NumberLiteral(value: String) extends SyntaxToken
-
-  case class DictionaryWord(value: String, exeTok: ExecutionToken) extends SyntaxToken
-
+  case class DictionaryWord(exeTok: ExecutionToken) extends SyntaxToken
   case class LastToken(value: String) extends SyntaxToken
-
   case class Unknown(value: String) extends SyntaxToken
-
   case class Definition(value: String) extends SyntaxToken
 
 }
@@ -57,8 +49,10 @@ object SyntaxTokens {
 trait ColorTheme {
   def colorize(token: SyntaxToken): String
 
-  def apply(text: String, words: Set[Word]): Try[String] =
-    new SyntaxParser(text, words).InputLine.run().map { _.map(colorize).mkString }
+  def apply(text: String, ctx: Context): Try[String] =
+    new SyntaxParser(text, ctx).InputLine.run().map {
+      _.map(colorize).mkString
+    }
 }
 
 object Darkula extends ColorTheme {
@@ -70,12 +64,12 @@ object Darkula extends ColorTheme {
     case Comment(value) => value.fg("grey_35")
     case StringLiteral(value) => value.fg("green_4")
     case NumberLiteral(value) => value.fg("deep_sky_blue_2")
-    case DictionaryWord(value, _: SystemDefined) => value.fg("dark_orange").bold
-    case DictionaryWord(value, _: Primitive) => value.fg("dark_orange").bold
-    case DictionaryWord(value, _: Constant) => value.fg("purple_3")
-    case DictionaryWord(value, _: Variable) => value.fg("purple_3")
-    case DictionaryWord(value, _: UserDefined) => value.fg("white")
-    case DictionaryWord(value, _: Anonymous) => value.fg("red")
+    case DictionaryWord(exeTok: SystemDefined) => exeTok.name.fg("dark_orange").bold
+    case DictionaryWord(exeTok: Primitive) => exeTok.name.fg("dark_orange").bold
+    case DictionaryWord(exeTok: Constant) => exeTok.name.fg("purple_3")
+    case DictionaryWord(exeTok: Variable) => exeTok.name.fg("purple_3")
+    case DictionaryWord(exeTok: UserDefined) => exeTok.name.fg("white")
+    case DictionaryWord(exeTok: Anonymous) => exeTok.name.fg("red")
     case LastToken(value) => value
     case Unknown(value) => value.black.onRed
     case Definition(value) => value.fg("light_yellow").bold
@@ -98,15 +92,28 @@ object Darkula extends ColorTheme {
 //    new DictionaryMap(words - key)
 //}
 
-class SyntaxParser(val input: ParserInput, words: Set[Word] = Set.empty) extends Parser {
+class SyntaxParser(val input: ParserInput, ctx: Context) extends Parser {
   private val COMMENT_BASE = CharPredicate.Printable -- ")"
   private val STRING_BASE = CharPredicate.Printable -- "\""
   private val NO_SPACE = CharPredicate.Printable -- " "
 
-  private val dictionary = words.map(word => (word.toLowerCase, SyntaxTokens.DictionaryWord(word, Constant(word, 45)))).toMap
+  private val dictionary = ctx.dictionary.toMap.iterator.map {
+    case (word, exeTok) => (word.toLowerCase, SyntaxTokens.DictionaryWord(exeTok))
+  }.toMap
 
-  def InputLine: Rule1[Seq[SyntaxToken]] = rule {
-    zeroOrMore(Whitespace | Comment | StringLiteral | NumberLiteral | Definition | DictionaryWord | LastToken | Unknown) ~ EOI
+  def InputLine = rule {
+    // ((Tokens ~ optional(LastToken)) ~> ((lst:Seq[SyntaxToken], x:Option[LastToken]) => lst ++ x.toList)) ~ EOI
+    Tokens ~ EOI
+  }
+
+  private def Tokens: Rule1[Seq[SyntaxToken]] = rule {
+    (optional(Token) ~ Whitespace ~ Tokens) ~> ((x1:Option[SyntaxToken], x2:SyntaxToken, x3:Seq[SyntaxToken]) => x1.toList ++ (x2 +: x3)) |
+      (Token ~ optional(Whitespace)) ~> ((x1:SyntaxToken, x2:Option[SyntaxToken]) => x1 +: x2.toList) |
+      (Whitespace ~ optional(Token)) ~> ((x1:SyntaxToken, x2:Option[SyntaxToken]) => x1 +: x2.toList)
+  }
+
+  private def Token = rule {
+     Comment | StringLiteral | Definition | DictionaryWord | NumberLiteral | LastToken | Unknown
   }
 
   private def NewLine = rule {
@@ -114,7 +121,7 @@ class SyntaxParser(val input: ParserInput, words: Set[Word] = Set.empty) extends
   }
 
   private def Whitespace = rule {
-    capture(oneOrMore(ch(' ') | ch('\t') | NewLine)) ~> SyntaxTokens.Whitespace
+    capture(oneOrMore(" " | "\t" | NewLine)) ~> SyntaxTokens.Whitespace
   }
 
   private def Comment = rule {
@@ -140,15 +147,15 @@ class SyntaxParser(val input: ParserInput, words: Set[Word] = Set.empty) extends
   }
 
   private def DictionaryWord = rule {
-    valueMap(dictionary, ignoreCase = true)
+     valueMap(dictionary, ignoreCase = true)
   }
 
   private def LastToken = rule {
-    capture(oneOrMore(NO_SPACE) ~ EOI) ~> SyntaxTokens.LastToken
+    capture(oneOrMore(NO_SPACE)) ~ EOI ~> SyntaxTokens.LastToken
   }
 
   private def Definition = rule {
-    capture(":" ~ oneOrMore(ch(' ') | ch('\t') | NewLine) ~ oneOrMore(NO_SPACE)) ~> SyntaxTokens.Definition
+    capture(":" ~ oneOrMore(" " | "\t'" | NewLine) ~ oneOrMore(NO_SPACE)) ~> SyntaxTokens.Definition
   }
 
   private def Unknown = rule {

@@ -24,7 +24,7 @@ package byok3.primitives
 import java.time.LocalDate
 
 import byok3.AnsiColor._
-import byok3.Disassembler
+import byok3.{Darkula, Disassembler, SyntaxTokens}
 import byok3.annonation.Documentation
 import byok3.data_structures.Context._
 import byok3.data_structures.CoreMemory._
@@ -266,20 +266,18 @@ object IO {
     token <- nextToken()
     name = token.value.toUpperCase
     _ <- guard(name.nonEmpty, Error(-16))
-    token <- dictionary(instruction(name))
+    ctx <- get[Try, Context]
+    exeTok <- dictionary(instruction(name))
     _ <- unsafeIO {
-      token.doc.foreach { doc =>
-        println(doc.stackEffect)
+      exeTok.doc.foreach { doc =>
+        println(Darkula.colorize(SyntaxTokens.Comment(doc.stackEffect)))
         println()
-        if (token.immediate) print("[IMMEDIATE] ")
+        if (exeTok.immediate) print("[IMMEDIATE] ")
         println(doc.value)
       }
 
-      token.position.foreach(println)
-      token.source.foreach(print)
-
-      if (token.immediate) println(" IMMEDIATE")
-      else println
+      exeTok.position.foreach(println)
+      exeTok.source.map(src => Darkula(src, ctx).getOrElse(src)).foreach(println)
     }
   } yield ()
 
