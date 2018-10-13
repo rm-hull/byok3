@@ -21,6 +21,7 @@
 
 package byok3.console
 
+import byok3.{SyntaxParser, Themes}
 import byok3.data_structures.Context.deref
 import byok3.data_structures._
 import byok3.implicits._
@@ -39,11 +40,7 @@ class SyntaxHighlighter(implicit F: FlatMap[Try]) extends Highlighter {
 
   override def highlight(lineReader: LineReader, buffer: String): AttributedString = {
     val sb = new AttributedStringBuilder
-
-    for ((token, index, trailingSpaces) <- tokenize(buffer)) {
-      sb.ansiAppend(colorize(token, buffer, index))
-      sb.append(trailingSpaces)
-    }
+    sb.ansiAppend(ctx.flatMap(c => Themes.Darkula(buffer, c).toOption).getOrElse(buffer))
     sb.toAttributedString
   }
 

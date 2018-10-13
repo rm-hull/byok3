@@ -46,36 +46,6 @@ object SyntaxTokens {
 
 }
 
-trait ColorTheme {
-  def colorize(token: SyntaxToken): String
-
-  def apply(text: String, ctx: Context): Try[String] =
-    new SyntaxParser(text, ctx).InputLine.run().map {
-      _.map(colorize).mkString
-    }
-}
-
-object Darkula extends ColorTheme {
-
-  import byok3.SyntaxTokens._
-
-  override def colorize(token: SyntaxToken): String = token match {
-    case Whitespace(value) => value
-    case Comment(value) => value.fg("grey_35")
-    case StringLiteral(value) => value.fg("green_4")
-    case NumberLiteral(value) => value.fg("deep_sky_blue_2")
-    case DictionaryWord(exeTok: SystemDefined) => exeTok.name.fg("dark_orange").bold
-    case DictionaryWord(exeTok: Primitive) => exeTok.name.fg("dark_orange").bold
-    case DictionaryWord(exeTok: Constant) => exeTok.name.fg("purple_3")
-    case DictionaryWord(exeTok: Variable) => exeTok.name.fg("purple_3")
-    case DictionaryWord(exeTok: UserDefined) => exeTok.name.fg("white")
-    case DictionaryWord(exeTok: Anonymous) => exeTok.name.fg("red")
-    case LastToken(value) => value
-    case Unknown(value) => value.black.onRed
-    case Definition(value) => value.fg("light_yellow").bold
-  }
-}
-
 //private class DictionaryMap(words: Set[Word]) extends Map[String, SyntaxTokens.DictionaryWord] {
 //
 //
@@ -108,12 +78,12 @@ class SyntaxParser(val input: ParserInput, ctx: Context) extends Parser {
 
   private def Tokens: Rule1[Seq[SyntaxToken]] = rule {
     (optional(Token) ~ Whitespace ~ Tokens) ~> ((x1:Option[SyntaxToken], x2:SyntaxToken, x3:Seq[SyntaxToken]) => x1.toList ++ (x2 +: x3)) |
-      (Token ~ optional(Whitespace)) ~> ((x1:SyntaxToken, x2:Option[SyntaxToken]) => x1 +: x2.toList) |
-      (Whitespace ~ optional(Token)) ~> ((x1:SyntaxToken, x2:Option[SyntaxToken]) => x1 +: x2.toList)
+      (Whitespace ~ optional(Token)) ~> ((x1:SyntaxToken, x2:Option[SyntaxToken]) => x1 +: x2.toList) |
+      (Token ~ optional(Whitespace)) ~> ((x1:SyntaxToken, x2:Option[SyntaxToken]) => x1 +: x2.toList)
   }
 
   private def Token = rule {
-     Comment | StringLiteral | Definition | DictionaryWord | NumberLiteral | LastToken | Unknown
+    LastToken | Comment | StringLiteral | Definition | DictionaryWord | NumberLiteral | Unknown
   }
 
   private def NewLine = rule {
@@ -129,8 +99,8 @@ class SyntaxParser(val input: ParserInput, ctx: Context) extends Parser {
       optional('.') ~ '(' ~ EOI |
         optional('.') ~ "( " ~ zeroOrMore(COMMENT_BASE) ~ ")" |
         optional('.') ~ "( " ~ zeroOrMore(COMMENT_BASE) ~ EOI |
-        "\\" ~ (EOI | NewLine) |
-        "\\ " ~ zeroOrMore(CharPredicate.Printable) ~ (EOI | NewLine)
+        "\\" ~ (EOI | test(cursorChar == '\n')) |
+        "\\ " ~ zeroOrMore(CharPredicate.Printable) ~ (EOI | test(cursorChar == '\n'))
     ) ~> SyntaxTokens.Comment
   }
 
@@ -143,7 +113,7 @@ class SyntaxParser(val input: ParserInput, ctx: Context) extends Parser {
   }
 
   private def NumberLiteral = rule {
-    capture(oneOrMore(CharPredicate.Digit)) ~> SyntaxTokens.NumberLiteral
+    capture(optional('-') ~ oneOrMore(CharPredicate.Digit)) ~> SyntaxTokens.NumberLiteral
   }
 
   private def DictionaryWord = rule {
@@ -155,7 +125,7 @@ class SyntaxParser(val input: ParserInput, ctx: Context) extends Parser {
   }
 
   private def Definition = rule {
-    capture(":" ~ oneOrMore(" " | "\t'" | NewLine) ~ oneOrMore(NO_SPACE)) ~> SyntaxTokens.Definition
+    capture(":" ~ oneOrMore(" " | "\t'" | NewLine) ~ zeroOrMore(NO_SPACE) | ":" ~ EOI) ~> SyntaxTokens.Definition
   }
 
   private def Unknown = rule {

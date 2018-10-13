@@ -21,8 +21,7 @@
 
 package byok3
 
-import byok3.SyntaxTokens._
-import byok3.data_structures.Constant
+import byok3.SyntaxTokens.{Whitespace, _}
 import byok3.data_structures.Source.USER_INPUT_DEVICE
 import org.parboiled2.ParseError
 import org.scalatest.{FunSuite, Matchers}
@@ -143,6 +142,13 @@ class SyntaxParserTest extends FunSuite with Matchers {
       ))
   }
 
+  test("should parse a negative number literal") {
+    new SyntaxParser("-94", emptyContext).InputLine.run() shouldEqual
+      Success(List(
+        NumberLiteral("-94")
+      ))
+  }
+
   test("should parse dictionary words") {
     val ctx = emptyContext
       .eval("10 CONSTANT HELLO", source = USER_INPUT_DEVICE)
@@ -254,8 +260,7 @@ class SyntaxParserTest extends FunSuite with Matchers {
   test("should handle DOES> definition") {
     val ctx = emptyContext
     val defn =
-      """
-        |: DOES>   ( -- , define execution code for CREATE word )
+      """: DOES>   ( -- , define execution code for CREATE word )
         |        0 [compile] literal \ dummy literal to hold xt
         |        here cell-          \ address of zero in literal
         |        compile (does>)     \ call (DOES>) from new creation word
@@ -266,12 +271,74 @@ class SyntaxParserTest extends FunSuite with Matchers {
         |        compile rdrop       \ drop a stack frame (call becomes goto)
         |        swap !              \ save execution token in literal
         |; immediate
-        |
-      """.stripMargin
-    val parser = new SyntaxParser(defn, ctx)
-    parser.InputLine.run().toEither.left.map {
-      case err:ParseError => err.format(parser)
-    } shouldEqual Success(List())
+        |""".stripMargin
+    new SyntaxParser(defn, ctx).InputLine.run() shouldEqual Success(List(
+      Definition(": DOES>"),
+      Whitespace("   "),
+      Comment("( -- , define execution code for CREATE word )"),
+
+      Whitespace("\n        "),
+      NumberLiteral("0"),
+      Whitespace(" "),
+      DictionaryWord(ctx.dictionary("[COMPILE]")),
+      Whitespace(" "),
+      DictionaryWord(ctx.dictionary("LITERAL")),
+      Whitespace(" "),
+      Comment("\\ dummy literal to hold xt"),
+
+      Whitespace("\n        "),
+      DictionaryWord(ctx.dictionary("HERE")),
+      Whitespace(" "),
+      DictionaryWord(ctx.dictionary("CELL-")),
+      Whitespace("          "),
+      Comment("\\ address of zero in literal"),
+
+      Whitespace("\n        "),
+      DictionaryWord(ctx.dictionary("COMPILE")),
+      Whitespace(" "),
+      DictionaryWord(ctx.dictionary("(DOES>)")),
+      Whitespace("     "),
+      Comment("\\ call (DOES>) from new creation word"),
+
+      Whitespace("\n        "),
+      DictionaryWord(ctx.dictionary(">R")),
+      Whitespace("                  "),
+      Comment("\\ move addrz to return stack so ; doesn't see stack garbage"),
+
+      Whitespace("\n        "),
+      DictionaryWord(ctx.dictionary("[COMPILE]")),
+      Whitespace(" "),
+      DictionaryWord(ctx.dictionary(";")),
+      Whitespace("         "),
+      Comment("\\ terminate part of code before does>"),
+
+      Whitespace("\n        "),
+      DictionaryWord(ctx.dictionary("R>")),
+
+      Whitespace("\n        "),
+      DictionaryWord(ctx.dictionary(":NONAME")),
+      Whitespace("       "),
+      Comment("( addrz xt )"),
+
+      Whitespace("\n        "),
+      DictionaryWord(ctx.dictionary("COMPILE")),
+      Whitespace(" "),
+      DictionaryWord(ctx.dictionary("RDROP")),
+      Whitespace("       "),
+      Comment("\\ drop a stack frame (call becomes goto)"),
+
+      Whitespace("\n        "),
+      DictionaryWord(ctx.dictionary("SWAP")),
+      Whitespace(" "),
+      DictionaryWord(ctx.dictionary("!")),
+      Whitespace("              "),
+      Comment("\\ save execution token in literal"),
+
+      Whitespace("\n"),
+      DictionaryWord(ctx.dictionary(";")),
+      Whitespace(" "),
+      DictionaryWord(ctx.dictionary("IMMEDIATE")),
+      Whitespace("\n"),
+    ))
   }
 }
-

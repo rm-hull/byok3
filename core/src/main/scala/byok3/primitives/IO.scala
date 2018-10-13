@@ -24,7 +24,6 @@ package byok3.primitives
 import java.time.LocalDate
 
 import byok3.AnsiColor._
-import byok3.{Darkula, Disassembler, SyntaxTokens}
 import byok3.annonation.Documentation
 import byok3.data_structures.Context._
 import byok3.data_structures.CoreMemory._
@@ -32,6 +31,7 @@ import byok3.data_structures.Dictionary.instruction
 import byok3.data_structures.Stack.{pop, push}
 import byok3.data_structures._
 import byok3.types.{AppState, Stack}
+import byok3.{Disassembler, SyntaxTokens, Themes}
 import cats.data.StateT
 import cats.data.StateT._
 import cats.implicits._
@@ -270,14 +270,14 @@ object IO {
     exeTok <- dictionary(instruction(name))
     _ <- unsafeIO {
       exeTok.doc.foreach { doc =>
-        println(Darkula.colorize(SyntaxTokens.Comment(doc.stackEffect)))
+        println(Themes.Darkula.colorize(SyntaxTokens.Comment(doc.stackEffect)))
         println()
         if (exeTok.immediate) print("[IMMEDIATE] ")
         println(doc.value)
       }
 
       exeTok.position.foreach(println)
-      exeTok.source.map(src => Darkula(src, ctx).getOrElse(src)).foreach(println)
+      exeTok.source.map(src => Themes.Darkula(src, ctx).getOrElse(src)).foreach(println)
     }
   } yield ()
 
