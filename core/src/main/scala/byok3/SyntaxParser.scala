@@ -104,16 +104,22 @@ class SyntaxParser(val input: ParserInput, ctx: Context) extends Parser {
     ) ~> SyntaxTokens.Comment
   }
 
+  private def StringStart = rule {
+    "\"" | ".\"" | ignoreCase("abort\"") | ignoreCase("warning\"")
+  }
+
   private def StringLiteral = rule {
     capture(
-      optional('.') ~ '"' ~ EOI |
-        optional('.') ~ "\" " ~ zeroOrMore(STRING_BASE) ~ "\"" |
-        optional('.') ~ "\" " ~ zeroOrMore(STRING_BASE) ~ EOI
+      StringStart ~ EOI |
+        StringStart ~ " " ~ zeroOrMore(STRING_BASE) ~ "\"" |
+        StringStart ~ " " ~ zeroOrMore(STRING_BASE) ~ EOI
     ) ~> SyntaxTokens.StringLiteral
   }
 
   private def NumberLiteral = rule {
-    capture(optional('-') ~ oneOrMore(CharPredicate.Digit)) ~> SyntaxTokens.NumberLiteral
+    capture(optional('#') ~ optional('-') ~ oneOrMore(CharPredicate.Digit)) ~> SyntaxTokens.NumberLiteral |
+    capture('$' ~ optional('-') ~ oneOrMore(anyOf("01234567890abcdefABCDEF"))) ~> SyntaxTokens.NumberLiteral |
+    capture('%' ~ optional('-') ~ oneOrMore(anyOf("01"))) ~> SyntaxTokens.NumberLiteral
   }
 
   private def DictionaryWord = rule {
