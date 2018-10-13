@@ -267,17 +267,17 @@ object IO {
     name = token.value.toUpperCase
     _ <- guard(name.nonEmpty, Error(-16))
     ctx <- get[Try, Context]
-    exeTok <- dictionary(instruction(name))
+    instr <- dictionary(instruction(name))
     _ <- unsafeIO {
-      exeTok.doc.foreach { doc =>
+      instr.doc.foreach { doc =>
         println(Themes.Darkula.colorize(SyntaxTokens.Comment(doc.stackEffect)))
         println()
-        if (exeTok.immediate) print("[IMMEDIATE] ")
+        if (instr.immediate) print("[IMMEDIATE] ")
         println(doc.value)
       }
 
-      exeTok.position.foreach(println)
-      exeTok.source.map(src => Themes.Darkula(src, ctx).getOrElse(src)).foreach(println)
+      instr.position.foreach(println)
+      instr.source.map(src => Themes.Darkula(src, ctx).getOrElse(src)).foreach(println)
     }
   } yield ()
 
