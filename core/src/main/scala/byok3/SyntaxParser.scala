@@ -83,7 +83,7 @@ class SyntaxParser(val input: ParserInput, ctx: Context) extends Parser {
   }
 
   private def Token = rule {
-    LastToken | Comment | StringLiteral | Definition | DictionaryWord | NumberLiteral | Unknown
+    Comment | StringLiteral | Definition | DictionaryWord | NumberLiteral | LastToken | Unknown
   }
 
   private def NewLine = rule {
@@ -117,7 +117,7 @@ class SyntaxParser(val input: ParserInput, ctx: Context) extends Parser {
   }
 
   private def DictionaryWord = rule {
-     valueMap(dictionary, ignoreCase = true)
+     valueMap(dictionary, ignoreCase = true) ~ (EOI | test(Set(' ', '\t', '\n').contains(cursorChar)))
   }
 
   private def LastToken = rule {

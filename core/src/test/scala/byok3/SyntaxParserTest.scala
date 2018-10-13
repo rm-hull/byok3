@@ -183,11 +183,19 @@ class SyntaxParserTest extends FunSuite with Matchers {
       ))
   }
 
-  test("should handle dictionary word in isolation") {
-    val ctx = emptyContext
-      .eval("10 CONSTANT HELLO", source = USER_INPUT_DEVICE)
-      .eval("20 CONSTANT WORLD", source = USER_INPUT_DEVICE)
+  test("should handle unknown token that starts with existing dictionary word") {
+    val ctx = emptyContext.eval("10 CONSTANT HELLO", source = USER_INPUT_DEVICE)
+    new SyntaxParser("HELLO WORLD ", ctx).InputLine.run() shouldEqual
+      Success(List(
+        DictionaryWord(ctx.dictionary("HELLO")),
+        Whitespace(" "),
+        Unknown("WORLD"),
+        Whitespace(" ")
+      ))
+  }
 
+  test("should handle dictionary word in isolation") {
+    val ctx = emptyContext.eval("20 CONSTANT WORLD", source = USER_INPUT_DEVICE)
     new SyntaxParser("WORLD", ctx).InputLine.run() shouldEqual
       Success(List(
         DictionaryWord(ctx.dictionary("WORLD"))
