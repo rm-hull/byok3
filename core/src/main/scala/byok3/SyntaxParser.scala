@@ -65,6 +65,7 @@ object SyntaxTokens {
 class SyntaxParser(val input: ParserInput, ctx: Context) extends Parser {
   private val COMMENT_BASE = CharPredicate.Printable -- ")"
   private val STRING_BASE = CharPredicate.Printable -- "\""
+  private val STRING_BASE_NO_QUOTE = CharPredicate.Printable -- "'"
   private val NO_SPACE = CharPredicate.Printable -- " "
 
   private val dictionary = ctx.dictionary.toMap.iterator.map {
@@ -105,12 +106,15 @@ class SyntaxParser(val input: ParserInput, ctx: Context) extends Parser {
   }
 
   private def StringStart = rule {
-    "\"" | ".\"" | ignoreCase("abort\"") | ignoreCase("warning\"")
+    "\"" | ".\"" | ignoreCase("abort\"") | ignoreCase("warning\"") | ignoreCase("p\"") | ignoreCase("c\"") | ignoreCase("s\"")
   }
 
   private def StringLiteral = rule {
     capture(
       StringStart ~ EOI |
+        ".'" ~ EOI |
+        ".'" ~ zeroOrMore(STRING_BASE_NO_QUOTE) ~ "'" |
+        ".'" ~ zeroOrMore(STRING_BASE_NO_QUOTE) ~ EOI |
         StringStart ~ " " ~ zeroOrMore(STRING_BASE) ~ "\"" |
         StringStart ~ " " ~ zeroOrMore(STRING_BASE) ~ EOI
     ) ~> SyntaxTokens.StringLiteral
