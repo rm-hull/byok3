@@ -22,12 +22,10 @@
 package byok3
 
 
-import byok3.SyntaxTokens.{LastToken, SyntaxToken}
+import byok3.SyntaxTokens.SyntaxToken
 import byok3.data_structures._
-import byok3.types.Word
+import cats.implicits._
 import org.parboiled2._
-import byok3.implicits._
-import shapeless.HNil
 
 import scala.util.Try
 
@@ -71,6 +69,8 @@ class SyntaxParser(val input: ParserInput, ctx: Context) extends Parser {
   private val dictionary = ctx.dictionary.toMap.iterator.map {
     case (word, exeTok) => (word.toLowerCase, SyntaxTokens.DictionaryWord(exeTok))
   }.toMap
+
+  private val base = Context.deref("BASE").runA(ctx).getOrElse(10)
 
   def InputLine = rule {
     // ((Tokens ~ optional(LastToken)) ~> ((lst:Seq[SyntaxToken], x:Option[LastToken]) => lst ++ x.toList)) ~ EOI
@@ -122,10 +122,11 @@ class SyntaxParser(val input: ParserInput, ctx: Context) extends Parser {
 
   private def NumberLiteral = rule {
     capture(optional('#') ~ optional('-') ~ oneOrMore(CharPredicate.Digit)) ~> SyntaxTokens.NumberLiteral |
-    capture('$' ~ optional('-') ~ oneOrMore(anyOf("01234567890abcdefABCDEF"))) ~> SyntaxTokens.NumberLiteral |
-    capture('%' ~ optional('-') ~ oneOrMore(anyOf("01"))) ~> SyntaxTokens.NumberLiteral
+      capture('$' ~ optional('-') ~ oneOrMore(anyOf("01234567890abcdefABCDEF"))) ~> SyntaxTokens.NumberLiteral |
+      capture('%' ~ optional('-') ~ oneOrMore(anyOf("01"))) ~> SyntaxTokens.NumberLiteral |
+      capture(oneOrMore(anyOf("-01234567890abcdefABCDEF"))) ~> (i => test(Try(Integer.parseInt(i, base)).isSuccess) ~ push(SyntaxTokens.NumberLiteral(i)))
   }
-
+  
   private def DictionaryWord = rule {
      valueMap(dictionary, ignoreCase = true) ~ (EOI | test(Set(' ', '\t', '\n').contains(cursorChar)))
   }
