@@ -38,7 +38,7 @@ import scala.util.Try
 class Dictionary[K, A](private val byKey: Map[K, Stack[Int]], private val byPosn: Vector[A]) {
 
   def apply(key: K): A = indexOf(key).flatMap(get).getOrElse {
-    throw new NoSuchElementException(s"Word $key not found in dictinoary")
+    throw new NoSuchElementException(s"Word $key not found in dictionary")
   }
 
   def add(key: K, a: A): Dictionary[K, A] =
