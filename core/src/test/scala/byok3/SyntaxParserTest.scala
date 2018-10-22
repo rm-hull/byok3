@@ -23,8 +23,7 @@ package byok3
 
 import byok3.SyntaxTokens.{Whitespace, _}
 import byok3.data_structures.Source.USER_INPUT_DEVICE
-import org.parboiled2.ParseError
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.{FunSuite, Ignore, Matchers}
 
 import scala.util.Success
 
@@ -356,4 +355,16 @@ class SyntaxParserTest extends FunSuite with Matchers {
       Whitespace("\n"),
     ))
   }
+
+//  test("should handle garbage") {
+//    val ctx = emptyContext
+//    new SyntaxParser("dfdf 1g", ctx).InputLine.run() shouldEqual
+//      Success(List(
+//        Unknown("dfdf"),
+//        Whitespace(" "),
+//        LastToken("1g")
+//      ))
+//  }
 }
+
+
