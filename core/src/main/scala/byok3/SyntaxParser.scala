@@ -27,7 +27,7 @@ import byok3.data_structures._
 import cats.implicits._
 import org.parboiled2._
 
-import scala.util.Try
+import scala.util.{Success, Try}
 
 object SyntaxTokens {
 
@@ -121,10 +121,10 @@ class SyntaxParser(val input: ParserInput, ctx: Context) extends Parser {
   }
 
   private def NumberLiteral = rule {
-    capture(optional('#') ~ optional('-') ~ oneOrMore(CharPredicate.Digit)) ~> SyntaxTokens.NumberLiteral |
-      capture('$' ~ optional('-') ~ oneOrMore(anyOf("01234567890abcdefABCDEF"))) ~> SyntaxTokens.NumberLiteral |
-      capture('%' ~ optional('-') ~ oneOrMore(anyOf("01"))) ~> SyntaxTokens.NumberLiteral |
-      capture(oneOrMore(anyOf("-01234567890abcdefABCDEF"))) ~> (i => test(canParseAsNumber(i)) ~ push(SyntaxTokens.NumberLiteral(i)))
+    capture(optional('-') ~ oneOrMore(anyOf("01234567890abcdefABCDEF"))) ~> asNumber(base) _ |
+      capture('#' ~ optional('-') ~ oneOrMore(CharPredicate.Digit)) ~> asNumber(10, 1) _ |
+      capture('$' ~ optional('-') ~ oneOrMore(anyOf("01234567890abcdefABCDEF"))) ~> asNumber(16, 1) _ |
+      capture('%' ~ optional('-') ~ oneOrMore(anyOf("01"))) ~> asNumber(2, 1) _
   }
   
   private def DictionaryWord = rule {
@@ -143,6 +143,14 @@ class SyntaxParser(val input: ParserInput, ctx: Context) extends Parser {
     capture(oneOrMore(NO_SPACE)) ~> SyntaxTokens.Unknown
   }
 
-  private def canParseAsNumber(text: String) =
-    base.flatMap(radix => Try(Integer.parseInt(text, radix))).isSuccess
+  private def asNumber(radix: Try[Int], offset: Int = 0)(text: String): Rule1[SyntaxTokens.NumberLiteral] = rule {
+    test(canParseAsNumber(radix, text.substring(offset))) ~ push(SyntaxTokens.NumberLiteral(text))
+  }
+
+  private def asNumber(radix: Int, offset: Int)(text: String): Rule1[SyntaxTokens.NumberLiteral] = rule {
+    asNumber(Success(radix), offset)(text)
+  }
+
+  private def canParseAsNumber(radix: Try[Int], text: String) =
+    radix.flatMap(r => Try(Integer.parseInt(text, r))).isSuccess
 }

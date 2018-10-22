@@ -142,6 +142,13 @@ class SyntaxParserTest extends FunSuite with Matchers {
       ))
   }
 
+  test("should parse a binary number literal") {
+    new SyntaxParser("%10101", emptyContext).InputLine.run() shouldEqual
+      Success(List(
+        NumberLiteral("%10101")
+      ))
+  }
+
   test("should parse a negative number literal") {
     new SyntaxParser("-94", emptyContext).InputLine.run() shouldEqual
       Success(List(
