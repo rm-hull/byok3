@@ -37,38 +37,18 @@ object SyntaxTokens {
   case class Comment(value: String) extends SyntaxToken
   case class StringLiteral(value: String) extends SyntaxToken
   case class NumberLiteral(value: String) extends SyntaxToken
-  case class DictionaryWord(exeTok: ExecutionToken) extends SyntaxToken
+  case class DictionaryWord(value: String, exeTok: ExecutionToken) extends SyntaxToken
   case class LastToken(value: String) extends SyntaxToken
   case class Unknown(value: String) extends SyntaxToken
   case class Definition(value: String) extends SyntaxToken
-
 }
 
-//private class DictionaryMap(words: Set[Word]) extends Map[String, SyntaxTokens.DictionaryWord] {
-//
-//
-//  override def get(key: String): Option[SyntaxTokens.DictionaryWord] =
-//    if (words.contains(key.toUpperCase)) Some(SyntaxTokens.DictionaryWord(key)) else None
-//
-//  override def iterator: Iterator[(String, SyntaxTokens.DictionaryWord)] =
-//    words.iterator.map(key => (key.toUpperCase, SyntaxTokens.DictionaryWord(key)))
-//
-//  override def +[V1 >: SyntaxTokens.DictionaryWord](kv: (String, V1)): Map[String, V1] =
-//    new DictionaryMap(words + kv._1)
-//
-//  override def -(key: String): Map[String, SyntaxTokens.DictionaryWord] =
-//    new DictionaryMap(words - key)
-//}
 
 class SyntaxParser(val input: ParserInput, ctx: Context) extends Parser {
   private val COMMENT_BASE = CharPredicate.Printable -- ")"
   private val STRING_BASE = CharPredicate.Printable -- "\""
   private val STRING_BASE_NO_QUOTE = CharPredicate.Printable -- "'"
   private val NO_SPACE = CharPredicate.Printable -- " "
-
-  private val dictionary = ctx.dictionary.toMap.iterator.map {
-    case (word, exeTok) => (word.toLowerCase, SyntaxTokens.DictionaryWord(exeTok))
-  }.toMap
 
   private val base = Context.deref("BASE").runA(ctx)
 
@@ -78,9 +58,9 @@ class SyntaxParser(val input: ParserInput, ctx: Context) extends Parser {
   }
 
   private def Tokens: Rule1[Seq[SyntaxToken]] = rule {
-    (optional(Token) ~ Whitespace ~ Tokens) ~> ((x1:Option[SyntaxToken], x2:SyntaxToken, x3:Seq[SyntaxToken]) => x1.toList ++ (x2 +: x3)) |
-      (Whitespace ~ optional(Token)) ~> ((x1:SyntaxToken, x2:Option[SyntaxToken]) => x1 +: x2.toList) |
-      (Token ~ optional(Whitespace)) ~> ((x1:SyntaxToken, x2:Option[SyntaxToken]) => x1 +: x2.toList)
+    (optional(Token) ~ Whitespace ~ Tokens) ~> ((x1: Option[SyntaxToken], x2: SyntaxToken, x3: Seq[SyntaxToken]) => x1.toList ++ (x2 +: x3)) |
+      (Whitespace ~ optional(Token)) ~> ((x1: SyntaxToken, x2: Option[SyntaxToken]) => x1 +: x2.toList) |
+      (Token ~ optional(Whitespace)) ~> ((x1: SyntaxToken, x2: Option[SyntaxToken]) => x1 +: x2.toList)
   }
 
   private def Token = rule {
@@ -126,9 +106,11 @@ class SyntaxParser(val input: ParserInput, ctx: Context) extends Parser {
       capture('$' ~ optional('-') ~ oneOrMore(anyOf("01234567890abcdefABCDEF"))) ~> asNumber(16, 1) _ |
       capture('%' ~ optional('-') ~ oneOrMore(anyOf("01"))) ~> asNumber(2, 1) _
   }
-  
+
   private def DictionaryWord = rule {
-     valueMap(dictionary, ignoreCase = true) ~ (EOI | test(Set(' ', '\t', '\n').contains(cursorChar)))
+    capture(oneOrMore(NO_SPACE)) ~>
+      (word => test(ctx.dictionary.contains(word.toUpperCase)) ~
+        push(SyntaxTokens.DictionaryWord(word, ctx.dictionary(word.toUpperCase))))
   }
 
   private def LastToken = rule {

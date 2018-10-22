@@ -164,9 +164,9 @@ class SyntaxParserTest extends FunSuite with Matchers {
     new SyntaxParser("  hello  WORLD ", ctx).InputLine.run() shouldEqual
       Success(List(
         Whitespace("  "),
-        DictionaryWord(ctx.dictionary("HELLO")),
+        DictionaryWord("hello", ctx.dictionary("HELLO")),
         Whitespace("  "),
-        DictionaryWord(ctx.dictionary("WORLD")),
+        DictionaryWord("WORLD", ctx.dictionary("WORLD")),
         Whitespace(" ")
       ))
   }
@@ -178,15 +178,15 @@ class SyntaxParserTest extends FunSuite with Matchers {
 
     new SyntaxParser("WORLD  HELLO GOOD\tBYE WORLD", ctx).InputLine.run() shouldEqual
       Success(List(
-        DictionaryWord(ctx.dictionary("WORLD")),
+        DictionaryWord("WORLD", ctx.dictionary("WORLD")),
         Whitespace("  "),
-        DictionaryWord(ctx.dictionary("HELLO")),
+        DictionaryWord("HELLO", ctx.dictionary("HELLO")),
         Whitespace(" "),
         Unknown("GOOD"),
         Whitespace("\t"),
-        DictionaryWord(ctx.dictionary("BYE")),
+        DictionaryWord("BYE", ctx.dictionary("BYE")),
         Whitespace(" "),
-        DictionaryWord(ctx.dictionary("WORLD")),
+        DictionaryWord("WORLD", ctx.dictionary("WORLD")),
       ))
   }
 
@@ -194,7 +194,7 @@ class SyntaxParserTest extends FunSuite with Matchers {
     val ctx = emptyContext.eval("10 CONSTANT HELLO", source = USER_INPUT_DEVICE)
     new SyntaxParser("HELLO WORLD ", ctx).InputLine.run() shouldEqual
       Success(List(
-        DictionaryWord(ctx.dictionary("HELLO")),
+        DictionaryWord("HELLO", ctx.dictionary("HELLO")),
         Whitespace(" "),
         Unknown("WORLD"),
         Whitespace(" ")
@@ -205,7 +205,7 @@ class SyntaxParserTest extends FunSuite with Matchers {
     val ctx = emptyContext.eval("20 CONSTANT WORLD", source = USER_INPUT_DEVICE)
     new SyntaxParser("WORLD", ctx).InputLine.run() shouldEqual
       Success(List(
-        DictionaryWord(ctx.dictionary("WORLD"))
+        DictionaryWord("WORLD", ctx.dictionary("WORLD"))
       ))
   }
 
@@ -223,7 +223,7 @@ class SyntaxParserTest extends FunSuite with Matchers {
 
     new SyntaxParser("HELLO GOODBYE HELL", ctx).InputLine.run() shouldEqual
       Success(List(
-        DictionaryWord(ctx.dictionary("HELLO")),
+        DictionaryWord("HELLO", ctx.dictionary("HELLO")),
         Whitespace(" "),
         Unknown("GOODBYE"),
         Whitespace(" "),
@@ -239,11 +239,11 @@ class SyntaxParserTest extends FunSuite with Matchers {
         Whitespace(" "),
         Comment("( n -- n )"),
         Whitespace(" "),
-        DictionaryWord(ctx.dictionary("DUP")),
+        DictionaryWord("DUP", ctx.dictionary("DUP")),
         Whitespace(" "),
-        DictionaryWord(ctx.dictionary("*")),
+        DictionaryWord("*", ctx.dictionary("*")),
         Whitespace(" "),
-        DictionaryWord(ctx.dictionary(";")),
+        DictionaryWord(";", ctx.dictionary(";")),
       ))
   }
 
@@ -256,19 +256,19 @@ class SyntaxParserTest extends FunSuite with Matchers {
         Whitespace("  "),
         Comment("( square guess -- square guess adjustment )"),
         Whitespace(" "),
-        DictionaryWord(ctx.dictionary("2DUP")),
+        DictionaryWord("2dup", ctx.dictionary("2DUP")),
         Whitespace(" "),
-        DictionaryWord(ctx.dictionary("/")),
+        DictionaryWord("/", ctx.dictionary("/")),
         Whitespace(" "),
-        DictionaryWord(ctx.dictionary("OVER")),
+        DictionaryWord("over", ctx.dictionary("OVER")),
         Whitespace(" "),
-        DictionaryWord(ctx.dictionary("-")),
+        DictionaryWord("-", ctx.dictionary("-")),
         Whitespace(" "),
         NumberLiteral("2"),
         Whitespace(" "),
-        DictionaryWord(ctx.dictionary("/")),
+        DictionaryWord("/", ctx.dictionary("/")),
         Whitespace(" "),
-        DictionaryWord(ctx.dictionary(";"))
+        DictionaryWord(";", ctx.dictionary(";"))
       ))
   }
 
@@ -295,64 +295,64 @@ class SyntaxParserTest extends FunSuite with Matchers {
       Whitespace("\n        "),
       NumberLiteral("0"),
       Whitespace(" "),
-      DictionaryWord(ctx.dictionary("[COMPILE]")),
+      DictionaryWord("[compile]", ctx.dictionary("[COMPILE]")),
       Whitespace(" "),
-      DictionaryWord(ctx.dictionary("LITERAL")),
+      DictionaryWord("literal", ctx.dictionary("LITERAL")),
       Whitespace(" "),
       Comment("\\ dummy literal to hold xt"),
 
       Whitespace("\n        "),
-      DictionaryWord(ctx.dictionary("HERE")),
+      DictionaryWord("here", ctx.dictionary("HERE")),
       Whitespace(" "),
-      DictionaryWord(ctx.dictionary("CELL-")),
+      DictionaryWord("cell-", ctx.dictionary("CELL-")),
       Whitespace("          "),
       Comment("\\ address of zero in literal"),
 
       Whitespace("\n        "),
-      DictionaryWord(ctx.dictionary("COMPILE")),
+      DictionaryWord("compile", ctx.dictionary("COMPILE")),
       Whitespace(" "),
-      DictionaryWord(ctx.dictionary("(DOES>)")),
+      DictionaryWord("(does>)", ctx.dictionary("(DOES>)")),
       Whitespace("     "),
       Comment("\\ call (DOES>) from new creation word"),
 
       Whitespace("\n        "),
-      DictionaryWord(ctx.dictionary(">R")),
+      DictionaryWord(">r", ctx.dictionary(">R")),
       Whitespace("                  "),
       Comment("\\ move addrz to return stack so ; doesn't see stack garbage"),
 
       Whitespace("\n        "),
-      DictionaryWord(ctx.dictionary("[COMPILE]")),
+      DictionaryWord("[compile]", ctx.dictionary("[COMPILE]")),
       Whitespace(" "),
-      DictionaryWord(ctx.dictionary(";")),
+      DictionaryWord(";", ctx.dictionary(";")),
       Whitespace("         "),
       Comment("\\ terminate part of code before does>"),
 
       Whitespace("\n        "),
-      DictionaryWord(ctx.dictionary("R>")),
+      DictionaryWord("r>", ctx.dictionary("R>")),
 
       Whitespace("\n        "),
-      DictionaryWord(ctx.dictionary(":NONAME")),
+      DictionaryWord(":noname", ctx.dictionary(":NONAME")),
       Whitespace("       "),
       Comment("( addrz xt )"),
 
       Whitespace("\n        "),
-      DictionaryWord(ctx.dictionary("COMPILE")),
+      DictionaryWord("compile", ctx.dictionary("COMPILE")),
       Whitespace(" "),
-      DictionaryWord(ctx.dictionary("RDROP")),
+      DictionaryWord("rdrop", ctx.dictionary("RDROP")),
       Whitespace("       "),
       Comment("\\ drop a stack frame (call becomes goto)"),
 
       Whitespace("\n        "),
-      DictionaryWord(ctx.dictionary("SWAP")),
+      DictionaryWord("swap", ctx.dictionary("SWAP")),
       Whitespace(" "),
-      DictionaryWord(ctx.dictionary("!")),
+      DictionaryWord("!", ctx.dictionary("!")),
       Whitespace("              "),
       Comment("\\ save execution token in literal"),
 
       Whitespace("\n"),
-      DictionaryWord(ctx.dictionary(";")),
+      DictionaryWord(";", ctx.dictionary(";")),
       Whitespace(" "),
-      DictionaryWord(ctx.dictionary("IMMEDIATE")),
+      DictionaryWord("immediate", ctx.dictionary("IMMEDIATE")),
       Whitespace("\n"),
     ))
   }

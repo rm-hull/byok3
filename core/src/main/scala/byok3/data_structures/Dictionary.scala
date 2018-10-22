@@ -56,6 +56,9 @@ class Dictionary[K, A](private val byKey: Map[K, Stack[Int]], private val byPosn
       case _ => throw new NoSuchElementException(key.toString)
     }
 
+  def contains(key: K): Boolean =
+    byKey.contains(key) && byKey(key).nonEmpty
+
   def get(key: K): Option[A] =
     indexOf(key).flatMap(get)
 
