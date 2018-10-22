@@ -70,7 +70,7 @@ class SyntaxParser(val input: ParserInput, ctx: Context) extends Parser {
     case (word, exeTok) => (word.toLowerCase, SyntaxTokens.DictionaryWord(exeTok))
   }.toMap
 
-  private val base = Context.deref("BASE").runA(ctx).getOrElse(10)
+  private val base = Context.deref("BASE").runA(ctx)
 
   def InputLine = rule {
     // ((Tokens ~ optional(LastToken)) ~> ((lst:Seq[SyntaxToken], x:Option[LastToken]) => lst ++ x.toList)) ~ EOI
@@ -124,7 +124,7 @@ class SyntaxParser(val input: ParserInput, ctx: Context) extends Parser {
     capture(optional('#') ~ optional('-') ~ oneOrMore(CharPredicate.Digit)) ~> SyntaxTokens.NumberLiteral |
       capture('$' ~ optional('-') ~ oneOrMore(anyOf("01234567890abcdefABCDEF"))) ~> SyntaxTokens.NumberLiteral |
       capture('%' ~ optional('-') ~ oneOrMore(anyOf("01"))) ~> SyntaxTokens.NumberLiteral |
-      capture(oneOrMore(anyOf("-01234567890abcdefABCDEF"))) ~> (i => test(Try(Integer.parseInt(i, base)).isSuccess) ~ push(SyntaxTokens.NumberLiteral(i)))
+      capture(oneOrMore(anyOf("-01234567890abcdefABCDEF"))) ~> (i => test(canParseAsNumber(i)) ~ push(SyntaxTokens.NumberLiteral(i)))
   }
   
   private def DictionaryWord = rule {
@@ -142,4 +142,7 @@ class SyntaxParser(val input: ParserInput, ctx: Context) extends Parser {
   private def Unknown = rule {
     capture(oneOrMore(NO_SPACE)) ~> SyntaxTokens.Unknown
   }
+
+  private def canParseAsNumber(text: String) =
+    base.flatMap(radix => Try(Integer.parseInt(text, radix))).isSuccess
 }
