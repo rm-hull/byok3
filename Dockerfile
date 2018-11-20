@@ -1,25 +1,21 @@
-FROM jfisbein/alpine-oracle-jdk9:latest
+FROM openjdk:11-slim
 MAINTAINER Richard Hull <rm_hull@yahoo.co.uk>
 
 ARG SCALA_VERSION=2.12
-ARG SBT_DOWNLOAD_URL=https://github.com/sbt/sbt/releases/download/v1.2.4/sbt-1.2.4.tgz
-
-RUN apk add --no-cache bash
-
-RUN apk add --no-cache --virtual=build-dependencies curl && \
-    curl -sL $SBT_DOWNLOAD_URL | gunzip | tar -x -C /usr/local && \
-    ln -s /usr/local/sbt/bin/sbt /usr/local/bin/sbt && \
-    chmod 0755 /usr/local/bin/sbt && \
-    apk del build-dependencies && \
-    rm -rf /tmp/* /var/cache/apk/*
-
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 COPY . /usr/src/app
-RUN \
+
+RUN apt-get update && \
+  apt-get install -y gnupg && \
+  echo "deb https://dl.bintray.com/sbt/debian /" | tee -a /etc/apt/sources.list.d/sbt.list && \
+  apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2EE0EA64E40A89B84B2DF73499E82A75642AC823 && \
+  apt-get update && \
+  apt-get install -y sbt && \
   sbt web/assembly && \
   mv web/target/scala-$SCALA_VERSION/byok3-web.jar byok3-web.jar && \
-  rm -rf target project/target ~/.ivy2
+  rm -rf target project/target ~/.ivy2 /var/cache/apt/archives && \
+  apt-get purge sbt gnupg
 
 EXPOSE 5000
 ENTRYPOINT ["java", "-jar", "byok3-web.jar"]
