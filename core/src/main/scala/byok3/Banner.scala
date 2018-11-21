@@ -44,11 +44,11 @@ object Banner {
       case other => other
     }.mkString
 
-  def apply(version: String = getClass.getPackage.getImplementationVersion, now: LocalDate = LocalDate.now) =
+  def apply(version: String = s"${BuildInfo.version}-${BuildInfo.gitCommitHash.substring(0, 8)}", now: LocalDate = LocalDate.now) =
     s"""|
         |${logo}
         |${RESET}${LIGHT_GREY}===============================================================================
-        |${RESET}${BOLD}                ## BYOK3: Forth machine, version: ${Option(version).getOrElse("<not-set>")} ##
+        |${RESET}${BOLD}              ## BYOK3: Forth machine, version: ${Option(version).getOrElse("<not-set>")} ##
         |${RESET}${LIGHT_GREY}      This program (c) ${now.getYear} Richard Hull, published under the MIT License.
         |     To read the licence, type LICENSE <enter>. For help, type HELP <enter>.
         |===============================================================================""".stripMargin
