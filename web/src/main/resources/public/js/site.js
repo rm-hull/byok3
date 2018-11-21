@@ -1,5 +1,7 @@
 "use strict";
 
+var API_ENDPOINT = "/api";
+
 String.prototype.replaceAll = function(search, replacement) {
   var target = this;
   return target.replace(new RegExp(search, 'g'), replacement);
@@ -29,7 +31,7 @@ function sendCommand(text, cb) {
   var xhr = new XMLHttpRequest();
   var loaded = 0;
 
-  xhr.open('POST', '/byok3', true);
+  xhr.open('POST', API_ENDPOINT, true);
   xhr.setRequestHeader('Accept', 'text/plain');
   xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
   xhr.onprogress = function(event) {

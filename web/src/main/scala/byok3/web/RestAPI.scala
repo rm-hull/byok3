@@ -69,14 +69,14 @@ trait RestRoutes extends SupervisorAPI {
     }
 
   private val version =
-    path("byok3" / "version") {
+    path("api" / "version") {
       get {
         complete(HttpEntity(ContentTypes.`application/json`, BuildInfo.toJson))
       }
     }
 
   private val sendCommand =
-    path("byok3") {
+    path("api") {
       post {
         entity(as[String]) { input =>
           optionalCookie("session") { cookie =>
