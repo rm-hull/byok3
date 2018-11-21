@@ -1,39 +1,41 @@
 "use strict";
 
+const API_ENDPOINT = "/api";
+
 String.prototype.replaceAll = function(search, replacement) {
-  var target = this;
+  const target = this;
   return target.replace(new RegExp(search, 'g'), replacement);
 };
 
 String.prototype.deleteCharAt = function(pos) {
-  var target = this;
+  const target = this;
   return (pos > 0) ? target.substring(0, pos - 1) + target.substring(pos) : target;
 };
 
 String.prototype.insertAt = function(pos, str) {
-  var target = this;
+  const target = this;
   return target.substring(0, pos) + str + target.substring(pos);
 };
 
 function busy(enable) {
-  var elem = document.getElementById('busy')
+  const elem = document.getElementById('busy')
   elem.className = enable ? 'blink' : 'hide';
 }
 
 function isBusy() {
-  var elem = document.getElementById('busy')
+  const elem = document.getElementById('busy')
   return elem.className === 'blink';
 }
 
 function sendCommand(text, cb) {
-  var xhr = new XMLHttpRequest();
-  var loaded = 0;
+  const xhr = new XMLHttpRequest();
+  let loaded = 0;
 
-  xhr.open('POST', '/byok3', true);
+  xhr.open('POST', API_ENDPOINT, true);
   xhr.setRequestHeader('Accept', 'text/plain');
   xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
   xhr.onprogress = function(event) {
-    var latestText = xhr.responseText.slice(loaded)
+    const latestText = xhr.responseText.slice(loaded)
     if (latestText != null) {
       cb(null, latestText || '');
     }
@@ -51,26 +53,26 @@ function ESC(ansicode) {
 }
 
 hterm.defaultStorage = new lib.Storage.Local();
-var t = new hterm.Terminal();
-t.onTerminalReady = function() {
-  var maxLineLength = 256;
-  var io = t.io.push();
-  var input = '';
-  var pos = 0;
-  var currHist = 0;
-  var history = [];
-  var insertMode = true;
-  var offset = 1;
+const term = new hterm.Terminal();
+term.onTerminalReady = function() {
+  const maxLineLength = 256;
+  const io = term.io.push();
+  let input = '';
+  let pos = 0;
+  let currHist = 0;
+  const history = [];
+  const insertMode = true;
+  let offset = 1;
 
   io.onReadline = function(str) {
     busy(true);
     sendCommand(input, function(err, result) {
       busy(false);
-      var smudge = result.endsWith('|  ' + ESC("0m") + '\n');
+      const smudge = result.endsWith('|  ' + ESC("0m") + '\n');
       if (smudge) {
         result = result.slice(0, -1);
       }
-      t.io.print(ESC('0G') + (result || err).replaceAll('\n', '\r\n'));
+      io.print(ESC('0G') + (result || err).replaceAll('\n', '\r\n'));
       offset = (result === null || !smudge) ? 1 : 4;
     });
   };
@@ -78,10 +80,10 @@ t.onTerminalReady = function() {
   io.onVTKeystroke = io.sendString = function(str) {
     if (isBusy()) return;
 
-    var chr = str.charCodeAt(0);
+    const chr = str.charCodeAt(0);
     if (chr === 13) {
 
-      var histIdx = history.indexOf(input.trim());
+      const histIdx = history.indexOf(input.trim());
       if (histIdx >= 0) {
         history.splice(histIdx, 1);
       }
@@ -137,10 +139,10 @@ t.onTerminalReady = function() {
   };
 
   sendCommand('', function(err, result) {
-    t.io.print((result || err).replaceAll('\n', '\r\n'));
+    io.print((result || err).replaceAll('\n', '\r\n'));
     busy(false);
   });
 };
 
-t.decorate(document.querySelector('#terminal'));
-t.installKeyboard();
+term.decorate(document.querySelector('#terminal'));
+term.installKeyboard();
