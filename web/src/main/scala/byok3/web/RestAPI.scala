@@ -32,6 +32,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.pattern.ask
 import akka.stream.scaladsl.Source
 import akka.util.Timeout
+import byok3.BuildInfo
 import byok3.web.actors._
 
 import scala.concurrent.ExecutionContext
@@ -47,7 +48,9 @@ class RestAPI(system: ActorSystem, timeout: Timeout) extends RestRoutes {
 
 trait SupervisorAPI {
   def createSupervisor(): ActorRef
+
   implicit def executionContext: ExecutionContext
+
   implicit def requestTimeout: Timeout
 
   @volatile lazy val supervisor = createSupervisor()
@@ -65,7 +68,14 @@ trait RestRoutes extends SupervisorAPI {
       HttpResponse(entity = HttpEntity.Chunked(`text/plain(UTF-8)`, data))
     }
 
-  val routes =
+  private val version =
+    path("byok3" / "version") {
+      get {
+        complete(HttpEntity(ContentTypes.`application/json`, BuildInfo.toJson))
+      }
+    }
+
+  private val sendCommand =
     path("byok3") {
       post {
         entity(as[String]) { input =>
@@ -87,6 +97,8 @@ trait RestRoutes extends SupervisorAPI {
         }
       }
     }
+
+  val routes = version ~ sendCommand
 }
 
 

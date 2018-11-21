@@ -1,6 +1,7 @@
 import sbt.Keys.scalacOptions
 
-val BaseVersion = "0.3.0"
+
+val BaseVersion = "0.4.0"
 scalaVersion := "2.12.7"
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-language:implicitConversions", "-Ypartial-unification")
 
@@ -31,7 +32,7 @@ lazy val commonSettings = Seq(
 )
 
 lazy val core = (project in file("core"))
-  .enablePlugins(AutomateHeaderPlugin)
+  .enablePlugins(BuildInfoPlugin, AutomateHeaderPlugin)
   .settings(
     commonSettings,
     name := "byok3-core",
@@ -39,7 +40,12 @@ lazy val core = (project in file("core"))
       "org.typelevel" %% "cats-core" % "1.4.0",
       "org.typelevel" %% "cats-effect" % "1.0.0",
       "org.parboiled" %% "parboiled" % "2.1.5"
-    )
+    ),
+    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion, "gitCommitHash" -> git.gitHeadCommit.value.getOrElse("Not Set")),
+    buildInfoPackage := "byok3",
+    buildInfoOptions += BuildInfoOption.BuildTime,
+    buildInfoOptions += BuildInfoOption.ToMap,
+    buildInfoOptions += BuildInfoOption.ToJson
   )
 
 lazy val repl = (project in file("repl"))
