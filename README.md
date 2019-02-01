@@ -3,7 +3,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/rm-hull/byok3/badge.svg?branch=master)](https://coveralls.io/github/rm-hull/byok3?branch=master)
 [![Dependency Status](https://www.versioneye.com/user/projects/5973b5240fb24f0056362d48/badge.svg)](https://www.versioneye.com/user/projects/5973b5240fb24f0056362d48)
 [![Docker Pulls](https://img.shields.io/docker/pulls/richardhull/byok3.svg?maxAge=2592000)](https://hub.docker.com/r/richardhull/byok3/)
-[![Maintenance](https://img.shields.io/maintenance/yes/2018.svg?maxAge=2592000)]()
+[![Maintenance](https://img.shields.io/maintenance/yes/2019.svg?maxAge=2592000)]()
 
 BYOK (_BYE-OK_) is a [Scala](https://www.scala-lang.org/) program that implements a
 [Forth](http://lars.nocrew.org/forth2012/index.html) virtual machine. It can be run
