@@ -58,9 +58,7 @@ approximations of the root of a number, for example:
 We can see the compiled code with:
 
 ```forth
-: show ' dup >body swap >size disassemble ;
-   ok
-show sqrt-closer
+see sqrt-closer
 000010AC:  2C 00 00 00  |,...|  : SQRT-CLOSER
 000010B0:  67 00 00 00  |g...|  2DUP
 000010B4:  03 00 00 00  |....|  /
@@ -71,7 +69,7 @@ show sqrt-closer
 000010C8:  03 00 00 00  |....|  /
 000010CC:  2D 00 00 00  |-...|  EXIT
   ok
-show sqrt
+see sqrt
 000010D0:  2C 00 00 00  |,...|  : SQRT
 000010D4:  4B 00 00 00  |K...|  (LIT)
 000010D8:  01 00 00 00  |....|  1
@@ -133,7 +131,9 @@ mandel
 
 Alternatively, watch a screencast:
 
-[![asciicast](https://asciinema.org/a/kXEtkGGKCLPNpoiiai6g7WB55.png)](https://asciinema.org/a/kXEtkGGKCLPNpoiiai6g7WB55)
+<p align="center">
+    <img src="https://images.destructuring-bind.org/screencast.svg">
+</p>
 
 ## Implementation Notes
 
