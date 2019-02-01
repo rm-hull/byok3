@@ -21,6 +21,8 @@
 
 package byok3.data_structures
 
+import java.util.NoSuchElementException
+
 import byok3.annonation.{Documentation, Immediate, Internal}
 import byok3.implicits._
 import byok3.primitives._
@@ -34,6 +36,10 @@ import scala.reflect.runtime.universe._
 import scala.util.Try
 
 class Dictionary[K, A](private val byKey: Map[K, Stack[Int]], private val byPosn: Vector[A]) {
+
+  def apply(key: K): A = indexOf(key).flatMap(get).getOrElse {
+    throw new NoSuchElementException(s"Word $key not found in dictionary")
+  }
 
   def add(key: K, a: A): Dictionary[K, A] =
     new Dictionary(byKey.updated(key, byPosn.length :: byKey.get(key).getOrElse(Nil)), byPosn :+ a)
@@ -49,6 +55,9 @@ class Dictionary[K, A](private val byKey: Map[K, Stack[Int]], private val byPosn
       case Some(_ :: rest) => new Dictionary(byKey.updated(key, rest), byPosn)
       case _ => throw new NoSuchElementException(key.toString)
     }
+
+  def contains(key: K): Boolean =
+    byKey.contains(key) && byKey(key).nonEmpty
 
   def get(key: K): Option[A] =
     indexOf(key).flatMap(get)

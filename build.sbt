@@ -38,7 +38,8 @@ lazy val core = (project in file("core"))
     name := "byok3-core",
     libraryDependencies ++= Seq(
       "org.typelevel" %% "cats-core" % "1.6.0",
-      "org.typelevel" %% "cats-effect" % "1.2.0"
+      "org.typelevel" %% "cats-effect" % "1.2.0",
+      "org.parboiled" %% "parboiled" % "2.1.5"
     ),
     buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion, "gitCommitHash" -> git.gitHeadCommit.value.getOrElse("Not Set")),
     buildInfoPackage := "byok3",

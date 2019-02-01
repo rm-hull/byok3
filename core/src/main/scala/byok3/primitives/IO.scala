@@ -24,7 +24,6 @@ package byok3.primitives
 import java.time.LocalDate
 
 import byok3.AnsiColor._
-import byok3.Disassembler
 import byok3.annonation.Documentation
 import byok3.data_structures.Context._
 import byok3.data_structures.CoreMemory._
@@ -32,6 +31,7 @@ import byok3.data_structures.Dictionary.instruction
 import byok3.data_structures.Stack.{pop, push}
 import byok3.data_structures._
 import byok3.types.{AppState, Stack}
+import byok3.{Disassembler, SyntaxTokens, Themes}
 import cats.data.StateT
 import cats.data.StateT._
 import cats.implicits._
@@ -266,20 +266,18 @@ object IO {
     token <- nextToken()
     name = token.value.toUpperCase
     _ <- guard(name.nonEmpty, Error(-16))
-    token <- dictionary(instruction(name))
+    ctx <- get[Try, Context]
+    instr <- dictionary(instruction(name))
     _ <- unsafeIO {
-      token.doc.foreach { doc =>
-        println(doc.stackEffect)
+      instr.doc.foreach { doc =>
+        println(Themes.Darkula.colorize(SyntaxTokens.Comment(doc.stackEffect)))
         println()
-        if (token.immediate) print("[IMMEDIATE] ")
+        if (instr.immediate) print("[IMMEDIATE] ")
         println(doc.value)
       }
 
-      token.position.foreach(println)
-      token.source.foreach(print)
-
-      if (token.immediate) println(" IMMEDIATE")
-      else println
+      instr.position.foreach(println)
+      instr.source.map(src => Themes.Darkula(src, ctx).getOrElse(src)).foreach(println)
     }
   } yield ()
 
