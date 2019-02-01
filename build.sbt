@@ -2,7 +2,7 @@ import sbt.Keys.scalacOptions
 
 
 val BaseVersion = "0.4.0"
-scalaVersion := "2.12.7"
+scalaVersion := "2.12.8"
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-language:implicitConversions", "-Ypartial-unification")
 
 lazy val commonSettings = Seq(
@@ -37,8 +37,8 @@ lazy val core = (project in file("core"))
     commonSettings,
     name := "byok3-core",
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats-core" % "1.4.0",
-      "org.typelevel" %% "cats-effect" % "1.0.0"
+      "org.typelevel" %% "cats-core" % "1.6.0",
+      "org.typelevel" %% "cats-effect" % "1.2.0"
     ),
     buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion, "gitCommitHash" -> git.gitHeadCommit.value.getOrElse("Not Set")),
     buildInfoPackage := "byok3",
@@ -69,10 +69,10 @@ lazy val web = (project in file("web"))
     assemblyJarName in assembly := "byok3-web.jar",
     mainClass in (Compile, run) := Some("byok3.web.Server"),
     libraryDependencies ++= Seq(
-      "com.typesafe.akka" %% "akka-http" % "10.1.5",
-      "com.typesafe.akka" %% "akka-stream" % "2.5.17",
-      "com.typesafe.akka" %% "akka-actor"  % "2.5.17",
-      "com.typesafe.akka" %% "akka-slf4j"  % "2.5.17",
+      "com.typesafe.akka" %% "akka-http" % "10.1.7",
+      "com.typesafe.akka" %% "akka-stream" % "2.5.20",
+      "com.typesafe.akka" %% "akka-actor"  % "2.5.20",
+      "com.typesafe.akka" %% "akka-slf4j"  % "2.5.20",
       "ch.qos.logback" % "logback-classic" % "1.2.3"
     ),
     WebKeys.packagePrefix in Assets := "public/",
