@@ -26,7 +26,7 @@ lazy val commonSettings = Seq(
 
   // test dependencies
   libraryDependencies ++= Seq(
-    "org.scalatest" %% "scalatest" % "3.0.5" % Test,
+    "org.scalatest" %% "scalatest" % "3.0.7" % Test,
     "org.scalacheck" %% "scalacheck" % "1.14.0" % Test
   )
 )
@@ -38,8 +38,8 @@ lazy val core = (project in file("core"))
     name := "byok3-core",
     libraryDependencies ++= Seq(
       "org.typelevel" %% "cats-core" % "1.6.0",
-      "org.typelevel" %% "cats-effect" % "1.2.0",
-      "org.parboiled" %% "parboiled" % "2.1.5"
+      "org.typelevel" %% "cats-effect" % "1.3.1",
+      "org.parboiled" %% "parboiled" % "2.1.6"
     ),
     buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion, "gitCommitHash" -> git.gitHeadCommit.value.getOrElse("Not Set")),
     buildInfoPackage := "byok3",
@@ -57,7 +57,7 @@ lazy val repl = (project in file("repl"))
     assemblyJarName in assembly := "byok3-repl.jar",
     mainClass in (Compile, run) := Some("byok3.console.REPL"),
     libraryDependencies ++= Seq(
-      "org.jline" % "jline" % "3.9.0"
+      "org.jline" % "jline" % "3.11.0"
     )
   )
 
@@ -70,10 +70,10 @@ lazy val web = (project in file("web"))
     assemblyJarName in assembly := "byok3-web.jar",
     mainClass in (Compile, run) := Some("byok3.web.Server"),
     libraryDependencies ++= Seq(
-      "com.typesafe.akka" %% "akka-http" % "10.1.7",
-      "com.typesafe.akka" %% "akka-stream" % "2.5.20",
-      "com.typesafe.akka" %% "akka-actor"  % "2.5.20",
-      "com.typesafe.akka" %% "akka-slf4j"  % "2.5.20",
+      "com.typesafe.akka" %% "akka-http" % "10.1.8",
+      "com.typesafe.akka" %% "akka-stream" % "2.5.23",
+      "com.typesafe.akka" %% "akka-actor"  % "2.5.23",
+      "com.typesafe.akka" %% "akka-slf4j"  % "2.5.23",
       "ch.qos.logback" % "logback-classic" % "1.2.3"
     ),
     WebKeys.packagePrefix in Assets := "public/",
