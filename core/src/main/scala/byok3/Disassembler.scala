@@ -30,11 +30,11 @@ import byok3.types.Address
 class Disassembler(ctx: Context) {
 
   val nest = ctx.dictionary.indexOf("__NEST").get
-  val defns = ctx.dictionary.toMap.values.map {
+  val defns = ctx.dictionary.toMap.values.flatMap {
     case word: ForthWord => Some((word.addr, word.name))
     case anon: Anonymous => Some((anon.addr, anon.name))
     case _ => None
-  }.flatten.toMap
+  }.toMap
 
   def print(offset: Address, len: Int): Unit = {
     def prevInstr(addr: Address) = {
@@ -64,8 +64,8 @@ class Disassembler(ctx: Context) {
         case Some("BRANCH") | Some("0BRANCH") |
              Some("(LOOP)") | Some("(+LOOP)") |
              Some("(LEAVE)") => f"$data $CYAN(==> 0x${addr + data}%08X)$RESET"
-        case _ if (data == nest) => {
-          val name = defns.get(addr).getOrElse("<unknown>")
+        case _ if data == nest => {
+          val name = defns.getOrElse(addr, "<unknown>")
           val immediate = ctx.dictionary.get(name).fold(false) { _.immediate }
           val position = ctx.dictionary.get(name).flatMap(_.position).map(pos => s" $pos").getOrElse("")
           s"$YELLOW$BOLD: $name${if (immediate) s" $MAGENTA#IMMEDIATE" else ""}$RESET$position"
