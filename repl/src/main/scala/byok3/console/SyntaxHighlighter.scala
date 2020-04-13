@@ -36,6 +36,10 @@ class SyntaxHighlighter(implicit F: FlatMap[Try]) extends Highlighter {
     this.ctx = Some(ctx)
   }
 
+  override def setErrorPattern(errorPattern: java.util.regex.Pattern): Unit = {}
+
+  override def setErrorIndex(errorIndex: Int): Unit = {}
+
   override def highlight(lineReader: LineReader, buffer: String): AttributedString = {
     val sb = new AttributedStringBuilder
     sb.ansiAppend(ctx.flatMap(c => Themes.Darkula(buffer, c).toOption).getOrElse(buffer))

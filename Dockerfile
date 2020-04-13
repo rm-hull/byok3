@@ -1,7 +1,7 @@
 FROM openjdk:11-slim
 MAINTAINER Richard Hull <rm_hull@yahoo.co.uk>
 
-ARG SCALA_VERSION=2.12
+ARG SCALA_VERSION=2.13
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 COPY . /usr/src/app
