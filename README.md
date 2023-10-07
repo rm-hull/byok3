@@ -131,9 +131,7 @@ mandel
 
 Alternatively, watch a screencast:
 
-<p align="center">
-    <img src="https://images.destructuring-bind.org/screencast.svg">
-</p>
+![screencast](https://raw.githubusercontent.com/rm-hull/byok3/master/screencast.svg)
 
 ## Implementation Notes
 
