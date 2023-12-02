@@ -31,4 +31,4 @@ jobs:
         uses: coverallsapp/github-action@v2
         with:
           format: cobertura
-          file: target/scala-2.13/coverage-report/cobertura.xml
+          file: target/scala-2.12/coverage-report/cobertura.xml
