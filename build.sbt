@@ -48,7 +48,9 @@ lazy val core = (project in file("core"))
     buildInfoPackage := "byok3",
     buildInfoOptions += BuildInfoOption.BuildTime,
     buildInfoOptions += BuildInfoOption.ToMap,
-    buildInfoOptions += BuildInfoOption.ToJson,)
+    buildInfoOptions += BuildInfoOption.ToJson,
+    Test / fork := true)
+
 
 lazy val repl = (project in file("repl"))
   .dependsOn(core)
@@ -58,7 +60,6 @@ lazy val repl = (project in file("repl"))
     name := "byok3-repl",
     assembly / assemblyJarName := "byok3-repl.jar",
     Compile / mainClass := Some("byok3.console.REPL"),
-    //    run / mainClass := Some("byok3.console.REPL"),
     libraryDependencies ++= Seq(
       "org.jline" % "jline" % "3.24.1"
     )
@@ -71,14 +72,14 @@ lazy val web = (project in file("web"))
     commonSettings,
     name := "byok3-web",
     assembly / assemblyJarName := "byok3-web.jar",
-    //    run / mainClass := Some("byok3.web.Server"),
+    run / fork := true,
     Compile / mainClass := Some("byok3.web.Server"),
     libraryDependencies ++= Seq(
-      "com.typesafe.akka" %% "akka-http" % "10.1.8",
-      "com.typesafe.akka" %% "akka-stream" % "2.6.4",
-      "com.typesafe.akka" %% "akka-actor" % "2.6.4",
-      "com.typesafe.akka" %% "akka-slf4j" % "2.6.4",
-      "ch.qos.logback" % "logback-classic" % "1.2.3"
+      "com.typesafe.akka" %% "akka-http" % "10.5.0",
+      "com.typesafe.akka" %% "akka-stream" % "2.8.0",
+      "com.typesafe.akka" %% "akka-actor" % "2.8.0",
+      "com.typesafe.akka" %% "akka-slf4j" % "2.8.0",
+      "ch.qos.logback" % "logback-classic" % "1.4.7"
     ),
     Assets / WebKeys.packagePrefix := "public/",
     Runtime / managedClasspath += (Assets / packageBin).value
