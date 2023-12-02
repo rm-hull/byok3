@@ -31,7 +31,6 @@ import cats.implicits._
 
 class MemoryTest extends PrimitivesTestBase {
 
-
   test("should poke a value in memory") {
     val ops = sequence(
       dataStack(push(0x77)),

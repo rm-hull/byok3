@@ -21,11 +21,13 @@
 
 package byok3.data_structures
 
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
-class DictionaryTest extends FunSuite with Matchers {
 
-  val dict = Range(0, 10).foldLeft[Dictionary[String, Int]](Dictionary.empty) {
+class DictionaryTest extends AnyFunSuite with Matchers {
+
+  private val dict = Range(0, 10).foldLeft[Dictionary[String, Int]](Dictionary.empty) {
     (dict, i) => dict.add(i.toString, i)
   }
 

@@ -24,11 +24,12 @@ package byok3
 import byok3.data_structures.Error
 import byok3.helpers.capturingOutput
 import cats.implicits._
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
 import scala.util.Success
 
-class InterpreterTest extends FunSuite with Matchers {
+class InterpreterTest extends AnyFunSuite with Matchers {
 
   test("should push values onto the data stack") {
     val ctx = Interpreter("9  5 3").runS(emptyContext)

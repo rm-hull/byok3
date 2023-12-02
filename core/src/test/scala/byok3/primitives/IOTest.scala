@@ -21,9 +21,10 @@
 
 package byok3.primitives
 
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
-class IOTest  extends FunSuite with Matchers {
+class IOTest extends AnyFunSuite with Matchers {
 
 
 

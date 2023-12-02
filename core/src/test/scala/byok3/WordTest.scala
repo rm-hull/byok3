@@ -22,17 +22,17 @@
 package byok3
 
 import java.io.File
-
 import byok3.data_structures.MachineState.OK
 import byok3.data_structures.Source.USER_INPUT_DEVICE
 import byok3.helpers.capturingOutput
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
 import scala.io.Source
 
-class WordTest extends FunSuite with Matchers {
+class WordTest extends AnyFunSuite with Matchers {
 
-  var ctx = emptyContext
+  private var ctx = emptyContext
 
   test("Context should initialize correctly") {
     // make sure system.fth is in a sane place first

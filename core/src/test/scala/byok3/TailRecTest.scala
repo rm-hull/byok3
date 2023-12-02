@@ -23,12 +23,14 @@ package byok3
 
 import byok3.data_structures.Context
 import cats.implicits._
-import org.scalatest.{FunSuite, Ignore, Matchers}
+import org.scalatest.Ignore
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
 @Ignore
-class TailRecTest extends FunSuite with Matchers {
+class TailRecTest extends AnyFunSuite with Matchers {
 
-  val emptyContext = Context(0x10000)
+  private val emptyContext = Context(0x10000)
 
   test("should process a large input stream") {
     val n = 5000
