@@ -1,4 +1,4 @@
-FROM openjdk:11-slim
+FROM eclipse-temurin:21-jammy
 MAINTAINER Richard Hull <rm_hull@yahoo.co.uk>
 
 ARG SCALA_VERSION=2.13
