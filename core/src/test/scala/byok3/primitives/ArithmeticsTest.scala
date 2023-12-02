@@ -28,7 +28,7 @@ import cats.implicits._
 
 class ArithmeticsTest extends PrimitivesTestBase {
 
-  val ops = sequence(dataStack(push(4)), dataStack(push(8)), dataStack(push(2)))
+  private val ops = sequence(dataStack(push(4)), dataStack(push(8)), dataStack(push(2)))
 
   test("should add top two stack elements") {
     assertDataStack(Arithmetics.+, List(10, 4), presets = ops)

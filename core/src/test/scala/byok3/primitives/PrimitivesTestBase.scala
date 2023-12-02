@@ -28,18 +28,20 @@ import byok3.helpers.sequence
 import byok3.types.AppState
 import cats.data.StateT
 import cats.implicits._
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.Assertion
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
 import scala.util.{Success, Try}
 
-abstract class PrimitivesTestBase extends FunSuite with Matchers {
+abstract class PrimitivesTestBase extends AnyFunSuite with Matchers {
 
-  protected val emptyContext = Context(0x10000)
-  protected val DP = exec("DP").runS(emptyContext).get.ds.head
-  protected val IP = exec("IP").runS(emptyContext).get.ds.head
+  protected val emptyContext: Context = Context(0x10000)
+  protected val DP: Int = exec("DP").runS(emptyContext).get.ds.head
+  protected val IP: Int = exec("IP").runS(emptyContext).get.ds.head
 
   def assertDataStack(op: AppState[Unit], expected: List[Int],
-                      presets: StateT[Try, Context, Unit] = sequence(dataStack(push(4)), dataStack(push(2)), dataStack(push(8)))) = {
+                      presets: StateT[Try, Context, Unit] = sequence(dataStack(push(4)), dataStack(push(2)), dataStack(push(8)))): Assertion = {
 
     val effects = for {
       _ <- presets

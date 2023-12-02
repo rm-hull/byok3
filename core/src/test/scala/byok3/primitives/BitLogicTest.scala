@@ -29,7 +29,7 @@ import cats.implicits._
 
 class BitLogicTest extends PrimitivesTestBase {
 
-  val ops = sequence(dataStack(push(3)), dataStack(push(19)))
+  private val ops = sequence(dataStack(push(3)), dataStack(push(19)))
 
   test("should bitwise-and top two stack elements") {
     assertDataStack(AND, List(3 & 19), presets = ops)

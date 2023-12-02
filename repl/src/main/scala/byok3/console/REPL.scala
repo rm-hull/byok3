@@ -27,6 +27,7 @@ import byok3.data_structures.Source._
 import byok3.data_structures.{Context, Error}
 import byok3.{Banner, Interruptible}
 import cats.effect.IO
+import cats.effect.unsafe.implicits.global
 import cats.implicits._
 import org.jline.reader.LineReader.Option._
 import org.jline.reader.{EndOfFileException, LineReaderBuilder, UserInterruptException}

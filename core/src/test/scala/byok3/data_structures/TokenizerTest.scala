@@ -22,9 +22,11 @@
 package byok3.data_structures
 
 import byok3.data_structures.Tokenizer._
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
-class TokenizerTest extends FunSuite with Matchers {
+
+class TokenizerTest extends AnyFunSuite with Matchers {
 
   test("should parse a single token") {
     val in = "10 20 +"

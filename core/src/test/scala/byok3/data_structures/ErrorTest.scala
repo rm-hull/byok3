@@ -21,11 +21,14 @@
 
 package byok3.data_structures
 
-import org.scalatest.{FunSuite, Matchers}
+
+
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
 import scala.util.Try
 
-class ErrorTest extends FunSuite with Matchers {
+class ErrorTest extends AnyFunSuite with Matchers {
 
   test("should transform divide by zero to error -10") {
     val ex = Try(1 / 0).failed.get

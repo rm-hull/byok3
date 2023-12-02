@@ -25,18 +25,19 @@ import byok3.AnsiColor._
 import byok3.data_structures.Context
 import byok3.helpers.capturingOutput
 import cats.implicits._
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
-class DisassemblerTest extends FunSuite with Matchers {
+class DisassemblerTest extends AnyFunSuite with Matchers {
 
-  val ops = for {
+  private val ops = for {
     _ <- Interpreter(": SQR DUP * ;")
     _ <- Interpreter(": SQR 9 9 * ;")
   } yield ()
 
-  val emptyContext = Context(0x1000)
-  val ctx = ops.runS(emptyContext).get
-  val disassembler = new Disassembler(ctx)
+  private val emptyContext = Context(0x1000)
+  private val ctx = ops.runS(emptyContext).get
+  private val disassembler = new Disassembler(ctx)
 
   test("should print disassembly") {
     val expected =

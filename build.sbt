@@ -1,15 +1,17 @@
 import sbt.Keys.scalacOptions
 
+import java.net.URI
+
 
 val BaseVersion = "0.4.0"
-scalaVersion := "2.12.8"
+scalaVersion := "2.13.12"
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-language:implicitConversions", "-Ypartial-unification")
 
 lazy val commonSettings = Seq(
   version := BaseVersion,
   startYear := Some(2017),
   organizationName := "Richard Hull",
-  licenses += ("MIT", new URL("https://opensource.org/licenses/MIT")),
+  licenses += ("MIT", URI.create("https://opensource.org/licenses/MIT").toURL),
   homepage := Some(url("https://github.com/rm-hull/byok3")),
   scmInfo := Some(
     ScmInfo(
@@ -18,16 +20,16 @@ lazy val commonSettings = Seq(
     )
   ),
   developers := List(
-    Developer(id="rhu",
-      name="Richard Hull",
-      email="rm_hull@yahoo.co.uk",
-      url=url("http://www.destructuring-bind.org"))
+    Developer(id = "rhu",
+      name = "Richard Hull",
+      email = "rm_hull@yahoo.co.uk",
+      url = url("http://www.destructuring-bind.org"))
   ),
 
   // test dependencies
   libraryDependencies ++= Seq(
-    "org.scalatest" %% "scalatest" % "3.0.7" % Test,
-    "org.scalacheck" %% "scalacheck" % "1.14.0" % Test
+    "org.scalatest" %% "scalatest" % "3.2.17" % Test,
+    "org.scalacheck" %% "scalacheck" % "1.17.0" % Test
   )
 )
 
@@ -37,47 +39,50 @@ lazy val core = (project in file("core"))
     commonSettings,
     name := "byok3-core",
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats-core" % "1.6.0",
-      "org.typelevel" %% "cats-effect" % "1.3.1",
-      "org.parboiled" %% "parboiled" % "2.1.6"
+      "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+      "org.typelevel" %% "cats-core" % "2.10.0",
+      "org.typelevel" %% "cats-effect" % "3.5.2",
+      "org.parboiled" %% "parboiled" % "2.5.1"
     ),
     buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion, "gitCommitHash" -> git.gitHeadCommit.value.getOrElse("Not Set")),
     buildInfoPackage := "byok3",
     buildInfoOptions += BuildInfoOption.BuildTime,
     buildInfoOptions += BuildInfoOption.ToMap,
-    buildInfoOptions += BuildInfoOption.ToJson
-  )
+    buildInfoOptions += BuildInfoOption.ToJson,
+    Test / fork := true)
+
 
 lazy val repl = (project in file("repl"))
   .dependsOn(core)
-  .enablePlugins(JavaAppPackaging, AutomateHeaderPlugin)
+  .enablePlugins(/*JavaAppPackaging,*/ AutomateHeaderPlugin)
   .settings(
     commonSettings,
     name := "byok3-repl",
-    assemblyJarName in assembly := "byok3-repl.jar",
-    mainClass in (Compile, run) := Some("byok3.console.REPL"),
+    assembly / assemblyJarName := "byok3-repl.jar",
+    Compile / mainClass := Some("byok3.console.REPL"),
     libraryDependencies ++= Seq(
-      "org.jline" % "jline" % "3.11.0"
+      "org.jline" % "jline" % "3.24.1"
     )
   )
 
 lazy val web = (project in file("web"))
   .dependsOn(core)
-  .enablePlugins(SbtWeb, SbtTwirl, JavaAppPackaging, AutomateHeaderPlugin)
+  .enablePlugins(SbtWeb, SbtTwirl, /*JavaAppPackaging,*/ AutomateHeaderPlugin)
   .settings(
     commonSettings,
     name := "byok3-web",
-    assemblyJarName in assembly := "byok3-web.jar",
-    mainClass in (Compile, run) := Some("byok3.web.Server"),
+    assembly / assemblyJarName := "byok3-web.jar",
+    run / fork := true,
+    Compile / mainClass := Some("byok3.web.Server"),
     libraryDependencies ++= Seq(
-      "com.typesafe.akka" %% "akka-http" % "10.1.8",
-      "com.typesafe.akka" %% "akka-stream" % "2.5.23",
-      "com.typesafe.akka" %% "akka-actor"  % "2.5.23",
-      "com.typesafe.akka" %% "akka-slf4j"  % "2.5.23",
-      "ch.qos.logback" % "logback-classic" % "1.2.3"
+      "com.typesafe.akka" %% "akka-http" % "10.5.0",
+      "com.typesafe.akka" %% "akka-stream" % "2.8.0",
+      "com.typesafe.akka" %% "akka-actor" % "2.8.0",
+      "com.typesafe.akka" %% "akka-slf4j" % "2.8.0",
+      "ch.qos.logback" % "logback-core" % "1.4.7"
     ),
-    WebKeys.packagePrefix in Assets := "public/",
-    managedClasspath in Runtime += (packageBin in Assets).value
+    Assets / WebKeys.packagePrefix := "public/",
+    Runtime / managedClasspath += (Assets / packageBin).value
   )
 
 

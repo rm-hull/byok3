@@ -29,7 +29,7 @@ import cats.implicits._
 
 class ComparisonTest extends PrimitivesTestBase {
 
-  val ops = sequence(dataStack(push(3)), dataStack(push(19)))
+  private val ops = sequence(dataStack(push(3)), dataStack(push(19)))
 
   test("should compare top two stack elements for equality") {
     assertDataStack(`=`, List(0), presets = ops)

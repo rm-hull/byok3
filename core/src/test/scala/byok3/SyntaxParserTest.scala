@@ -23,11 +23,12 @@ package byok3
 
 import byok3.SyntaxTokens.{Whitespace, _}
 import byok3.data_structures.Source.USER_INPUT_DEVICE
-import org.scalatest.{FunSuite, Ignore, Matchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
 import scala.util.Success
 
-class SyntaxParserTest extends FunSuite with Matchers {
+class SyntaxParserTest extends AnyFunSuite with Matchers {
 
   test("should parse spaces as whitespace") {
     new SyntaxParser("   ", emptyContext).InputLine.run() shouldEqual

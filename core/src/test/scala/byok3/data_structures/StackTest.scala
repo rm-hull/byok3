@@ -24,12 +24,13 @@ package byok3.data_structures
 import byok3.data_structures.Stack._
 import byok3.helpers._
 import cats.implicits._
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
 import scala.util.Success
 
 
-class StackTest extends FunSuite with Matchers {
+class StackTest extends AnyFunSuite with Matchers {
 
   test("should push to an empty stack") {
     val ops = sequence(push(10), push(3), push(6))
