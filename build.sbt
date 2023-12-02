@@ -4,8 +4,6 @@ import java.net.URI
 
 
 val BaseVersion = "0.4.0"
-scalaVersion := "2.13.12"
-scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-language:implicitConversions", "-Ypartial-unification")
 
 lazy val commonSettings = Seq(
   version := BaseVersion,
@@ -26,7 +24,10 @@ lazy val commonSettings = Seq(
       url = url("http://www.destructuring-bind.org"))
   ),
 
-  // test dependencies
+  scalaVersion := "2.12.18",
+  scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-language:implicitConversions", "-Ypartial-unification"),
+
+    // test dependencies
   libraryDependencies ++= Seq(
     "org.scalatest" %% "scalatest" % "3.2.17" % Test,
     "org.scalacheck" %% "scalacheck" % "1.17.0" % Test
@@ -79,7 +80,7 @@ lazy val web = (project in file("web"))
       "com.typesafe.akka" %% "akka-stream" % "2.8.0",
       "com.typesafe.akka" %% "akka-actor" % "2.8.0",
       "com.typesafe.akka" %% "akka-slf4j" % "2.8.0",
-      "ch.qos.logback" % "logback-core" % "1.4.7"
+      "ch.qos.logback" % "logback-core" % "1.4.12"
     ),
     Assets / WebKeys.packagePrefix := "public/",
     Runtime / managedClasspath += (Assets / packageBin).value
