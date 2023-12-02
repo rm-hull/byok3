@@ -40,17 +40,15 @@ lazy val core = (project in file("core"))
     name := "byok3-core",
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      "org.typelevel" %% "cats-core" % "2.1.1",
-      "org.typelevel" %% "cats-effect" % "2.1.2",
+      "org.typelevel" %% "cats-core" % "2.10.0",
+      "org.typelevel" %% "cats-effect" % "3.5.2",
       "org.parboiled" %% "parboiled" % "2.5.1"
     ),
     buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion, "gitCommitHash" -> git.gitHeadCommit.value.getOrElse("Not Set")),
     buildInfoPackage := "byok3",
     buildInfoOptions += BuildInfoOption.BuildTime,
     buildInfoOptions += BuildInfoOption.ToMap,
-    buildInfoOptions += BuildInfoOption.ToJson,
-    Test / scalacOptions += "-deprecation"
-  )
+    buildInfoOptions += BuildInfoOption.ToJson,)
 
 lazy val repl = (project in file("repl"))
   .dependsOn(core)
@@ -60,7 +58,6 @@ lazy val repl = (project in file("repl"))
     name := "byok3-repl",
     assembly / assemblyJarName := "byok3-repl.jar",
     Compile / mainClass := Some("byok3.console.REPL"),
-    Test / scalacOptions += "-deprecation",
     //    run / mainClass := Some("byok3.console.REPL"),
     libraryDependencies ++= Seq(
       "org.jline" % "jline" % "3.24.1"
@@ -76,7 +73,6 @@ lazy val web = (project in file("web"))
     assembly / assemblyJarName := "byok3-web.jar",
     //    run / mainClass := Some("byok3.web.Server"),
     Compile / mainClass := Some("byok3.web.Server"),
-    Test / scalacOptions += "-deprecation",
     libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-http" % "10.1.8",
       "com.typesafe.akka" %% "akka-stream" % "2.6.4",
