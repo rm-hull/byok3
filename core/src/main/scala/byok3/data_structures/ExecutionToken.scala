@@ -47,6 +47,8 @@ sealed trait ExecutionToken {
   val position: Option[Position] = None
   val source: Option[String] = None
 
+  override def toString: String = name
+
   def markAsImmediate: ExecutionToken = ???
 
   def compile = for {

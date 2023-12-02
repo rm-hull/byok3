@@ -65,7 +65,7 @@ object IO {
     lines <- unsafeIO {
       Try(Source.fromFile(filename)).orElse(
         Try(Source.fromResource(filename)))
-        .map(_.getLines.toStream.zipWithIndex.map { case(line, idx) =>
+        .map(_.getLines().toStream.zipWithIndex.map { case(line, idx) =>
           if (term) print(s"\r${ProgressIndicator(idx)}\r")
           (line, Position(filename, idx + 1))
         })
@@ -257,7 +257,7 @@ object IO {
 
   @Documentation("displays some help text", stackEffect = "( -- )")
   val HELP: AppState[Unit] = unsafeIO {
-    Source.fromResource("help.txt").getLines.foreach(println)
+    Source.fromResource("help.txt").getLines().foreach(println)
     noOp
   }
 

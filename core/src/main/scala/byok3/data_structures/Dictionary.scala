@@ -21,8 +21,6 @@
 
 package byok3.data_structures
 
-import java.util.NoSuchElementException
-
 import byok3.annonation.{Documentation, Immediate, Internal}
 import byok3.implicits._
 import byok3.primitives._
@@ -34,6 +32,7 @@ import cats.implicits._
 import scala.reflect.ClassTag
 import scala.reflect.runtime.universe._
 import scala.util.Try
+import scala.collection.MapView
 
 class Dictionary[K, A](private val byKey: Map[K, Stack[Int]], private val byPosn: Vector[A]) {
 
@@ -42,7 +41,7 @@ class Dictionary[K, A](private val byKey: Map[K, Stack[Int]], private val byPosn
   }
 
   def add(key: K, a: A): Dictionary[K, A] =
-    new Dictionary(byKey.updated(key, byPosn.length :: byKey.get(key).getOrElse(Nil)), byPosn :+ a)
+    new Dictionary(byKey.updated(key, byPosn.length :: byKey.getOrElse(key, Nil)), byPosn :+ a)
 
   def replace(key: K, a: A): Dictionary[K, A] =
     byKey.get(key) match {
@@ -72,8 +71,8 @@ class Dictionary[K, A](private val byKey: Map[K, Stack[Int]], private val byPosn
 
   def length: Int = byPosn.length
 
-  def toMap: Map[K, A] =
-    byKey.filter(_._2.nonEmpty).mapValues {
+  def toMap: MapView[K, A] =
+    byKey.filter(_._2.nonEmpty).mapValues[A] {
       case idx :: _ => get(idx).get
       case Nil => throw new AssertionError("Should never be nil")
     }
@@ -114,7 +113,7 @@ object Dictionary {
 
   def apply(): Dict = {
     val tokens =
-        getExecutionTokens(Arithmetics) ++
+      getExecutionTokens(Arithmetics) ++
         getExecutionTokens(BitLogic) ++
         getExecutionTokens(Comparison) ++
         getExecutionTokens(Compiler) ++
@@ -127,8 +126,9 @@ object Dictionary {
           Constant("TRUE", -1), // TODO: move to system.fth?
           Constant("FALSE", 0))
 
-    tokens.foldLeft[Dict](Dictionary.empty) {
-      (m, a) => m.add(a.name, a)
+    val zero: Dict = Dictionary.empty[Word, ExecutionToken]
+    tokens.foldLeft(zero) {
+      (m, a) => m.add(a.toString, a)
     }
   }
 

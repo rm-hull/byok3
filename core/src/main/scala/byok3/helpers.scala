@@ -22,7 +22,6 @@
 package byok3
 
 import java.io.{ByteArrayOutputStream, PipedInputStream, PipedOutputStream}
-
 import cats.data.StateT
 import cats.data.StateT._
 import cats.{Applicative, FlatMap}

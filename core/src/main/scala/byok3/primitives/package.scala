@@ -21,11 +21,13 @@
 
 package byok3
 
+import scala.language.implicitConversions
+
 package object primitives {
 
-  implicit def truth(condition: Boolean) = if (condition) -1 else 0
+  implicit def truth(condition: Boolean): Int = if (condition) -1 else 0
 
-  implicit def truth(condition: Int) = (condition == -1)
+  implicit def truth(condition: Int): Boolean = (condition == -1)
 
   def unsigned(n: Int) = if (n < 0) n + 0x80000000 else n
 }

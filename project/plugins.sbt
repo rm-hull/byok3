@@ -11,4 +11,4 @@ addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.11.1")
 addSbtPlugin("org.playframework.twirl" % "sbt-twirl" % "2.0.2")
 addSbtPlugin("com.vmunier" % "sbt-web-scalajs" % "1.2.0")
 
-//addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.5.6")
+addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.10.4")

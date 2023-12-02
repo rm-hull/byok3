@@ -4,10 +4,10 @@ import java.net.URI
 
 
 val BaseVersion = "0.4.0"
-scalaVersion := "2.13.12"
-scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-language:implicitConversions", "-Ypartial-unification")
 
 lazy val commonSettings = Seq(
+  scalaVersion := "2.13.12",
+  scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-language:implicitConversions"),
   version := BaseVersion,
   startYear := Some(2017),
   organizationName := "Richard Hull",
@@ -30,7 +30,10 @@ lazy val commonSettings = Seq(
   libraryDependencies ++= Seq(
     "org.scalatest" %% "scalatest" % "3.2.17" % Test,
     "org.scalacheck" %% "scalacheck" % "1.17.0" % Test
-  )
+  ),
+  libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "2.11.0",
+//  scalacOptions += "-P:semanticdb:synthetics:on",
+  scalacOptions += "-Wconf:origin=scala.collection.compat.*:s"
 )
 
 lazy val core = (project in file("core"))
@@ -42,7 +45,7 @@ lazy val core = (project in file("core"))
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
       "org.typelevel" %% "cats-core" % "2.10.0",
       "org.typelevel" %% "cats-effect" % "3.5.2",
-      "org.parboiled" %% "parboiled" % "2.5.1"
+      "org.parboiled" %% "parboiled" % "2.5.1",
     ),
     buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion, "gitCommitHash" -> git.gitHeadCommit.value.getOrElse("Not Set")),
     buildInfoPackage := "byok3",

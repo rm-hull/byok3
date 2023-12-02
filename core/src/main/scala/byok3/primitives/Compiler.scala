@@ -106,7 +106,7 @@ object Compiler {
 
   @Documentation("Make the most recent definition an immediate word", stackEffect = "( -- )")
   val IMMEDIATE = for {
-    lastWord <- dictionary(last)
+    lastWord <- dictionary(last())
     _ <- dictionary(replace(lastWord.markAsImmediate))
   } yield ()
 
