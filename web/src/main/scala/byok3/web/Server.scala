@@ -24,16 +24,15 @@ package byok3.web
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.RouteConcatenation.concat
-import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.typesafe.config.{Config, ConfigFactory}
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.concurrent.duration.{Duration, FiniteDuration}
 
 object Server extends RequestTimeout {
 
-  val log = LoggerFactory.getLogger(getClass)
+  val log: Logger = LoggerFactory.getLogger(getClass)
 
   def main(args: Array[String]): Unit = {
 
@@ -41,12 +40,10 @@ object Server extends RequestTimeout {
     val host = config.getString("http.host")
     val port = config.getInt("http.port")
 
-    implicit val system = ActorSystem("byok3")
-    implicit val materializer = ActorMaterializer()
-    implicit val executionContext = system.dispatcher
+    implicit val system: ActorSystem = ActorSystem("byok3")
 
     val api = concat(Assets.routes, new RestAPI(system, requestTimeout(config)).routes)
-    Http().bindAndHandle(api, host, port)
+    Http().newServerAt(host, port).bindFlow(api)
 
     log.info(s"Server online at http://$host:$port/")
     log.info(s"Press CTRL-C to stop...")
